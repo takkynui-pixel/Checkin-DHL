@@ -294,6 +294,28 @@ body {
 }
 .quick-icon .notif-dot.show { display:inline-block; }
 
+/* ── สีไอคอนเฉพาะจุด บนเมนูลัดหน้าหลัก (ตาม Glass Neo Card mockup) ── */
+.quick-icon .ic.c-blue   { background:#E3F2FD; }
+.quick-icon .ic.c-blue   svg { color:#1976D2; }
+.quick-icon .ic.c-purple { background:#EDE9FE; }
+.quick-icon .ic.c-purple svg { color:#7C3AED; }
+.quick-icon .ic.c-orange { background:#FFF1DE; }
+.quick-icon .ic.c-orange svg { color:#F59E0B; }
+.quick-icon .ic.c-teal   { background:#DCFCE7; }
+.quick-icon .ic.c-teal   svg { color:#16A34A; }
+.quick-icon .ic.c-slate  { background:#F1F5F9; }
+.quick-icon .ic.c-slate  svg { color:#64748B; }
+
+/* ── ป้ายจำนวนแจ้งเตือนแบบตัวเลข (แทนจุดแดงเปล่า) ── */
+.quick-icon .badge-num {
+  display:none; position:absolute; top:6px; right:10px;
+  min-width:17px; height:17px; padding:0 4px; border-radius:9px;
+  background:var(--red); color:#fff; font-family:var(--mono);
+  font-size:10px; font-weight:700; line-height:17px; text-align:center;
+  box-shadow:0 0 0 2px var(--surface);
+}
+.quick-icon .badge-num.show { display:inline-block; }
+
 /* ══════════════════ ประวัติการลงเวลา / สรุปเวลา — shared bits ══════════════════ */
 .month-picker-row { display:flex; align-items:center; gap:8px; padding: 4px 18px 12px; }
 .month-picker-row select { flex:1; }
@@ -1060,6 +1082,25 @@ select.field-sm { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .notify-row:last-child { border-bottom:none; }
 .notify-time { font-family:var(--mono); font-size:12px; color:var(--muted); }
 
+/* ── Profile self-edit modal ── */
+.avatar-edit-row { display:flex; align-items:center; gap:14px; margin-bottom:6px; }
+.avatar-edit-preview {
+  width:64px; height:64px; border-radius:50%; background:var(--primary-dim);
+  display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0;
+  font-size:22px; font-weight:700; color:var(--primary); font-family:var(--font-heading);
+  border:2px solid var(--border);
+}
+.avatar-edit-preview img { width:100%; height:100%; object-fit:cover; }
+.pending-approval-badge {
+  display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:600;
+  color:var(--amber); background:var(--amber-dim); border-radius:8px; padding:3px 8px; margin-top:6px;
+}
+.profile-req-row {
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+  background:var(--surface2); border:1px solid var(--border); border-radius:12px;
+  padding:10px 12px; margin-bottom:8px; font-size:12px;
+}
+
 /* toggle switch */
 .toggle-wrap { display:flex; align-items:center; gap:8px; font-size:13px; }
 .toggle { position:relative; width:36px; height:20px; }
@@ -1178,7 +1219,7 @@ select.field-sm { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
     <div class="login-clock-wrap">
       <div style="font-size:12px;color:var(--muted);">🔒 Secure Login</div>
-      <div class="login-footer-ver">Version 2.65.063 · Powered by VTA-Service</div>
+      <div class="login-footer-ver">Version 2.65.065 · Powered by VTA-Service</div>
     </div>
   </div>
 </div>
@@ -1253,29 +1294,31 @@ select.field-sm { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
       <div class="dash-quick-grid">
         <div class="quick-icon" onclick="switchTab('history')">
-          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><polyline points="12 7 12 12 15 15"></polyline></svg></div>
+          <div class="ic c-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><polyline points="12 7 12 12 15 15"></polyline></svg></div>
           <div class="lbl">ประวัติการลงเวลา</div>
+          <span class="badge-num" id="historyBadge">0</span>
         </div>
         <div class="quick-icon" onclick="switchTab('requests')">
-          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="3" width="12" height="18" rx="2"></rect><line x1="9" y1="8" x2="15" y2="8"></line><line x1="9" y1="12" x2="15" y2="12"></line></svg></div>
+          <div class="ic c-purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="3" width="12" height="18" rx="2"></rect><line x1="9" y1="8" x2="15" y2="8"></line><line x1="9" y1="12" x2="15" y2="12"></line></svg></div>
           <div class="lbl">คำขออนุมัติ</div>
-          <span class="notif-dot" id="leaveNotifDot"></span>
+          <span class="badge-num" id="leaveNotifDot">0</span>
         </div>
         <div class="quick-icon" onclick="switchTab('workcal')">
-          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></div>
+          <div class="ic c-orange"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></div>
           <div class="lbl">ปฏิทินการทำงาน</div>
+          <span class="badge-num" id="calBadge">0</span>
         </div>
         <div class="quick-icon" onclick="switchTab('news')">
-          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h13a2 2 0 0 1 2 2v13a1 1 0 0 1-1 1H4z"></path><path d="M4 4v16"></path><line x1="8" y1="8" x2="15" y2="8"></line><line x1="8" y1="12" x2="15" y2="12"></line></svg></div>
+          <div class="ic c-teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h13a2 2 0 0 1 2 2v13a1 1 0 0 1-1 1H4z"></path><path d="M4 4v16"></path><line x1="8" y1="8" x2="15" y2="8"></line><line x1="8" y1="12" x2="15" y2="12"></line></svg></div>
           <div class="lbl">ข่าวสารองค์กร</div>
-          <span class="notif-dot" id="newsNotifDot"></span>
+          <span class="badge-num" id="newsNotifDot">0</span>
         </div>
         <div class="quick-icon" onclick="switchTab('profile')">
-          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 20c0-4 3.5-6 8-6s8 2 8 6"></path></svg></div>
+          <div class="ic c-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 20c0-4 3.5-6 8-6s8 2 8 6"></path></svg></div>
           <div class="lbl">โปรไฟล์</div>
         </div>
         <div class="quick-icon" onclick="openSettingsIcon()">
-          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></div>
+          <div class="ic c-slate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></div>
           <div class="lbl">ตั้งค่า</div>
         </div>
       </div>
@@ -1364,10 +1407,11 @@ select.field-sm { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
       <div class="profile-avatar" id="profileAvatar">?</div>
       <div class="profile-name" id="profileName">—</div>
       <div class="profile-role" id="profileRole">ตำแหน่ง: —</div>
+      <div id="profilePendingBadge"></div>
       <div class="profile-code" id="profileCode">รหัสพนักงาน: —</div>
     </div>
     <div class="profile-menu">
-      <div class="profile-menu-item" onclick="showToast('👤 ข้อมูลส่วนตัว: ติดต่อ Admin เพื่อแก้ไข','a')">
+      <div class="profile-menu-item" onclick="openEditProfileModal()">
         <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 20c0-4 3.5-6 8-6s8 2 8 6"></path></svg>
         ข้อมูลส่วนตัว
         <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
@@ -1382,12 +1426,12 @@ select.field-sm { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
         สิทธิ์การใช้งาน
         <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
       </div>
-      <div class="profile-menu-item" onclick="openChangePinPrompt()">
+      <div class="profile-menu-item" onclick="openChangePinModal()">
         <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>
         เปลี่ยนรหัส PIN
         <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
       </div>
-      <div class="profile-menu-item" onclick="showToast('🔔 การแจ้งเตือน: เปิดใช้งานอยู่','a')">
+      <div class="profile-menu-item" onclick="openNotifyPrefModal()">
         <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.7 21a2 2 0 0 1-3.4 0"></path></svg>
         การแจ้งเตือน
         <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
@@ -1395,6 +1439,113 @@ select.field-sm { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
       <div class="profile-menu-item" onclick="logout()">
         <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
         ออกจากระบบ
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ EDIT PROFILE MODAL (รูปโปรไฟล์ + ตำแหน่ง — self-service) ══ -->
+  <div class="leave-modal" id="editProfileModal">
+    <div class="leave-box">
+      <div class="leave-title">
+        👤 แก้ไขข้อมูลส่วนตัว
+        <button class="leave-close" onclick="closeEditProfileModal()">✕</button>
+      </div>
+
+      <div class="avatar-edit-row">
+        <div class="avatar-edit-preview" id="epAvatarPreview">?</div>
+        <div style="flex:1;">
+          <div class="field-lbl-sm">รูปโปรไฟล์</div>
+          <input class="field-sm" id="epAvatarFile" type="file" accept="image/*" onchange="onEpAvatarFileChange()">
+          <div style="font-size:10.5px;color:var(--muted);margin-top:4px;">อัปโหลดแล้วบันทึกทันที ไม่ต้องรออนุมัติ</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="leave-section-lbl">ตำแหน่งงาน</div>
+        <input class="field-sm" id="epPosition" placeholder="เช่น IT Support">
+        <div style="font-size:10.5px;color:var(--muted);margin-top:4px;">การเปลี่ยนตำแหน่งต้องรอ Admin กดอนุมัติก่อนจึงจะมีผล</div>
+        <div id="epPendingNote" style="display:none;font-size:11px;color:var(--amber);margin-top:6px;">⏳ มีคำขอเปลี่ยนตำแหน่งค้างอยู่ รอ Admin อนุมัติ</div>
+      </div>
+
+      <div id="epSchemaWarning" class="leave-warning" style="display:none;flex-direction:column;align-items:stretch;gap:6px;margin-top:8px;">
+        <div>⚠️ ยังไม่ได้สร้างตาราง <code>profile_change_requests</code> ใน Supabase กรุณาแจ้งแอดมินให้รันคำสั่งนี้ใน Supabase SQL editor:</div>
+        <code style="display:block;background:#00000010;padding:8px;border-radius:6px;font-size:10.5px;user-select:all;white-space:pre-wrap;">create table if not exists profile_change_requests (
+  id uuid primary key default gen_random_uuid(),
+  employee_id uuid not null references employees(id) on delete cascade,
+  field text not null default 'position',
+  old_value text,
+  new_value text not null,
+  status text not null default 'pending',
+  requested_at timestamptz not null default now(),
+  reviewed_at timestamptz,
+  reviewed_by uuid
+);
+alter table profile_change_requests enable row level security;
+create policy "Allow all access to profile_change_requests"
+on profile_change_requests for all using (true) with check (true);</code>
+      </div>
+
+      <div class="leave-actions">
+        <button class="btn-sm" style="background:var(--surface2);color:var(--muted);border:1px solid var(--border);" onclick="closeEditProfileModal()">ปิด</button>
+        <button class="btn-sm primary" id="epSubmitBtn" onclick="submitPositionChangeRequest()">✓ ส่งคำขอเปลี่ยนตำแหน่ง</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ CHANGE PIN MODAL (self-service) ══ -->
+  <div class="leave-modal" id="changePinModal">
+    <div class="leave-box">
+      <div class="leave-title">
+        🔐 เปลี่ยนรหัส PIN
+        <button class="leave-close" onclick="closeChangePinModal()">✕</button>
+      </div>
+      <div>
+        <div class="leave-section-lbl">PIN ปัจจุบัน</div>
+        <input class="field-sm" id="cpOldPin" type="password" inputmode="numeric" maxlength="4" placeholder="••••">
+      </div>
+      <div>
+        <div class="leave-section-lbl">PIN ใหม่ (4 หลัก)</div>
+        <input class="field-sm" id="cpNewPin" type="password" inputmode="numeric" maxlength="4" placeholder="1234">
+      </div>
+      <div>
+        <div class="leave-section-lbl">ยืนยัน PIN ใหม่</div>
+        <input class="field-sm" id="cpNewPin2" type="password" inputmode="numeric" maxlength="4" placeholder="1234">
+      </div>
+      <div class="leave-actions">
+        <button class="btn-sm" style="background:var(--surface2);color:var(--muted);border:1px solid var(--border);" onclick="closeChangePinModal()">ยกเลิก</button>
+        <button class="btn-sm primary" id="cpSubmitBtn" onclick="submitChangePin()">✓ บันทึก PIN ใหม่</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ NOTIFY PREFERENCE MODAL (เตือนก่อนมาทำงาน — local, ไม่ต้องมี Server) ══ -->
+  <div class="leave-modal" id="notifyPrefModal">
+    <div class="leave-box">
+      <div class="leave-title">
+        🔔 แจ้งเตือนก่อนมาทำงาน
+        <button class="leave-close" onclick="closeNotifyPrefModal()">✕</button>
+      </div>
+      <div class="toggle-wrap" style="margin-bottom:4px;">
+        <label class="toggle">
+          <input type="checkbox" id="npEnabled" onchange="onNpToggleChange()">
+          <span class="toggle-slider"></span>
+        </label>
+        <span>เปิดใช้งานการแจ้งเตือน</span>
+      </div>
+      <div>
+        <div class="leave-section-lbl">แจ้งเตือนล่วงหน้า</div>
+        <select class="field-sm" id="npMinutes">
+          <option value="15">15 นาที ก่อนเข้ากะ</option>
+          <option value="30" selected>30 นาที ก่อนเข้ากะ</option>
+          <option value="60">60 นาที ก่อนเข้ากะ</option>
+        </select>
+      </div>
+      <div id="npPermNote" style="font-size:11px;color:var(--muted);line-height:1.6;">
+        ระบบจะเทียบเวลากับ "กะการทำงาน" ที่ใกล้ที่สุดวันนี้ และแจ้งเตือน (ป๊อปอัป + เลขแดงบนไอคอนแอป ถ้าเบราว์เซอร์รองรับ) ตอนที่เปิดแอปอยู่เท่านั้น — เนื่องจากระบบนี้ยังไม่มี Server กลางสำหรับส่ง Push แจ้งเตือนตอนปิดแอป
+      </div>
+      <div class="leave-actions">
+        <button class="btn-sm" style="background:var(--surface2);color:var(--muted);border:1px solid var(--border);" onclick="closeNotifyPrefModal()">ปิด</button>
+        <button class="btn-sm primary" onclick="saveNotifyPref()">💾 บันทึก</button>
       </div>
     </div>
   </div>
@@ -1638,6 +1789,10 @@ ALTER TABLE leave_requests ADD CONSTRAINT leave_requests_status_check
 
       <!-- SUB-VIEW: employees -->
       <div id="sv-employees" style="display:none">
+        <div class="table-card" id="profileReqCard" style="display:none;margin-bottom:12px;">
+          <div class="history-header"><span>⏳ คำขอเปลี่ยนตำแหน่ง (รออนุมัติ)</span></div>
+          <div id="profileReqList"></div>
+        </div>
         <div class="emp-form" id="empForm">
           <div style="font-size:13px;font-weight:500;margin-bottom:4px;" id="empFormTitle">➕ เพิ่มพนักงานใหม่</div>
           <div class="emp-form-row">
@@ -2112,6 +2267,7 @@ with check ( bucket_id = 'leave-attachments' );</code>
 // ══════════════════════════════════════
 let sb = null;
 let currentUser = null;
+let currentCompany = null; // ข้อมูลบริษัท (multi-tenant) — เซ็ตหลัง login จาก join กับตาราง companies
 // ── เวลาเริ่มงาน global (ใช้ร่วมกันทุก function) ──
 const WORK_START_HOUR = 9;
 const WORK_START_MIN  = 0;
@@ -2206,8 +2362,8 @@ function buildApprovedLeaveDayMap(leaves, from, to) {
 // ══════════════════════════════════════
 //  SETUP
 // ══════════════════════════════════════
-const SUPABASE_URL = 'https://teptjkthmfqebxwrauvx.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRlcHRqa3RobWZxZWJ4d3JhdXZ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0NDg5MTEsImV4cCI6MjA5ODAyNDkxMX0.h7rzhMrTvkWeItSFjTvRKgZLSC3ijGL9IO3rYom5lw8';
+const SUPABASE_URL = 'https://gmbhjmmjsyfvjuhbparc.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtYmhqbW1qc3lmdmp1aGJwYXJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc3MjM2NTIsImV4cCI6MjEwMzI5OTY1Mn0.63vOrPVMYP4YRcItRVqauBY9VqunyRAmiNsya-NmazE';
 
 window.addEventListener('DOMContentLoaded', () => {
   initSupabase(SUPABASE_URL, SUPABASE_KEY);
@@ -2359,9 +2515,19 @@ async function doLogin() {
   if (!email) { err.textContent = 'กรุณากรอกอีเมล'; loginErrorAnim(); pinClear(); return; }
 
   try {
-    // ดึงข้อมูลพนักงานตาม email ก่อน (ไม่ส่ง PIN ผ่าน query เพื่อความปลอดภัย)
-    const {data, error} = await sb.from('employees')
-      .select('*').eq('email', email).single();
+    // ดึงข้อมูลพนักงานตาม email พร้อม join ข้อมูลบริษัท (multi-tenant) ในคราวเดียว
+    let { data, error } = await sb.from('employees')
+      .select('*, companies(id, name, slug, plan, is_active, settings)')
+      .eq('email', email).single();
+
+    // รองรับกรณี relationship embed ล้มเหลว (เช่น PostgREST schema cache ยังไม่รีเฟรชหลังเพิ่ง ALTER TABLE
+    // เพิ่ม FK ไป companies, หรือยังไม่ได้ตั้งค่าตาราง companies เลย) → ดึงแบบไม่ join แทน
+    // หมายเหตุสำคัญ: ต้องพยายามดึง company_id ตรงๆ ต่อ ไม่ใช่ทิ้งไปเฉยๆ เพราะถ้า currentCompany
+    // กลายเป็น null แต่ตาราง attendance ฯลฯ มี company_id NOT NULL แล้ว จะบันทึกเวลาไม่ได้ทันที
+    if (error && (isMissingTableError(error, 'companies') || isMissingColumnError(error, 'company_id') || (error.message||'').toLowerCase().includes('companies'))) {
+      console.warn('companies join ล้มเหลว (เช่น schema cache ยังไม่รีเฟรช) — ดึงข้อมูลพนักงานแบบไม่ join แทน', error);
+      ({ data, error } = await sb.from('employees').select('*').eq('email', email).single());
+    }
     if (error || !data) throw new Error('ไม่พบบัญชีผู้ใช้นี้');
 
     // เปรียบเทียบ PIN: รองรับทั้ง plain-text (เก่า) และ SHA-256 hash (ใหม่)
@@ -2369,7 +2535,25 @@ async function doLogin() {
     const pinMatch = data.pin === pinValue || data.pin === pinHash;
     if (!pinMatch) throw new Error('PIN ไม่ถูกต้อง');
 
-    currentUser = data;
+    // ตั้งค่า currentCompany: ใช้ผลจาก join ถ้ามี ถ้าไม่มี (join ล้มเหลว) แต่ employees.company_id มีค่าอยู่
+    // ให้ดึงข้อมูลบริษัทแยกต่างหากอีกครั้ง เพื่อให้ currentCompany?.id ถูกต้องเสมอไม่ว่า join จะสำเร็จหรือไม่
+    let company = data.companies || null;
+    if (!company && data.company_id) {
+      try {
+        const { data: compData } = await sb.from('companies').select('id, name, slug, plan, is_active, settings').eq('id', data.company_id).single();
+        company = compData || { id: data.company_id };
+      } catch(compErr) {
+        console.warn('ดึงข้อมูล companies แยกไม่สำเร็จ — ใช้ company_id เปล่าไปก่อน', compErr);
+        company = { id: data.company_id };
+      }
+    }
+
+    if (company && company.is_active === false) {
+      throw new Error('บัญชีบริษัทถูกระงับการใช้งาน กรุณาติดต่อผู้ดูแลระบบ');
+    }
+
+    currentUser    = data;
+    currentCompany = company;
     pinClear();
     await loginSuccessAnim();
     showApp();
@@ -2408,10 +2592,15 @@ async function showApp() {
   await loadGeofence();
   await loadTodayHistory();
   await syncCheckinStateFromDB();
-  checkLeaveNotifDot(); // เช็คว่ามีผลอนุมัติ/ปฏิเสธลาที่ยังไม่เคยเห็นหรือไม่ (โชว์จุดแดงที่แท็บ)
-  checkNewsNotifDot(); // เช็คว่ามีข่าวสารใหม่ที่ยังไม่เคยเห็นหรือไม่ (โชว์จุดแดงที่เมนูข่าวสาร)
+  checkLeaveNotifDot(); // เช็คว่ามีผลอนุมัติ/ปฏิเสธลาที่ยังไม่เคยเห็นหรือไม่ (โชว์เลขแจ้งเตือนที่เมนูลัด)
+  checkNewsNotifDot(); // เช็คว่ามีข่าวสารใหม่ที่ยังไม่เคยเห็นหรือไม่ (โชว์เลขแจ้งเตือนที่เมนูลัด)
+  checkCalendarBadge(); // นับรายการลา/โอทีที่อนุมัติแล้วและยังไม่ถึงวันในเดือนนี้
   // Init shifts
   await loadShiftsFromStorage();
+  // ── แจ้งเตือนก่อนมาทำงาน (local, ไม่มี Server) — เช็คทันทีแล้วเช็คซ้ำทุกนาที ──
+  checkShiftReminder();
+  if (shiftReminderTicker) clearInterval(shiftReminderTicker);
+  shiftReminderTicker = setInterval(checkShiftReminder, 60000);
   // Start scheduled notifications if configured
   // ── ดึงการตั้งค่า Telegram จากส่วนกลาง (Supabase) ทุกครั้งที่แอปเริ่มทำงาน
   //    เพื่อให้อุปกรณ์นี้ (ไม่ว่าจะเป็นมือถือพนักงานหรือคอมแอดมิน) มีข้อมูล
@@ -2434,6 +2623,7 @@ function logout() {
   // หยุด notification timers — จะเริ่มใหม่เมื่อ login กลับใน showApp()
   notifyTimers.forEach(t => clearInterval(t));
   notifyTimers = [];
+  if (shiftReminderTicker) { clearInterval(shiftReminderTicker); shiftReminderTicker = null; }
   // ไม่ลบ wc_session — syncCheckinStateFromDB() จะตรวจสอบสถานะจริงจากฐานข้อมูลใหม่ทุกครั้งที่ login กลับมาอยู่แล้ว
   document.getElementById('app').style.display = 'none';
   if (isDemo) {
@@ -2746,7 +2936,7 @@ async function performAction(photoDataUrl) {
             // แปลง base64 → Blob
             const res = await fetch(photoDataUrl);
             const blob = await res.blob();
-            const fileName = `${currentUser.id}/${type}_${Date.now()}.jpg`;
+            const fileName = `${currentCompany?.id}/${currentUser.id}_${type}_${Date.now()}.jpg`;
             const { data: storageData, error: storageErr } = await sb
               .storage.from('attendance-photos')
               .upload(fileName, blob, { contentType: 'image/jpeg', upsert: false });
@@ -2763,6 +2953,7 @@ async function performAction(photoDataUrl) {
         }
 
         const payload = {
+          company_id: currentCompany?.id,
           employee_id: currentUser.id,
           type,
           lat: currentCoords.latitude,
@@ -2773,7 +2964,12 @@ async function performAction(photoDataUrl) {
         };
         if (photoUrl) payload.photo_url = photoUrl;
         if (type === 'check_in' && pendingCheckinReason) payload.note = pendingCheckinReason;
-        const { error } = await sb.from('attendance').insert(payload);
+        let { error } = await sb.from('attendance').insert(payload);
+        if (error && isMissingColumnError(error, 'company_id')) {
+          // ยังไม่ได้ทำ multi-tenant migration ในตาราง attendance — บันทึกแบบเดิมโดยไม่มี company_id
+          const { company_id, ...fallbackPayload } = payload;
+          ({ error } = await sb.from('attendance').insert(fallbackPayload));
+        }
         if (error) throw error;
       } catch(e) {
         showToast('❌ บันทึกไม่สำเร็จ: ' + e.message, 'r');
@@ -2797,6 +2993,7 @@ async function performAction(photoDataUrl) {
       showToast('✅ เช็คอินสำเร็จ ' + timeStr, 'g');
       hideCarriedOverWarning();
       showCheckinSuccessScreen('check_in', timeStr, dist);
+      clearShiftReminderBadge();
 
       // ── แจ้งเตือนมาสายผ่าน Telegram ──
       try {
@@ -3181,12 +3378,13 @@ async function loadTodayHistory() {
   const tomorrow = new Date(today); tomorrow.setDate(tomorrow.getDate()+1);
   const todayStr = toLocalDateStr(new Date());
 
-  const {data} = await sb.from('attendance')
+  const {data, error} = await sb.from('attendance')
     .select('*')
     .eq('employee_id', currentUser.id)
     .gte('checked_at', today.toISOString())
     .lt('checked_at', tomorrow.toISOString())
     .order('checked_at', {ascending:false});
+  if (error) console.warn('loadTodayHistory: attendance query error (เช่น RLS บล็อกการอ่าน)', error);
 
   const attendanceRows = (data || []).map(r => ({ kind:'attendance', ...r }));
 
@@ -3281,6 +3479,7 @@ async function cancelLeaveRequest(id, autoAllowed) {
 function renderHistory(rows) {
   const list = document.getElementById('historyList');
   document.getElementById('histCount').textContent = rows.length + ' รายการ';
+  setBadgeNum('historyBadge', rows.length);
   if (!rows.length) { list.innerHTML = '<div class="empty-row">ยังไม่มีรายการวันนี้</div>'; return; }
   list.innerHTML = rows.map(r => {
     if (r.kind === 'leave') return renderLeaveHistoryItem(r);
@@ -3410,7 +3609,7 @@ async function uploadLeaveAttachmentIfAny() {
   const file = document.getElementById('leaveAttachFile')?.files?.[0];
   if (!file) return null;
   const ext = (file.name.split('.').pop() || 'dat').toLowerCase();
-  const fileName = `${currentUser.id}/${Date.now()}.${ext}`;
+  const fileName = `${currentCompany?.id}/${currentUser.id}_${Date.now()}.${ext}`;
   const { error: upErr } = await sb.storage.from('leave-attachments').upload(fileName, file, { contentType: file.type, upsert: false });
   if (upErr) throw upErr;
   const { data: urlData } = sb.storage.from('leave-attachments').getPublicUrl(fileName);
@@ -3450,31 +3649,39 @@ function updateLeaveNotice() {
 //  แจ้งเตือนผลอนุมัติ/ปฏิเสธลาให้พนักงาน (in-app)
 // ══════════════════════════════════════
 
-// เช็คแบบเบาๆ ว่ามีผลลาที่ยังไม่เคยเห็นหรือไม่ — ใช้แค่โชว์/ซ่อนจุดแดงบนแท็บ (ไม่ mark ว่าเห็นแล้ว)
+// ── ตั้งค่าป้ายเลขแจ้งเตือนแบบ badge-num (แสดง 1-99 หรือ 99+ ถ้ามากกว่า) ──
+function setBadgeNum(elId, count) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  const n = count || 0;
+  el.textContent = n > 99 ? '99+' : String(n);
+  el.classList.toggle('show', n > 0);
+}
+
+// เช็คว่ามีผลลา/โอทีที่ยังไม่เคยเห็นกี่รายการ — แสดงเป็นตัวเลขแจ้งเตือนที่เมนูลัด "คำขออนุมัติ" (ไม่ mark ว่าเห็นแล้ว)
 async function checkLeaveNotifDot() {
-  const dot = document.getElementById('leaveNotifDot');
-  if (!dot || !currentUser || isDemo) return;
+  if (!currentUser || isDemo) return;
   try {
+    let total = 0;
     const { data, error } = await sb.from('leave_requests')
       .select('id')
       .eq('employee_id', currentUser.id)
       .in('status', ['approved','rejected'])
-      .eq('employee_seen', false)
-      .limit(1);
+      .eq('employee_seen', false);
     if (error) throw error;
-    let hasUnseen = !!(data && data.length);
+    total += (data || []).length;
 
-    if (!hasUnseen) {
-      // เช็คคำขอโอทีที่ยังไม่เคยเห็นผลด้วย — ใช้จุดแดงร่วมกับคำขอลา (ตารางอาจยังไม่มี ให้เงียบไว้)
+    // เช็คคำขอโอทีที่ยังไม่เคยเห็นผลด้วย — รวมเลขเข้าด้วยกัน (ตารางอาจยังไม่มี ให้เงียบไว้)
+    try {
       const { data: otData, error: otErr } = await sb.from('ot_requests')
         .select('id')
         .eq('employee_id', currentUser.id)
         .in('status', ['approved','rejected'])
-        .eq('employee_seen', false)
-        .limit(1);
-      if (!otErr) hasUnseen = !!(otData && otData.length);
-    }
-    dot.classList.toggle('show', hasUnseen);
+        .eq('employee_seen', false);
+      if (!otErr) total += (otData || []).length;
+    } catch(e) { /* ตาราง ot_requests อาจยังไม่มี — เงียบไว้ */ }
+
+    setBadgeNum('leaveNotifDot', total);
   } catch(e) { console.warn('checkLeaveNotifDot error', e); }
 }
 
@@ -3526,7 +3733,7 @@ async function showAndAckLeaveNotifications() {
       }
     } catch(e) { console.warn('ot notif ack error', e); }
 
-    document.getElementById('leaveNotifDot')?.classList.remove('show');
+    setBadgeNum('leaveNotifDot', 0);
   } catch(e) { console.warn('showAndAckLeaveNotifications error', e); }
 }
 
@@ -3558,6 +3765,7 @@ async function submitLeaveRequest() {
   submitBtn.textContent = 'กำลังส่ง…';
 
   const payload = {
+    company_id: currentCompany?.id,
     employee_id: currentUser.id,
     leave_type: selectedLeaveType,
     start_date: startDate,
@@ -3582,7 +3790,11 @@ async function submitLeaveRequest() {
           document.getElementById('leaveAttachSchemaWarning').style.display = 'flex';
         }
       }
-      const { error } = await sb.from('leave_requests').insert(payload);
+      let { error } = await sb.from('leave_requests').insert(payload);
+      if (error && isMissingColumnError(error, 'company_id')) {
+        const { company_id, ...fallbackPayload } = payload;
+        ({ error } = await sb.from('leave_requests').insert(fallbackPayload));
+      }
       if (error) throw error;
     }
 
@@ -3754,7 +3966,8 @@ async function submitOtRequest() {
   submitBtn.disabled = true; submitBtn.textContent = 'กำลังส่ง…';
 
   try {
-    const { error } = await sb.from('ot_requests').insert({
+    const otPayload = {
+      company_id: currentCompany?.id,
       employee_id: currentUser.id,
       request_date: dateVal,
       shift_id: shiftId,
@@ -3764,7 +3977,12 @@ async function submitOtRequest() {
       reason,
       status: 'pending',
       employee_seen: true,
-    });
+    };
+    let { error } = await sb.from('ot_requests').insert(otPayload);
+    if (error && isMissingColumnError(error, 'company_id')) {
+      const { company_id, ...fallbackPayload } = otPayload;
+      ({ error } = await sb.from('ot_requests').insert(fallbackPayload));
+    }
     if (error) {
       if (isMissingTableError(error, 'ot_requests')) {
         showToast('⚠️ ยังไม่ได้สร้างตาราง ot_requests ในฐานข้อมูล — กรุณาแจ้งผู้ดูแลระบบให้รัน SQL สร้างตาราง (ดูเอกสารประกอบ)', 'r');
@@ -3833,7 +4051,7 @@ async function loadLeaveRequestsAdmin() {
   const empFilterEl = document.getElementById('leaveFilterEmp');
   if (empFilterEl && empFilterEl.options.length <= 1) {
     try {
-      const { data: emps } = await sb.from('employees').select('id,name').neq('role','admin').order('name');
+      const { data: emps } = await fetchEmployeePickerList();
       (emps || []).forEach(e => {
         const opt = document.createElement('option');
         opt.value = e.id; opt.textContent = e.name;
@@ -3980,7 +4198,7 @@ async function loadOtRequestsAdmin() {
   const empFilterEl = document.getElementById('otFilterEmp');
   if (empFilterEl && empFilterEl.options.length <= 1) {
     try {
-      const { data: emps } = await sb.from('employees').select('id,name').neq('role','admin').order('name');
+      const { data: emps } = await fetchEmployeePickerList();
       (emps || []).forEach(e => {
         const opt = document.createElement('option');
         opt.value = e.id; opt.textContent = e.name;
@@ -4271,7 +4489,12 @@ async function loadGeofence() {
     renderAllGeoZones();
     return;
   }
-  const {data} = await sb.from('geofences').select('*').order('created_at', {ascending:false});
+  let geoQuery = sb.from('geofences').select('*');
+  if (currentCompany?.id) geoQuery = geoQuery.eq('company_id', currentCompany.id);
+  let { data, error: geoErr } = await geoQuery.order('created_at', {ascending:false});
+  if (geoErr && isMissingColumnError(geoErr, 'company_id')) {
+    ({ data } = await sb.from('geofences').select('*').order('created_at', {ascending:false}));
+  }
   if (data?.length) {
     allGeofences = data;
     // activeGeofence สำหรับ checkGeofence ตอนเช็คอิน — ใช้ first active
@@ -4562,7 +4785,7 @@ async function saveManualLog() {
   btn.disabled = true; btn.textContent = 'กำลังบันทึก…';
 
   try {
-    const { error } = await sb.from('attendance').insert({
+    const basePayload = {
       employee_id: manualLogEmpId,
       type: manualLogType,
       checked_at: checkedAt.toISOString(),
@@ -4571,8 +4794,34 @@ async function saveManualLog() {
       distance_meters: 0,
       geofence_id: null,
       note
-    });
+    };
+    const fullPayload = {
+      company_id: currentCompany?.id,
+      ...basePayload,
+      is_manual: true,
+      manual_by: currentUser.id,
+    };
+    let { error } = await sb.from('attendance').insert(fullPayload);
+    if (error && (isMissingColumnError(error, 'company_id') || isMissingColumnError(error, 'is_manual') || isMissingColumnError(error, 'manual_by'))) {
+      // ยังไม่ได้ migrate คอลัมน์ multi-tenant/audit ในตาราง attendance — บันทึกแบบเดิม
+      ({ error } = await sb.from('attendance').insert(basePayload));
+    }
     if (error) throw error;
+
+    // บันทึก audit log แบบ best-effort — ถ้าตาราง/คอลัมน์ยังไม่มี ไม่ให้กระทบการบันทึกเวลาหลัก
+    try {
+      const { error: auditErr } = await sb.from('audit_logs').insert({
+        company_id: currentCompany?.id,
+        actor_id: currentUser.id,
+        action: 'manual_checkin',
+        target_id: manualLogEmpId,
+        target_type: 'attendance',
+        meta: { type: manualLogType, checked_at: checkedAt.toISOString(), note }
+      });
+      if (auditErr) console.warn('audit_logs insert skipped (ตารางอาจยังไม่มี):', auditErr);
+    } catch(auditErr) {
+      console.warn('audit_logs insert skipped:', auditErr);
+    }
 
     showToast('✅ บันทึกเวลาให้พนักงานแล้ว', 'g');
     closeManualLogModal();
@@ -4707,6 +4956,18 @@ async function exportCSV() {
 // เดิมระบบมีแค่ role 'admin' เดียว เห็น/ทำได้ทุกอย่าง — เพื่อไม่ให้แอดมินเดิมเสียสิทธิ์ทันทีที่อัปเดตแอป
 // ถ้ายังไม่เคยตั้งค่าคอลัมน์สิทธิ์ย่อยเลย (is_super_admin/can_approve_leave/can_approve_ot ไม่มีในฐานข้อมูล)
 // จะถือว่าแอดมินทุกคนเป็น Super Admin เหมือนพฤติกรรมเดิมไปก่อน จนกว่าจะมีการตั้งค่าจริงในหน้า "พนักงาน"
+// รายชื่อพนักงาน (ไม่รวมแอดมิน) สำหรับ dropdown เลือกพนักงานในหน้าแอดมินต่างๆ — สโคปตามบริษัท (multi-tenant)
+// พร้อม fallback อัตโนมัติถ้าคอลัมน์ company_id ยังไม่ได้ migrate
+async function fetchEmployeePickerList() {
+  let q = sb.from('employees').select('id,name').neq('role','admin');
+  if (currentCompany?.id) q = q.eq('company_id', currentCompany.id);
+  let { data, error } = await q.order('name');
+  if (error && isMissingColumnError(error, 'company_id')) {
+    ({ data, error } = await sb.from('employees').select('id,name').neq('role','admin').order('name'));
+  }
+  return { data, error };
+}
+
 function getAdminPermissions() {
   if (!currentUser || currentUser.role !== 'admin') return null;
   const hasPermSystem = ('is_super_admin' in currentUser) || ('can_approve_leave' in currentUser) || ('can_approve_ot' in currentUser);
@@ -4752,7 +5013,7 @@ function switchSubTab(name) {
   if (name === 'monthly') loadMonthlyData();
   if (name === 'leave') loadLeaveRequestsAdmin();
   if (name === 'otreq') loadOtRequestsAdmin();
-  if (name === 'employees') loadEmployeeList();
+  if (name === 'employees') { loadEmployeeList().then(() => loadPendingProfileRequests()); }
   if (name === 'news') loadCompanyNewsAdmin();
   if (name === 'notify') loadNotifySettings();
 }
@@ -4800,7 +5061,7 @@ async function loadMonthlyData() {
 
   // ── ดึงข้อมูลพร้อมกัน (parallel) ──
   const [empResult2, logResult2] = await Promise.all([
-    sb.from('employees').select('id,name').neq('role','admin'),
+    fetchEmployeePickerList(),
     sb.from('attendance')
       .select('employee_id, type, checked_at')
       .gte('checked_at', from.toISOString())
@@ -4912,7 +5173,7 @@ async function exportMonthlyCSV() {
   const [yr, mo] = monthVal.split('-').map(Number);
   const from = new Date(yr, mo-1, 1);
   const to   = new Date(yr, mo, 0, 23, 59, 59, 999);
-  const {data: allEmps} = await sb.from('employees').select('id,name').neq('role','admin');
+  const {data: allEmps} = await fetchEmployeePickerList();
   const {data: logs} = await sb.from('attendance')
     .select('*').gte('checked_at', from.toISOString()).lte('checked_at', to.toISOString())
     .order('checked_at', {ascending:true});
@@ -4974,12 +5235,22 @@ async function loadEmployeeList() {
   }
   document.getElementById('empList').innerHTML = '<div class="empty-row"><div class="spinner"></div></div>';
   let data, error;
-  ({ data, error } = await sb.from('employees')
-    .select('id,name,email,role,position,employee_code,avatar_url,is_super_admin,can_approve_leave,can_approve_ot').order('name'));
+  let empQuery = sb.from('employees')
+    .select('id,name,email,role,position,employee_code,avatar_url,is_super_admin,can_approve_leave,can_approve_ot');
+  if (currentCompany?.id) empQuery = empQuery.eq('company_id', currentCompany.id);
+  ({ data, error } = await empQuery.order('name'));
+  if (error && isMissingColumnError(error, 'company_id')) {
+    ({ data, error } = await sb.from('employees')
+      .select('id,name,email,role,position,employee_code,avatar_url,is_super_admin,can_approve_leave,can_approve_ot').order('name'));
+  }
   if (error && (isMissingColumnError(error, 'is_super_admin') || isMissingColumnError(error, 'can_approve_leave') || isMissingColumnError(error, 'can_approve_ot'))) {
     document.getElementById('empPermSchemaWarning').style.display = 'flex';
-    ({ data, error } = await sb.from('employees')
-      .select('id,name,email,role,position,employee_code,avatar_url').order('name'));
+    let fallbackQuery = sb.from('employees').select('id,name,email,role,position,employee_code,avatar_url');
+    if (currentCompany?.id) fallbackQuery = fallbackQuery.eq('company_id', currentCompany.id);
+    ({ data, error } = await fallbackQuery.order('name'));
+    if (error && isMissingColumnError(error, 'company_id')) {
+      ({ data, error } = await sb.from('employees').select('id,name,email,role,position,employee_code,avatar_url').order('name'));
+    }
   } else {
     document.getElementById('empPermSchemaWarning').style.display = 'none';
   }
@@ -5074,7 +5345,7 @@ async function uploadAvatarIfNeeded() {
   const fileInput = document.getElementById('efAvatarFile');
   const file = fileInput?.files?.[0];
   if (!file) return document.getElementById('efAvatarUrl').value || null;
-  const fileName = `emp_${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g,'_')}`;
+  const fileName = `${currentCompany?.id || 'shared'}/emp_${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g,'_')}`;
   const { error: upErr } = await sb.storage.from('avatars').upload(fileName, file, { upsert: true });
   if (upErr) throw upErr;
   const { data: urlData } = sb.storage.from('avatars').getPublicUrl(fileName);
@@ -5095,6 +5366,7 @@ async function saveEmployee() {
 
   try {
     const payload = {name, email, role, position: position || null, employee_code: employee_code || null};
+    if (!editingEmpId && currentCompany?.id) payload.company_id = currentCompany.id;
     if (role === 'admin') {
       payload.is_super_admin = document.getElementById('efIsSuperAdmin').checked;
       payload.can_approve_leave = document.getElementById('efCanApproveLeave').checked;
@@ -5116,12 +5388,19 @@ async function saveEmployee() {
       return sb.from('employees').insert(p);
     }
 
-    let { error } = await runSave(payload);
+    let workingPayload = { ...payload };
+    let { error } = await runSave(workingPayload);
+    if (error && isMissingColumnError(error, 'company_id')) {
+      const { company_id, ...rest } = workingPayload;
+      workingPayload = rest;
+      ({ error } = await runSave(workingPayload));
+    }
     if (error && (isMissingColumnError(error, 'is_super_admin') || isMissingColumnError(error, 'can_approve_leave') || isMissingColumnError(error, 'can_approve_ot'))) {
       // ฐานข้อมูลยังไม่มีคอลัมน์สิทธิ์แอดมิน — บันทึกข้อมูลส่วนอื่นตามปกติก่อน แล้วแจ้งให้รัน SQL เพื่อเปิดใช้ระบบสิทธิ์ย่อย
       document.getElementById('empPermSchemaWarning').style.display = 'flex';
-      const { is_super_admin, can_approve_leave, can_approve_ot, ...basicPayload } = payload;
-      ({ error } = await runSave(basicPayload));
+      const { is_super_admin, can_approve_leave, can_approve_ot, ...basicPayload } = workingPayload;
+      workingPayload = basicPayload;
+      ({ error } = await runSave(workingPayload));
       if (!error) showToast('✅ บันทึกสำเร็จ (ยังไม่ได้ตั้งค่าสิทธิ์แอดมินย่อย ดูคำแนะนำ SQL ด้านบน)', 'a');
     } else if (!error) {
       document.getElementById('empPermSchemaWarning').style.display = 'none';
@@ -5180,7 +5459,7 @@ async function uploadNewsImageIfNeeded() {
   const fileInput = document.getElementById('newsImageFile');
   const file = fileInput?.files?.[0];
   if (!file) return document.getElementById('newsImageUrl').value || null;
-  const fileName = `news_${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g,'_')}`;
+  const fileName = `${currentCompany?.id || 'shared'}/news_${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g,'_')}`;
   const { error: upErr } = await sb.storage.from('news-images').upload(fileName, file, { upsert: true });
   if (upErr) throw upErr;
   const { data: urlData } = sb.storage.from('news-images').getPublicUrl(fileName);
@@ -5197,6 +5476,7 @@ async function saveCompanyNews() {
   if (isDemo) { showToast('⚠️ ไม่สามารถแก้ไขในโหมด Demo','a'); return; }
   try {
     const payload = { title, body, published, category, pinned };
+    if (!editingNewsId && currentCompany?.id) payload.company_id = currentCompany.id;
     try {
       const imgUrl = await uploadNewsImageIfNeeded();
       if (imgUrl) payload.image_url = imgUrl;
@@ -5207,16 +5487,22 @@ async function saveCompanyNews() {
     // ลอง insert/update ทั้งหมด ถ้าเจอ error คอลัมน์ขาด ให้ตัดคอลัมน์นั้นออกแล้วลองใหม่ (วนจนกว่าจะผ่านหรือหมดคอลัมน์ให้ตัด)
     async function runWithColumnFallback(fn) {
       let currentPayload = { ...payload };
-      let missingAny = false;
+      let missingAny = false;      // คอลัมน์ข่าวสาร (published/category/pinned/view_count) หายไป
+      let missingCompany = false;  // ยังไม่ได้ migrate multi-tenant (company_id)
       for (let i = 0; i < 6; i++) {
         const { error } = await fn(currentPayload);
-        if (!error) return { error: null, missingAny };
+        if (!error) return { error: null, missingAny, missingCompany };
+        if (isMissingColumnError(error, 'company_id') && 'company_id' in currentPayload) {
+          delete currentPayload.company_id;
+          missingCompany = true;
+          continue;
+        }
         const col = ['published','category','pinned','view_count'].find(c => isMissingColumnError(error, c) && c in currentPayload);
-        if (!col) return { error, missingAny };
+        if (!col) return { error, missingAny, missingCompany };
         delete currentPayload[col];
         missingAny = true;
       }
-      return { error: new Error('บันทึกไม่สำเร็จ'), missingAny };
+      return { error: new Error('บันทึกไม่สำเร็จ'), missingAny, missingCompany };
     }
 
     let result;
@@ -5226,6 +5512,7 @@ async function saveCompanyNews() {
       result = await runWithColumnFallback(p => sb.from('company_news').insert(p));
     }
     if (result.error) throw result.error;
+    if (result.missingCompany) console.warn('company_news: บันทึกโดยไม่มี company_id (ตารางยังไม่ได้ migrate multi-tenant)');
     if (result.missingAny) {
       document.getElementById('newsSchemaWarning').style.display = 'flex';
       showToast(`⚠️ บันทึกข่าวสำเร็จ แต่บางคอลัมน์ยังไม่มีในฐานข้อมูล (ดูวิธีแก้ด้านบน)`, 'a');
@@ -5287,7 +5574,12 @@ async function loadCompanyNewsAdmin() {
   const warnBox = document.getElementById('newsSchemaWarning');
   if (warnBox) warnBox.style.display = colCheckErr ? 'flex' : 'none';
 
-  const {data, error} = await sb.from('company_news').select('*').order('created_at', {ascending:false});
+  let newsQuery = sb.from('company_news').select('*');
+  if (currentCompany?.id) newsQuery = newsQuery.eq('company_id', currentCompany.id);
+  let {data, error} = await newsQuery.order('created_at', {ascending:false});
+  if (error && isMissingColumnError(error, 'company_id')) {
+    ({data, error} = await sb.from('company_news').select('*').order('created_at', {ascending:false}));
+  }
   if (error) { box.innerHTML = `<div class="empty-row" style="color:var(--red)">❌ ${error.message}</div>`; return; }
   window._newsCache = {};
   (data||[]).forEach(n => window._newsCache[n.id] = n);
@@ -5547,6 +5839,7 @@ async function testTelegramNotify() {
 }
 
 let notifyTimers = [];
+let shiftReminderTicker = null;
 // แปลง time string รองรับทั้ง "18:00" และ "06:00 PM"
 function parseNotifyTime(timeStr) {
   if (!timeStr) return null;
@@ -5601,7 +5894,7 @@ function scheduleNotifications(s) {
               .select('employee_id, type, employees(name)')
               .gte('checked_at', dayStart.toISOString())
               .order('checked_at');
-            const allEmpsRes = await sb.from('employees').select('id,name').neq('role','admin');
+            const allEmpsRes = await fetchEmployeePickerList();
             const total = (allEmpsRes.data || []).length;
             const ciNames = [...new Set((logs||[]).filter(r=>r.type==='check_in').map(r=>r.employees?.name).filter(Boolean))];
             const absentCount = total - ciNames.length;
@@ -5889,6 +6182,245 @@ function renderProfile() {
   document.getElementById('profileName').textContent = currentUser.name || '—';
   document.getElementById('profileRole').textContent = 'ตำแหน่ง: ' + (currentUser.position || (currentUser.role==='admin' ? 'ผู้ดูแลระบบ' : '—'));
   document.getElementById('profileCode').textContent = 'รหัสพนักงาน: ' + (currentUser.employee_code || '—');
+  checkPendingPositionRequest();
+}
+
+// ══════════════════════════════════════
+//  โปรไฟล์ — แก้ไขรูป/ตำแหน่งเอง (Self-service, ข้อ 1)
+// ══════════════════════════════════════
+let pendingPositionRequest = null;
+
+async function checkPendingPositionRequest() {
+  const box = document.getElementById('profilePendingBadge');
+  if (!box) return;
+  if (!currentUser || isDemo) { box.innerHTML = ''; return; }
+  try {
+    const { data, error } = await sb.from('profile_change_requests')
+      .select('id,new_value,status')
+      .eq('employee_id', currentUser.id)
+      .eq('field', 'position')
+      .eq('status', 'pending')
+      .order('requested_at', { ascending:false })
+      .limit(1);
+    if (error) throw error;
+    pendingPositionRequest = (data && data[0]) || null;
+    box.innerHTML = pendingPositionRequest
+      ? `<span class="pending-approval-badge">⏳ รออนุมัติตำแหน่งใหม่: ${escapeHtml(pendingPositionRequest.new_value)}</span>`
+      : '';
+  } catch(e) {
+    if (!isMissingTableError(e, 'profile_change_requests')) console.warn('checkPendingPositionRequest error', e);
+    box.innerHTML = '';
+  }
+}
+
+function openEditProfileModal() {
+  if (!currentUser) return;
+  const preview = document.getElementById('epAvatarPreview');
+  if (currentUser.avatar_url) {
+    preview.innerHTML = `<img src="${currentUser.avatar_url}" alt="avatar">`;
+  } else {
+    preview.textContent = (currentUser.name || '?').trim().charAt(0).toUpperCase() || '?';
+  }
+  document.getElementById('epAvatarFile').value = '';
+  document.getElementById('epPosition').value = currentUser.position || '';
+  document.getElementById('epSchemaWarning').style.display = 'none';
+  document.getElementById('epPendingNote').style.display = pendingPositionRequest ? 'block' : 'none';
+  document.getElementById('editProfileModal').classList.add('show');
+}
+
+function closeEditProfileModal() {
+  document.getElementById('editProfileModal').classList.remove('show');
+}
+
+function onEpAvatarFileChange() {
+  const file = document.getElementById('epAvatarFile').files?.[0];
+  if (!file) return;
+  // อัปโหลดทันทีที่เลือกรูป (ไม่ต้องรออนุมัติ ตามข้อ 1)
+  saveProfilePhoto(file);
+}
+
+async function saveProfilePhoto(file) {
+  if (isDemo) { showToast('📋 Demo: ไม่บันทึกจริง','g'); return; }
+  const preview = document.getElementById('epAvatarPreview');
+  try {
+    showToast('📤 กำลังอัปโหลดรูป…','g');
+    const fileName = `${currentCompany?.id || 'shared'}/self_${currentUser.id}_${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g,'_')}`;
+    const { error: upErr } = await sb.storage.from('avatars').upload(fileName, file, { upsert: true });
+    if (upErr) throw upErr;
+    const { data: urlData } = sb.storage.from('avatars').getPublicUrl(fileName);
+    const avatarUrl = urlData?.publicUrl;
+    if (!avatarUrl) throw new Error('ไม่ได้ URL รูปภาพ');
+
+    const { error: updErr } = await sb.from('employees').update({ avatar_url: avatarUrl }).eq('id', currentUser.id);
+    if (updErr) throw updErr;
+
+    currentUser.avatar_url = avatarUrl;
+    preview.innerHTML = `<img src="${avatarUrl}" alt="avatar">`;
+    // อัปเดตรูปทุกจุดที่แสดงอยู่ในแอปทันที
+    renderProfile();
+    const dashAvEl = document.getElementById('dashGreetAvatar');
+    if (dashAvEl) dashAvEl.innerHTML = `<img src="${avatarUrl}" alt="avatar">`;
+    showToast('✅ เปลี่ยนรูปโปรไฟล์แล้ว','g');
+  } catch(e) {
+    console.error('saveProfilePhoto error', e);
+    if (isStorageBucketMissingError(e)) {
+      showToast('⚠️ ยังไม่ได้ตั้งค่าที่เก็บรูป (avatars) ใน Supabase กรุณาแจ้งแอดมิน','r');
+    } else {
+      showToast('❌ อัปโหลดรูปไม่สำเร็จ: ' + e.message, 'r');
+    }
+  }
+}
+
+async function submitPositionChangeRequest() {
+  const newPos = document.getElementById('epPosition').value.trim();
+  if (!newPos) { showToast('⚠️ กรุณากรอกตำแหน่ง','a'); return; }
+  if (newPos === (currentUser.position || '')) { showToast('ℹ️ ตำแหน่งไม่มีการเปลี่ยนแปลง','a'); return; }
+  if (isDemo) { showToast('📋 Demo: ไม่บันทึกจริง','g'); return; }
+  if (pendingPositionRequest) { showToast('⏳ มีคำขอเปลี่ยนตำแหน่งค้างอยู่แล้ว รอ Admin อนุมัติก่อน','a'); return; }
+
+  const btn = document.getElementById('epSubmitBtn');
+  btn.disabled = true;
+  try {
+    const { error } = await sb.from('profile_change_requests').insert({
+      employee_id: currentUser.id,
+      field: 'position',
+      old_value: currentUser.position || null,
+      new_value: newPos,
+      status: 'pending',
+    });
+    if (error) throw error;
+    showToast('✅ ส่งคำขอเปลี่ยนตำแหน่งแล้ว รอ Admin กดอนุมัติ', 'g');
+    closeEditProfileModal();
+    await checkPendingPositionRequest();
+  } catch(e) {
+    console.error('submitPositionChangeRequest error', e);
+    if (isMissingTableError(e, 'profile_change_requests')) {
+      document.getElementById('epSchemaWarning').style.display = 'flex';
+      showToast('⚠️ ยังไม่ได้สร้างตาราง profile_change_requests — ดูคำแนะนำ SQL ด้านบน','r');
+    } else {
+      showToast('❌ ส่งคำขอไม่สำเร็จ: ' + e.message, 'r');
+    }
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// ══════════════════════════════════════
+//  เปลี่ยนรหัส PIN เอง (Self-service)
+// ══════════════════════════════════════
+function openChangePinModal() {
+  document.getElementById('cpOldPin').value = '';
+  document.getElementById('cpNewPin').value = '';
+  document.getElementById('cpNewPin2').value = '';
+  document.getElementById('changePinModal').classList.add('show');
+}
+function closeChangePinModal() {
+  document.getElementById('changePinModal').classList.remove('show');
+}
+
+async function submitChangePin() {
+  const oldPin = document.getElementById('cpOldPin').value.trim();
+  const newPin = document.getElementById('cpNewPin').value.trim();
+  const newPin2 = document.getElementById('cpNewPin2').value.trim();
+
+  if (!oldPin || !newPin || !newPin2) { showToast('⚠️ กรอกข้อมูลให้ครบ','a'); return; }
+  if (!/^\d{4}$/.test(newPin)) { showToast('⚠️ PIN ใหม่ต้องเป็นตัวเลข 4 หลัก','a'); return; }
+  if (newPin !== newPin2) { showToast('⚠️ ยืนยัน PIN ใหม่ไม่ตรงกัน','a'); return; }
+  if (isDemo) { showToast('📋 Demo: ไม่บันทึกจริง','g'); return; }
+
+  const btn = document.getElementById('cpSubmitBtn');
+  btn.disabled = true;
+  try {
+    // ตรวจสอบ PIN เดิม: รองรับทั้ง plain-text (เก่า) และ SHA-256 hash (ใหม่) เหมือนตอน login
+    const oldHash = await sha256(oldPin);
+    const oldMatch = currentUser.pin === oldPin || currentUser.pin === oldHash;
+    if (!oldMatch) { showToast('❌ PIN ปัจจุบันไม่ถูกต้อง','r'); btn.disabled = false; return; }
+
+    const newHash = await sha256(newPin);
+    const { error } = await sb.from('employees').update({ pin: newHash }).eq('id', currentUser.id);
+    if (error) throw error;
+
+    currentUser.pin = newHash;
+    showToast('✅ เปลี่ยนรหัส PIN สำเร็จ', 'g');
+    closeChangePinModal();
+  } catch(e) {
+    console.error('submitChangePin error', e);
+    showToast('❌ เปลี่ยน PIN ไม่สำเร็จ: ' + e.message, 'r');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// ══════════════════════════════════════
+//  Admin: อนุมัติ/ปฏิเสธ คำขอเปลี่ยนตำแหน่ง
+// ══════════════════════════════════════
+async function loadPendingProfileRequests() {
+  const card = document.getElementById('profileReqCard');
+  const list = document.getElementById('profileReqList');
+  if (!card || !list || isDemo) return;
+  try {
+    const { data, error } = await sb.from('profile_change_requests')
+      .select('id, employee_id, field, old_value, new_value, requested_at')
+      .eq('status', 'pending')
+      .order('requested_at', { ascending:true });
+    if (error) throw error;
+    if (!data || !data.length) { card.style.display = 'none'; list.innerHTML = ''; return; }
+
+    const empCache = window._empCache || {};
+    card.style.display = '';
+    list.innerHTML = data.map(r => {
+      const emp = empCache[r.employee_id];
+      const empName = emp ? emp.name : r.employee_id;
+      const fieldLabel = r.field === 'position' ? 'ตำแหน่ง' : r.field;
+      return `<div class="profile-req-row">
+        <div>
+          <b>${escapeHtml(empName)}</b><br>
+          ขอเปลี่ยน${fieldLabel}: <span style="color:var(--muted);">${escapeHtml(r.old_value || '—')}</span> → <b>${escapeHtml(r.new_value)}</b>
+        </div>
+        <div style="display:flex;gap:4px;flex-shrink:0;">
+          <button class="btn-sm primary" style="padding:5px 9px;font-size:11px;" onclick="approveProfileRequest('${r.id}','${r.employee_id}','${r.field}')">✓ อนุมัติ</button>
+          <button class="btn-sm danger" style="padding:5px 9px;font-size:11px;" onclick="rejectProfileRequest('${r.id}')">✕</button>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    if (!isMissingTableError(e, 'profile_change_requests')) console.warn('loadPendingProfileRequests error', e);
+    card.style.display = 'none';
+  }
+}
+
+async function approveProfileRequest(reqId, employeeId, field) {
+  try {
+    const { data: reqRow, error: reqErr } = await sb.from('profile_change_requests').select('new_value').eq('id', reqId).single();
+    if (reqErr) throw reqErr;
+    const updatePayload = {};
+    updatePayload[field] = reqRow.new_value;
+    const { error: empErr } = await sb.from('employees').update(updatePayload).eq('id', employeeId);
+    if (empErr) throw empErr;
+    const { error: reqUpdErr } = await sb.from('profile_change_requests')
+      .update({ status:'approved', reviewed_at: new Date().toISOString() }).eq('id', reqId);
+    if (reqUpdErr) throw reqUpdErr;
+    showToast('✅ อนุมัติแล้ว', 'g');
+    await loadPendingProfileRequests();
+    await loadEmployeeList();
+  } catch(e) {
+    console.error('approveProfileRequest error', e);
+    showToast('❌ อนุมัติไม่สำเร็จ: ' + e.message, 'r');
+  }
+}
+
+async function rejectProfileRequest(reqId) {
+  if (!confirm('ปฏิเสธคำขอนี้?')) return;
+  try {
+    const { error } = await sb.from('profile_change_requests')
+      .update({ status:'rejected', reviewed_at: new Date().toISOString() }).eq('id', reqId);
+    if (error) throw error;
+    showToast('❌ ปฏิเสธคำขอแล้ว', 'a');
+    await loadPendingProfileRequests();
+  } catch(e) {
+    console.error('rejectProfileRequest error', e);
+    showToast('❌ ดำเนินการไม่สำเร็จ: ' + e.message, 'r');
+  }
 }
 
 // ══════════════════════════════════════
@@ -5960,24 +6492,25 @@ function newsSeenKey() {
   return currentUser ? `news_last_seen_${currentUser.id}` : null;
 }
 
-// เช็คแบบเบาๆ ว่ามีข่าวใหม่กว่าที่เคยเห็นหรือไม่ — ใช้แค่โชว์/ซ่อนจุดแดง (ไม่ mark ว่าเห็นแล้ว)
+// เช็คว่ามีข่าวใหม่กว่าที่เคยเห็นกี่รายการ — แสดงเป็นตัวเลขแจ้งเตือนที่เมนูลัด (ไม่ mark ว่าเห็นแล้ว)
 async function checkNewsNotifDot() {
-  const dot = document.getElementById('newsNotifDot');
-  if (!dot || !currentUser || isDemo) return;
+  if (!currentUser || isDemo) return;
   try {
     let { data, error } = await sb.from('company_news')
       .select('created_at').eq('published', true)
-      .order('created_at', {ascending:false}).limit(1);
+      .order('created_at', {ascending:false}).limit(50);
     if (error && isMissingColumnError(error, 'published')) {
       ({ data, error } = await sb.from('company_news')
-        .select('created_at').order('created_at', {ascending:false}).limit(1));
+        .select('created_at').order('created_at', {ascending:false}).limit(50));
     }
     if (error) throw error;
-    if (!data || !data.length) { dot.classList.remove('show'); return; }
+    if (!data || !data.length) { setBadgeNum('newsNotifDot', 0); return; }
 
-    const latest = data[0].created_at;
     const lastSeen = localStorage.getItem(newsSeenKey());
-    dot.classList.toggle('show', !lastSeen || new Date(latest) > new Date(lastSeen));
+    const unseenCount = lastSeen
+      ? data.filter(n => new Date(n.created_at) > new Date(lastSeen)).length
+      : data.length;
+    setBadgeNum('newsNotifDot', unseenCount);
   } catch(e) { console.warn('checkNewsNotifDot error', e); }
 }
 
@@ -5989,7 +6522,7 @@ function ackNewsNotifications(latestCreatedAt) {
   if (!prev || new Date(latestCreatedAt) > new Date(prev)) {
     localStorage.setItem(key, latestCreatedAt);
   }
-  document.getElementById('newsNotifDot')?.classList.remove('show');
+  setBadgeNum('newsNotifDot', 0);
 }
 
 // ══════════════════════════════════════
@@ -6015,14 +6548,21 @@ async function loadNews() {
   }
 
   // ลองดึงคอลัมน์ครบก่อน ถ้าคอลัมน์ไหนยังไม่มีในฐานข้อมูล ค่อยๆ ตัดออกแล้วลองใหม่
-  async function fetchNews(selectCols, useFilter) {
+  async function fetchNews(selectCols, useFilter, useCompanyScope) {
     let q = sb.from('company_news').select(selectCols).order('created_at', {ascending:false});
     if (useFilter) q = q.eq('published', true);
+    if (useCompanyScope && currentCompany?.id) q = q.eq('company_id', currentCompany.id);
     return q;
   }
-  let { data, error } = await fetchNews('*', true);
+  let { data, error } = await fetchNews('*', true, true);
+  if (error && isMissingColumnError(error, 'company_id')) {
+    ({ data, error } = await fetchNews('*', true, false));
+  }
   if (error && isMissingColumnError(error, 'published')) {
-    ({ data, error } = await fetchNews('*', false));
+    ({ data, error } = await fetchNews('*', false, true));
+    if (error && isMissingColumnError(error, 'company_id')) {
+      ({ data, error } = await fetchNews('*', false, false));
+    }
   }
   if (error) { box.innerHTML = `<div class="empty-row" style="color:var(--red)">❌ ${error.message}</div>`; return; }
   if (!data?.length) { box.innerHTML = '<div class="empty-row">ยังไม่มีข่าวสาร</div>'; return; }
@@ -6185,7 +6725,12 @@ async function loadShiftsFromStorage() {
   }
 
   try {
-    const { data, error } = await sb.from('shifts').select('*').order('start_time', { ascending: true });
+    let shiftQuery = sb.from('shifts').select('*');
+    if (currentCompany?.id) shiftQuery = shiftQuery.eq('company_id', currentCompany.id);
+    let { data, error } = await shiftQuery.order('start_time', { ascending: true });
+    if (error && isMissingColumnError(error, 'company_id')) {
+      ({ data, error } = await sb.from('shifts').select('*').order('start_time', { ascending: true }));
+    }
     if (error) throw error;
 
     shiftsDbUnavailable = false;
@@ -6198,9 +6743,14 @@ async function loadShiftsFromStorage() {
       // หมายเหตุ: ไม่ส่ง id เอง เพราะคอลัมน์ id ของตาราง shifts เป็น uuid (ให้ฐานข้อมูล gen_random_uuid() ให้เอง)
       const seedShifts = defaultShifts();
       try {
-        const { data: seeded, error: seedErr } = await sb.from('shifts').insert(seedShifts.map(s => ({
-          name: s.name, start_time: s.start, end_time: s.end, grace_minutes: s.grace
-        }))).select('*');
+        const seedRows = seedShifts.map(s => ({
+          company_id: currentCompany?.id, name: s.name, start_time: s.start, end_time: s.end, grace_minutes: s.grace
+        }));
+        let { data: seeded, error: seedErr } = await sb.from('shifts').insert(seedRows).select('*');
+        if (seedErr && isMissingColumnError(seedErr, 'company_id')) {
+          const seedRowsNoCompany = seedShifts.map(s => ({ name: s.name, start_time: s.start, end_time: s.end, grace_minutes: s.grace }));
+          ({ data: seeded, error: seedErr } = await sb.from('shifts').insert(seedRowsNoCompany).select('*'));
+        }
         if (seedErr) throw seedErr;
         allShifts = (seeded || []).map(s => ({ id: s.id, name: s.name, start: hhmm(s.start_time), end: hhmm(s.end_time), grace: s.grace_minutes }));
       } catch(seedErr) {
@@ -6385,6 +6935,158 @@ function isLateForShift(checkinDate, shift) {
   return ciMins > graceEnd;
 }
 
+
+// หากะถัดไปที่ยังไม่เริ่มวันนี้ (ใกล้ที่สุด) — ใช้สำหรับแจ้งเตือนก่อนมาทำงาน
+function getNextShiftToday(date = new Date()) {
+  const nowMins = date.getHours() * 60 + date.getMinutes();
+  let best = null, bestDiff = Infinity;
+  for (const s of allShifts) {
+    const [sh, sm] = s.start.split(':').map(Number);
+    const startMins = sh * 60 + sm;
+    const diff = startMins - nowMins;
+    if (diff >= 0 && diff < bestDiff) { best = s; bestDiff = diff; }
+  }
+  return best ? { shift: best, minutesUntilStart: bestDiff } : null;
+}
+
+// ══════════════════════════════════════
+//  แจ้งเตือนก่อนมาทำงาน (Local, ไม่มี Server — ข้อ 2)
+//  เก็บค่าไว้ต่ออุปกรณ์ใน localStorage เท่านั้น (ยังไม่ sync ข้ามเครื่อง)
+// ══════════════════════════════════════
+function notifyPrefKey() {
+  return currentUser ? `shift_notify_pref_${currentUser.id}` : null;
+}
+
+function loadNotifyPref() {
+  const key = notifyPrefKey();
+  if (!key) return { enabled:false, minutesBefore:30 };
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return { enabled:false, minutesBefore:30 };
+    const parsed = JSON.parse(raw);
+    return { enabled: !!parsed.enabled, minutesBefore: parseInt(parsed.minutesBefore) || 30 };
+  } catch(e) { return { enabled:false, minutesBefore:30 }; }
+}
+
+function saveNotifyPrefToStorage(pref) {
+  const key = notifyPrefKey();
+  if (!key) return;
+  localStorage.setItem(key, JSON.stringify(pref));
+}
+
+function openNotifyPrefModal() {
+  const pref = loadNotifyPref();
+  document.getElementById('npEnabled').checked = pref.enabled;
+  document.getElementById('npMinutes').value = String(pref.minutesBefore);
+  updateNpPermNote();
+  document.getElementById('notifyPrefModal').classList.add('show');
+}
+function closeNotifyPrefModal() {
+  document.getElementById('notifyPrefModal').classList.remove('show');
+}
+
+function updateNpPermNote() {
+  const note = document.getElementById('npPermNote');
+  if (!note) return;
+  const base = 'ระบบจะเทียบเวลากับ "กะการทำงาน" ที่ใกล้ที่สุดวันนี้ และแจ้งเตือน (ป๊อปอัป + เลขแดงบนไอคอนแอป ถ้าเบราว์เซอร์รองรับ) ตอนที่เปิดแอปอยู่เท่านั้น — เนื่องจากระบบนี้ยังไม่มี Server กลางสำหรับส่ง Push แจ้งเตือนตอนปิดแอป';
+  if (typeof Notification === 'undefined') {
+    note.textContent = base + ' (เบราว์เซอร์นี้ไม่รองรับ Notification popup — จะเห็นแค่ข้อความในแอปแทน)';
+  } else if (Notification.permission === 'denied') {
+    note.textContent = base + ' ⚠️ คุณเคยปฏิเสธสิทธิ์การแจ้งเตือนของเบราว์เซอร์ไว้ — จะเห็นแค่ข้อความในแอปแทน (แก้ไขได้ที่การตั้งค่าเบราว์เซอร์)';
+  } else {
+    note.textContent = base;
+  }
+}
+
+async function onNpToggleChange() {
+  const enabled = document.getElementById('npEnabled').checked;
+  if (enabled && typeof Notification !== 'undefined' && Notification.permission === 'default') {
+    try { await Notification.requestPermission(); } catch(e) {}
+  }
+  updateNpPermNote();
+}
+
+function saveNotifyPref() {
+  const enabled = document.getElementById('npEnabled').checked;
+  const minutesBefore = parseInt(document.getElementById('npMinutes').value) || 30;
+  saveNotifyPrefToStorage({ enabled, minutesBefore });
+  showToast(enabled ? `✅ เปิดแจ้งเตือนก่อนเข้ากะ ${minutesBefore} นาที` : '✅ ปิดการแจ้งเตือนแล้ว', 'g');
+  closeNotifyPrefModal();
+  checkShiftReminder();
+}
+
+// เคลียร์ badge บนไอคอนแอป (Badging API) — เรียกตอนเช็คอินสำเร็จ หรือเมื่อไม่มีอะไรต้องเตือนแล้ว
+function clearShiftReminderBadge() {
+  try { if (navigator.clearAppBadge) navigator.clearAppBadge(); } catch(e) {}
+}
+
+function setShiftReminderBadge(count) {
+  try { if (navigator.setAppBadge) navigator.setAppBadge(count); } catch(e) {}
+}
+
+// เช็คทุกนาทีว่าใกล้ถึงเวลากะแล้วหรือยัง ถ้าใช่และยังไม่เช็คอิน → เตือน (toast + Notification popup + app badge)
+// ทำงานเฉพาะตอนแอปเปิดอยู่ (ไม่มี Server/Service Worker ส่ง Push ตอนปิดแอป — ตามที่เลือกไว้)
+function checkShiftReminder() {
+  if (!currentUser || isDemo) return;
+  const pref = loadNotifyPref();
+  if (!pref.enabled) { clearShiftReminderBadge(); return; }
+  if (isCheckedIn) { clearShiftReminderBadge(); return; }
+
+  const next = getNextShiftToday();
+  if (!next) return;
+  const { shift, minutesUntilStart } = next;
+
+  const todayStr = toLocalDateStr(new Date());
+  const flagKey = `shift_notified_${currentUser.id}_${todayStr}_${shift.id}`;
+
+  if (minutesUntilStart <= pref.minutesBefore && minutesUntilStart >= 0) {
+    if (localStorage.getItem(flagKey)) return; // เตือนไปแล้ววันนี้สำหรับกะนี้
+    localStorage.setItem(flagKey, '1');
+
+    const msg = `⏰ อีก ${minutesUntilStart} นาที จะถึงเวลาเข้ากะ "${shift.name}" (${shift.start} น.) อย่าลืมเช็คอิน!`;
+    showToast(msg, 'a');
+    setShiftReminderBadge(1);
+
+    if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+      try { new Notification('VTA 360 — ใกล้ถึงเวลาเข้างาน', { body: msg, icon: 'icon.png' }); } catch(e) {}
+    }
+  }
+}
+
+// ══════════════════════════════════════
+//  ตัวเลขแจ้งเตือนเมนู "ปฏิทินการทำงาน" — จำนวนวันลา/โอทีที่อนุมัติแล้วและยังไม่ถึงวัน (เดือนนี้)
+// ══════════════════════════════════════
+async function checkCalendarBadge() {
+  if (!currentUser || isDemo) return;
+  try {
+    const now = new Date();
+    const todayStr = toLocalDateStr(now);
+    const monthEnd = toLocalDateStr(new Date(now.getFullYear(), now.getMonth()+1, 0));
+
+    let total = 0;
+    try {
+      const { data, error } = await sb.from('leave_requests')
+        .select('id')
+        .eq('employee_id', currentUser.id)
+        .eq('status', 'approved')
+        .gte('end_date', todayStr)
+        .lte('start_date', monthEnd);
+      if (!error) total += (data || []).length;
+    } catch(e) { /* ตารางอาจยังไม่มี — เงียบไว้ */ }
+
+    try {
+      const { data: otData, error: otErr } = await sb.from('ot_requests')
+        .select('id')
+        .eq('employee_id', currentUser.id)
+        .eq('status', 'approved')
+        .gte('request_date', todayStr)
+        .lte('request_date', monthEnd);
+      if (!otErr) total += (otData || []).length;
+    } catch(e) { /* ตารางอาจยังไม่มี — เงียบไว้ */ }
+
+    setBadgeNum('calBadge', total);
+  } catch(e) { console.warn('checkCalendarBadge error', e); }
+}
 
 // ══════════════════════════════════════
 let toastTimer;
