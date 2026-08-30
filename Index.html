@@ -273,21 +273,21 @@ body {
 .dash-action-btn .sub { display:block; font-size:10.5px; font-weight:400; opacity:.85; margin-top:2px; }
 
 .dash-quick-grid {
-  display:grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px;
+  display:grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px;
 }
 .quick-icon {
-  background: var(--surface); border:1px solid var(--border); border-radius: 16px;
-  padding: 14px 6px; display:flex; flex-direction:column; align-items:center; gap:7px;
+  background: var(--surface); border:1px solid var(--border); border-radius: 14px;
+  padding: 12px 4px; display:flex; flex-direction:column; align-items:center; gap:6px;
   cursor:pointer; box-shadow: var(--shadow-sm); transition: transform .12s;
   font-family: var(--font); color: var(--text); position:relative;
 }
 .quick-icon:active { transform: scale(.96); }
 .quick-icon .ic {
-  width:40px; height:40px; border-radius:50%; background: var(--primary-dim);
+  width:36px; height:36px; border-radius:50%; background: var(--primary-dim);
   display:flex; align-items:center; justify-content:center;
 }
-.quick-icon .ic svg { width:20px; height:20px; color: var(--primary); }
-.quick-icon .lbl { font-size:10.5px; text-align:center; line-height:1.25; font-weight:500; }
+.quick-icon .ic svg { width:18px; height:18px; color: var(--primary); }
+.quick-icon .lbl { font-size:10px; text-align:center; line-height:1.2; font-weight:500; }
 .quick-icon .notif-dot {
   display:none; position:absolute; top:8px; right:14px;
   width:8px; height:8px; border-radius:50%; background:var(--red); box-shadow:0 0 0 2px var(--surface);
@@ -305,16 +305,60 @@ body {
 .quick-icon .ic.c-teal   svg { color:#16A34A; }
 .quick-icon .ic.c-slate  { background:#F1F5F9; }
 .quick-icon .ic.c-slate  svg { color:#64748B; }
+.quick-icon .ic.c-gold   { background:#FEF3C7; }
+.quick-icon .ic.c-gold   svg { color:#D97706; }
+.quick-icon .ic.c-indigo { background:#E0E7FF; }
+.quick-icon .ic.c-indigo svg { color:#4F46E5; }
 
 /* ── ป้ายจำนวนแจ้งเตือนแบบตัวเลข (แทนจุดแดงเปล่า) ── */
 .quick-icon .badge-num {
-  display:none; position:absolute; top:6px; right:10px;
+  display:none; position:absolute; top:6px; right:8px;
   min-width:17px; height:17px; padding:0 4px; border-radius:9px;
   background:var(--red); color:#fff; font-family:var(--mono);
   font-size:10px; font-weight:700; line-height:17px; text-align:center;
   box-shadow:0 0 0 2px var(--surface);
 }
 .quick-icon .badge-num.show { display:inline-block; }
+
+/* ── การ์ด CTA ใหญ่แบบ 2 คอลัมน์ (แจ้งลา / ขอโอที) — สไตล์กระจกใส ตามแนวทาง Glass Neo Card ── */
+.dash-cta-row { display:flex; gap:10px; margin-bottom:16px; }
+.dash-cta-card {
+  flex:1; border:1.5px solid transparent; border-radius:16px; padding:14px 12px; cursor:pointer;
+  display:flex; flex-direction:row; align-items:center; justify-content:center; gap:8px;
+  font-family:var(--font); text-align:center; transition:transform .12s;
+  position:relative;
+}
+.dash-cta-card:active { transform: scale(.97); }
+.dash-cta-card .cta-ic { display:flex; align-items:center; justify-content:center; }
+.dash-cta-card .cta-ic svg { width:19px; height:19px; }
+.dash-cta-card .cta-lbl { font-size:13.5px; font-weight:700; line-height:1.3; white-space:nowrap; }
+.dash-cta-card .cta-arrow { display:none; } /* ไม่ใช้ลูกศรในสไตล์ปุ่มแบบเดิม */
+.dash-cta-card.cta-leave { background:#EAF2FF; border-color:#DCE9FF; color:#2563EB; }
+.dash-cta-card.cta-leave .cta-ic svg { color:#2563EB; }
+.dash-cta-card.cta-ot    { background:#FDF3E7; border-color:#FCE7CC; color:#D97706; }
+.dash-cta-card.cta-ot    .cta-ic svg { color:#D97706; }
+
+/* ── การ์ด "คำขอล่าสุดของฉัน" (แนวเดียวกับการ์ดนัดหมายในแอปตัวอย่าง) ── */
+.recent-req-section { margin: 4px 0 16px; }
+.recent-req-title { font-size:13.5px; font-weight:700; margin: 0 0 10px 2px; color:var(--text); }
+.recent-req-card {
+  background: var(--surface); border:1px solid var(--border); border-radius: var(--radius);
+  padding:14px; display:flex; gap:12px; align-items:flex-start; box-shadow: var(--shadow-sm);
+}
+.recent-req-ic {
+  width:44px; height:44px; border-radius:50%; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; font-size:20px;
+}
+.recent-req-body { flex:1; min-width:0; }
+.recent-req-name { font-size:13.5px; font-weight:700; margin-bottom:2px; }
+.recent-req-sub { font-size:11.5px; color:var(--muted); margin-bottom:2px; }
+.recent-req-loc { font-size:11px; color:var(--muted); display:flex; align-items:center; gap:4px; margin-bottom:8px; }
+.recent-req-chip-row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.recent-req-chip {
+  display:inline-flex; align-items:center; gap:5px; background:var(--surface2);
+  border-radius:8px; padding:4px 9px; font-size:11px; font-family:var(--mono); color:var(--text);
+}
+.recent-req-chip svg { width:12px; height:12px; }
 
 /* ══════════════════ ประวัติการลงเวลา / สรุปเวลา — shared bits ══════════════════ */
 .month-picker-row { display:flex; align-items:center; gap:8px; padding: 4px 18px 12px; }
@@ -618,6 +662,7 @@ body {
 .hi-badge.rejected { background:var(--red-dim); color:var(--red); }
 .hi-badge.cancel_requested { background:var(--amber-dim); color:var(--amber); }
 .hi-badge.cancelled { background:var(--surface2); color:var(--muted); }
+.hi-badge.paid { background:#DCFCE7; color:#15803D; }
 
 /* ── ADMIN TAB ── */
 .admin-wrap { max-width: 700px; margin:0 auto; padding: 20px 18px; display:flex; flex-direction:column; gap:16px; }
@@ -717,6 +762,7 @@ select.field-sm { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .badge-s.rejected { background:var(--red-dim); color:var(--red); }
 .badge-s.cancel_requested { background:var(--amber-dim); color:var(--amber); }
 .badge-s.cancelled { background:var(--surface2); color:var(--muted); }
+.badge-s.paid { background:#DCFCE7; color:#15803D; }
 .leave-type-txt { color:var(--blue); font-weight:500; }
 
 .map-link {
@@ -1101,6 +1147,20 @@ select.field-sm { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   padding:10px 12px; margin-bottom:8px; font-size:12px;
 }
 
+/* ── สลับภาษา TH/EN ── */
+.lang-toggle {
+  display:flex; background:rgba(255,255,255,.18); border-radius:20px; padding:2px;
+  gap:2px; backdrop-filter:blur(4px);
+}
+.lang-toggle button {
+  border:none; background:transparent; color:rgba(255,255,255,.75); font-family:var(--mono);
+  font-size:10.5px; font-weight:700; padding:4px 9px; border-radius:16px; cursor:pointer; transition:background .15s,color .15s;
+}
+.lang-toggle button.active { background:#fff; color:var(--primary); }
+.lang-toggle.on-light { background:var(--surface2); }
+.lang-toggle.on-light button { color:var(--muted); }
+.lang-toggle.on-light button.active { background:var(--primary); color:#fff; }
+
 /* toggle switch */
 .toggle-wrap { display:flex; align-items:center; gap:8px; font-size:13px; }
 .toggle { position:relative; width:36px; height:20px; }
@@ -1172,13 +1232,13 @@ select.field-sm { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
         <div class="login-live-date" id="loginLiveDate"></div>
       </div>
 
-      <div class="login-field-lbl">User (ผู้ใช้งาน)</div>
+      <div class="login-field-lbl" data-i18n="login_user_lbl">User (ผู้ใช้งาน)</div>
       <div class="login-input-wrap">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 20c0-4 3.5-6 8-6s8 2 8 6"></path></svg>
-        <input class="login-input" id="loginEmail" placeholder="เบอร์โทรศัพท์ หรือ E-mail">
+        <input class="login-input" id="loginEmail" placeholder="เบอร์โทรศัพท์ หรือ E-mail" data-i18n-ph="login_user_ph">
       </div>
 
-      <div class="login-pin-lbl">รหัส PIN</div>
+      <div class="login-pin-lbl" data-i18n="login_pin_lbl">รหัส PIN</div>
       <div class="pin-dots" id="pinDots">
         <div class="pin-dot" id="d0"></div>
         <div class="pin-dot" id="d1"></div>
@@ -1195,7 +1255,7 @@ select.field-sm { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
         <button class="num-btn" onclick="pinInput('7', this)">7</button>
         <button class="num-btn" onclick="pinInput('8', this)">8</button>
         <button class="num-btn" onclick="pinInput('9', this)">9</button>
-        <button class="num-btn clr" onclick="pinClear(this)">ล้าง</button>
+        <button class="num-btn clr" onclick="pinClear(this)" data-i18n="login_clear">ล้าง</button>
         <button class="num-btn" onclick="pinInput('0', this)">0</button>
         <button class="num-btn del" onclick="pinBack(this)">⌫</button>
       </div>
@@ -1204,7 +1264,7 @@ select.field-sm { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
       <div class="login-biometric">
         <button type="button" onclick="tryBiometricLogin()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 11a2 2 0 0 0-2 2c0 3-1 5-2 6"></path><path d="M8 8.5A5 5 0 0 1 17 12c0 1 0 3-.5 4.5"></path><path d="M12 3a9 9 0 0 0-8.7 11.2"></path><path d="M16 4.5A9 9 0 0 1 21 12c0 1.5 0 2.5-.3 3.5"></path><path d="M14 13c0 3-.5 5-1.5 7"></path></svg>
-          Face ID / ลายนิ้วมือ
+          <span data-i18n="login_biometric">Face ID / ลายนิ้วมือ</span>
         </button>
       </div>
 
@@ -1212,14 +1272,18 @@ select.field-sm { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
         <div class="login-success-check">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
         </div>
-        <div class="login-success-title">Welcome Back 👋</div>
-        <div class="login-success-sub">กำลังเข้าสู่ระบบ...</div>
+        <div class="login-success-title" data-i18n="login_welcome_back">Welcome Back 👋</div>
+        <div class="login-success-sub" data-i18n="login_signing_in">กำลังเข้าสู่ระบบ...</div>
       </div>
     </div>
 
     <div class="login-clock-wrap">
-      <div style="font-size:12px;color:var(--muted);">🔒 Secure Login</div>
-      <div class="login-footer-ver">Version 2.65.065 · Powered by VTA-Service</div>
+      <div class="lang-toggle on-light" id="langToggleLogin" style="margin:0 auto 10px;width:fit-content;">
+        <button type="button" data-lang="th" onclick="setLanguage('th')">TH</button>
+        <button type="button" data-lang="en" onclick="setLanguage('en')">EN</button>
+      </div>
+      <div style="font-size:12px;color:var(--muted);" data-i18n="login_secure">🔒 Secure Login</div>
+      <div class="login-footer-ver">Version 2.65.064 · Powered by VTA-Service</div>
     </div>
   </div>
 </div>
@@ -1236,13 +1300,19 @@ select.field-sm { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   <!-- ══ DASHBOARD (หน้าหลัก) ══ -->
   <div class="view active" id="view-dashboard">
     <div class="dash-wrap">
-      <div class="dash-greet-card" style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+      <div class="dash-greet-card" style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;position:relative;">
         <div style="min-width:0;">
           <div class="dash-greet-hi" id="dashGreetHi">สวัสดี</div>
           <div class="dash-greet-name" id="dashGreetName">—</div>
-          <div class="dash-greet-role" id="dashGreetRole">ตำแหน่ง: —</div>
+          <div class="dash-greet-role" id="dashGreetRole">ตำแหน่ง : —</div>
         </div>
-        <div class="dash-greet-avatar" id="dashGreetAvatar">?</div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;">
+          <div class="lang-toggle" id="langToggleHero">
+            <button type="button" data-lang="th" onclick="setLanguage('th')">TH</button>
+            <button type="button" data-lang="en" onclick="setLanguage('en')">EN</button>
+          </div>
+          <div class="dash-greet-avatar" id="dashGreetAvatar">?</div>
+        </div>
       </div>
 
       <div class="dash-time-card">
@@ -1254,8 +1324,8 @@ select.field-sm { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
       </div>
 
       <div class="dash-status-card">
-        <div class="dash-status-title">สถานะการทำงานวันนี้</div>
-        <div class="dash-status-value out" id="statusLbl">ยังไม่ได้เช็คอิน</div>
+        <div class="dash-status-title" data-i18n="status_title">สถานะการทำงานวันนี้</div>
+        <div class="dash-status-value out" id="statusLbl" data-i18n="status_not_checked_in">ยังไม่ได้เช็คอิน</div>
         <div id="statusRing" style="display:none"><div class="status-dot"></div></div>
       </div>
 
@@ -1263,7 +1333,7 @@ select.field-sm { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
       <div class="geo-card loading" id="geoCard">
         <div class="geo-icon">📡</div>
         <div class="geo-info">
-          <div class="geo-title">ตรวจสอบพิกัด</div>
+          <div class="geo-title" data-i18n="geo_title">ตรวจสอบพิกัด</div>
           <div class="geo-detail" id="geoDetail">กำลังรับ GPS…</div>
           <div class="geo-dist" id="geoDist"></div>
         </div>
@@ -1273,62 +1343,80 @@ select.field-sm { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
       <div id="carriedOverWarning" style="display:none;"></div>
 
       <div class="session-card" id="sessionCard" style="display:none">
-        <div class="session-row"><span class="lbl">เช็คอินเมื่อ</span><span class="val" id="ciTime">—</span></div>
-        <div class="session-row"><span class="lbl">พิกัด</span><span class="val" id="ciCoord">—</span></div>
-        <div class="session-row"><span class="lbl">ระยะทาง</span><span class="val" id="ciDist">—</span></div>
-        <div class="session-row"><span class="lbl">เวลาทำงาน</span><span class="val" id="elapsed">00:00:00</span></div>
+        <div class="session-row"><span class="lbl" data-i18n="session_checkin_at">เช็คอินเมื่อ</span><span class="val" id="ciTime">—</span></div>
+        <div class="session-row"><span class="lbl" data-i18n="session_coords">พิกัด</span><span class="val" id="ciCoord">—</span></div>
+        <div class="session-row"><span class="lbl" data-i18n="session_distance">ระยะทาง</span><span class="val" id="ciDist">—</span></div>
+        <div class="session-row"><span class="lbl" data-i18n="session_elapsed">เวลาทำงาน</span><span class="val" id="elapsed">00:00:00</span></div>
       </div>
 
       <button class="dash-action-btn checkin" id="btnAction" onclick="doAction()" disabled style="width:100%;margin-bottom:12px;">
         <span id="btnIcon">📍</span> <span id="btnText">กำลังรับ GPS…</span>
       </button>
 
-      <div style="display:flex; gap:10px; margin-bottom:16px;">
-        <button class="btn-action leave" id="btnLeave" onclick="openLeaveModal()" style="flex:1;">
-          🏖️ แจ้งลา / ขอลา
+      <div class="dash-cta-row">
+        <button class="dash-cta-card cta-leave" id="btnLeave" onclick="openLeaveModal()">
+          <div class="cta-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></div>
+          <div class="cta-lbl" data-i18n="cta_leave">แจ้งลา / ขอลา</div>
         </button>
-        <button class="btn-action ot" id="btnOt" onclick="openOtModal()" style="flex:1;">
-          ⏰ ขอโอที
+        <button class="dash-cta-card cta-ot" id="btnOt" onclick="openOtModal()">
+          <div class="cta-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><polyline points="12 7 12 12 15 15"></polyline></svg></div>
+          <div class="cta-lbl" data-i18n="cta_ot">ขอโอที</div>
         </button>
       </div>
 
       <div class="dash-quick-grid">
         <div class="quick-icon" onclick="switchTab('history')">
           <div class="ic c-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><polyline points="12 7 12 12 15 15"></polyline></svg></div>
-          <div class="lbl">ประวัติการลงเวลา</div>
+          <div class="lbl" data-i18n="qg_history">ประวัติการลงเวลา</div>
           <span class="badge-num" id="historyBadge">0</span>
         </div>
         <div class="quick-icon" onclick="switchTab('requests')">
           <div class="ic c-purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="3" width="12" height="18" rx="2"></rect><line x1="9" y1="8" x2="15" y2="8"></line><line x1="9" y1="12" x2="15" y2="12"></line></svg></div>
-          <div class="lbl">คำขออนุมัติ</div>
+          <div class="lbl" data-i18n="qg_requests">คำขออนุมัติ</div>
           <span class="badge-num" id="leaveNotifDot">0</span>
         </div>
         <div class="quick-icon" onclick="switchTab('workcal')">
           <div class="ic c-orange"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></div>
-          <div class="lbl">ปฏิทินการทำงาน</div>
+          <div class="lbl" data-i18n="qg_workcal">ปฏิทินการทำงาน</div>
           <span class="badge-num" id="calBadge">0</span>
+        </div>
+        <div class="quick-icon" onclick="openClaimModal()">
+          <div class="ic c-gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="3"></circle><line x1="6" y1="10" x2="6" y2="10"></line><line x1="18" y1="14" x2="18" y2="14"></line></svg></div>
+          <div class="lbl" data-i18n="qg_claim">เบิกเงิน</div>
+          <span class="badge-num" id="claimBadge">0</span>
         </div>
         <div class="quick-icon" onclick="switchTab('news')">
           <div class="ic c-teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h13a2 2 0 0 1 2 2v13a1 1 0 0 1-1 1H4z"></path><path d="M4 4v16"></path><line x1="8" y1="8" x2="15" y2="8"></line><line x1="8" y1="12" x2="15" y2="12"></line></svg></div>
-          <div class="lbl">ข่าวสารองค์กร</div>
+          <div class="lbl" data-i18n="qg_news">ข่าวสารองค์กร</div>
           <span class="badge-num" id="newsNotifDot">0</span>
+        </div>
+        <div class="quick-icon" onclick="openPayslipListModal()">
+          <div class="ic c-indigo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="9" y1="15" x2="15" y2="15"></line><line x1="9" y1="18" x2="13" y2="18"></line></svg></div>
+          <div class="lbl" data-i18n="qg_payslip">สลิปเงินเดือน</div>
+          <span class="badge-num" id="payslipBadge">0</span>
         </div>
         <div class="quick-icon" onclick="switchTab('profile')">
           <div class="ic c-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 20c0-4 3.5-6 8-6s8 2 8 6"></path></svg></div>
-          <div class="lbl">โปรไฟล์</div>
+          <div class="lbl" data-i18n="qg_profile">โปรไฟล์</div>
         </div>
         <div class="quick-icon" onclick="openSettingsIcon()">
           <div class="ic c-slate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></div>
-          <div class="lbl">ตั้งค่า</div>
+          <div class="lbl" data-i18n="qg_settings">ตั้งค่า</div>
         </div>
+      </div>
+
+      <!-- ══ คำขอล่าสุดของฉัน (แนวเดียวกับการ์ดนัดหมายในแอปตัวอย่าง) ══ -->
+      <div class="recent-req-section" id="recentReqSection" style="display:none">
+        <div class="recent-req-title" data-i18n="recent_req_title">คำขอล่าสุดของฉัน</div>
+        <div id="recentReqCard"></div>
       </div>
 
       <div class="history-card">
         <div class="history-header">
-          <span>ประวัติวันนี้</span>
+          <span data-i18n="history_today">ประวัติวันนี้</span>
           <span id="histCount" style="font-size:11px;"></span>
         </div>
-        <div id="historyList"><div class="empty-row">ยังไม่มีรายการ</div></div>
+        <div id="historyList"><div class="empty-row" data-i18n="empty_no_items">ยังไม่มีรายการ</div></div>
       </div>
     </div>
   </div>
@@ -1337,7 +1425,7 @@ select.field-sm { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   <div class="view" id="view-history">
     <div class="screen-back-header">
       <button onclick="switchTab('dashboard')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg></button>
-      <span class="title">ประวัติการลงเวลา</span>
+      <span class="title" data-i18n="history_screen_title">ประวัติการลงเวลา</span>
     </div>
     <div class="month-picker-row">
       <select class="field-input" id="myHistMonth" onchange="onHistMonthChange()"></select>
@@ -1346,13 +1434,13 @@ select.field-sm { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     </div>
     <div style="padding:0 18px;">
       <div class="stats-row" style="margin-bottom:14px;">
-        <div class="stat-card"><div class="stat-num g" id="myStatDays">&#x2014;</div><div class="stat-lbl">วันมาทำงาน</div></div>
-        <div class="stat-card"><div class="stat-num a" id="myStatLate">&#x2014;</div><div class="stat-lbl">มาสาย</div></div>
-        <div class="stat-card"><div class="stat-num" style="color:var(--blue)" id="myStatHours">&#x2014;</div><div class="stat-lbl">ชั่วโมงรวม</div></div>
+        <div class="stat-card"><div class="stat-num g" id="myStatDays">&#x2014;</div><div class="stat-lbl" data-i18n="stat_days_worked">วันมาทำงาน</div></div>
+        <div class="stat-card"><div class="stat-num a" id="myStatLate">&#x2014;</div><div class="stat-lbl" data-i18n="stat_late">มาสาย</div></div>
+        <div class="stat-card"><div class="stat-num" style="color:var(--blue)" id="myStatHours">&#x2014;</div><div class="stat-lbl" data-i18n="stat_total_hours">ชั่วโมงรวม</div></div>
       </div>
       <div class="table-card" style="margin-bottom:24px;">
         <div class="table-head" style="grid-template-columns:90px 80px 80px 1fr;">
-          <div>วันที่</div><div>เช็คอิน</div><div>เช็คเอ้าท์</div><div>ชั่วโมง / หมายเหตุ</div>
+          <div data-i18n="th_date">วันที่</div><div data-i18n="th_checkin">เช็คอิน</div><div data-i18n="th_checkout">เช็คเอ้าท์</div><div data-i18n="th_hours_note">ชั่วโมง / หมายเหตุ</div>
         </div>
         <div id="myHistoryTable"><div class="empty-row"><div class="spinner"></div></div></div>
       </div>
@@ -1361,84 +1449,88 @@ select.field-sm { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
   <!-- ══ สรุปเวลาการทำงาน (bottom-nav) ══ -->
   <div class="view" id="view-summary">
-    <div class="screen-back-header"><span class="title">สรุปเวลาการทำงาน</span></div>
+    <div class="screen-back-header"><span class="title" data-i18n="summary_screen_title">สรุปเวลาการทำงาน</span></div>
     <div class="month-picker-row">
       <select class="field-input" id="summaryMonth" onchange="loadSummaryData()"></select>
     </div>
     <div class="summary-total-card">
       <div class="summary-total-num" id="sumTotalHours">0:00</div>
-      <div class="summary-total-lbl">ชั่วโมงทำงานรวม</div>
+      <div class="summary-total-lbl" data-i18n="summary_total_hours">ชั่วโมงทำงานรวม</div>
     </div>
     <div class="bar-chart-card">
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
-        <div style="font-size:12px;color:var(--muted);">ชั่วโมงทำงานรายวัน</div>
+        <div style="font-size:12px;color:var(--muted);" data-i18n="summary_daily_hours">ชั่วโมงทำงานรายวัน</div>
         <div style="display:flex;gap:10px;font-size:10.5px;color:var(--muted);">
-          <span style="display:inline-flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:2px;background:linear-gradient(180deg,var(--secondary),var(--primary));display:inline-block;"></span>วันทำงาน</span>
-          <span style="display:inline-flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:2px;background:linear-gradient(180deg,#FBBF24,#D97706);display:inline-block;"></span>วันหยุด (ส-อา)</span>
+          <span style="display:inline-flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:2px;background:linear-gradient(180deg,var(--secondary),var(--primary));display:inline-block;"></span><span data-i18n="legend_workday">วันทำงาน</span></span>
+          <span style="display:inline-flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:2px;background:linear-gradient(180deg,#FBBF24,#D97706);display:inline-block;"></span><span data-i18n="legend_weekend">วันหยุด (ส-อา)</span></span>
         </div>
       </div>
       <div class="bar-chart" id="sumBarChart"></div>
     </div>
     <div class="donut-row">
-      <div class="donut" id="sumDonut" style="--pct:0;"><div class="donut-inner"><b id="sumPct">0%</b><span>เข้างาน</span></div></div>
+      <div class="donut" id="sumDonut" style="--pct:0;"><div class="donut-inner"><b id="sumPct">0%</b><span data-i18n="donut_attendance">เข้างาน</span></div></div>
       <div class="donut-legend">
-        <div><span class="dot" style="background:var(--primary)"></span>วันมาทำงาน: <b id="sumDaysWorked">0</b></div>
-        <div><span class="dot" style="background:var(--amber)"></span>มาสาย: <b id="sumDaysLate">0</b></div>
-        <div><span class="dot" style="background:var(--surface2)"></span>ขาด/ไม่มา: <b id="sumDaysAbsent">0</b></div>
+        <div><span class="dot" style="background:var(--primary)"></span><span data-i18n="legend_days_worked">วันมาทำงาน</span>: <b id="sumDaysWorked">0</b></div>
+        <div><span class="dot" style="background:var(--amber)"></span><span data-i18n="legend_late">มาสาย</span>: <b id="sumDaysLate">0</b></div>
+        <div><span class="dot" style="background:var(--surface2)"></span><span data-i18n="legend_absent">ขาด/ไม่มา</span>: <b id="sumDaysAbsent">0</b></div>
       </div>
     </div>
   </div>
 
   <!-- ══ คำขออนุมัติ (bottom-nav) ══ -->
   <div class="view" id="view-requests">
-    <div class="screen-back-header"><span class="title">คำขออนุมัติ</span></div>
+    <div class="screen-back-header"><span class="title" data-i18n="requests_screen_title">คำขออนุมัติ</span></div>
     <div class="req-subtabs">
-      <button class="req-subtab active" onclick="switchReqSubTab('pending')" id="reqstab-pending">รออนุมัติ</button>
-      <button class="req-subtab" onclick="switchReqSubTab('approved')" id="reqstab-approved">อนุมัติแล้ว</button>
-      <button class="req-subtab" onclick="switchReqSubTab('all')" id="reqstab-all">ทั้งหมด</button>
+      <button class="req-subtab active" onclick="switchReqSubTab('pending')" id="reqstab-pending" data-i18n="reqtab_pending">รออนุมัติ</button>
+      <button class="req-subtab" onclick="switchReqSubTab('approved')" id="reqstab-approved" data-i18n="reqtab_approved">อนุมัติแล้ว</button>
+      <button class="req-subtab" onclick="switchReqSubTab('all')" id="reqstab-all" data-i18n="reqtab_all">ทั้งหมด</button>
     </div>
     <div class="req-list" id="reqList"><div class="empty-row"><div class="spinner"></div></div></div>
-    <button class="req-fab" onclick="openLeaveModal()">＋ สร้างคำขอใหม่</button>
+    <button class="req-fab" onclick="openLeaveModal()" data-i18n="req_fab_new">＋ สร้างคำขอใหม่</button>
   </div>
 
   <!-- ══ โปรไฟล์ (bottom-nav) ══ -->
   <div class="view" id="view-profile">
     <div class="profile-hero">
+      <div class="lang-toggle on-light" id="langToggleProfile" style="margin-bottom:12px;">
+        <button type="button" data-lang="th" onclick="setLanguage('th')">TH</button>
+        <button type="button" data-lang="en" onclick="setLanguage('en')">EN</button>
+      </div>
       <div class="profile-avatar" id="profileAvatar">?</div>
       <div class="profile-name" id="profileName">—</div>
-      <div class="profile-role" id="profileRole">ตำแหน่ง: —</div>
+      <div class="profile-role" id="profileRole">ตำแหน่ง : —</div>
       <div id="profilePendingBadge"></div>
-      <div class="profile-code" id="profileCode">รหัสพนักงาน: —</div>
+      <div class="profile-code" id="profileCode">รหัสพนักงาน : —</div>
     </div>
     <div class="profile-menu">
       <div class="profile-menu-item" onclick="openEditProfileModal()">
         <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 20c0-4 3.5-6 8-6s8 2 8 6"></path></svg>
-        ข้อมูลส่วนตัว
+        <span data-i18n="pm_personal_info">ข้อมูลส่วนตัว</span>
         <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
       </div>
       <div class="profile-menu-item" onclick="switchTab('history')">
         <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-        ข้อมูลการทำงาน
+        <span data-i18n="pm_work_info">ข้อมูลการทำงาน</span>
         <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
       </div>
-      <div class="profile-menu-item" onclick="showToast('🔐 สิทธิ์การใช้งาน: ' + (currentUser && currentUser.role==='admin' ? 'ผู้ดูแลระบบ' : 'พนักงานทั่วไป'),'a')">
+      <div class="profile-menu-item" onclick="showToast('🔐 ' + t('pm_permissions') + ': ' + (currentUser && currentUser.role==='admin' ? t('role_admin') : t('role_employee')),'a')">
         <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-        สิทธิ์การใช้งาน
+        <span data-i18n="pm_permissions">สิทธิ์การใช้งาน</span>
         <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
       </div>
       <div class="profile-menu-item" onclick="openChangePinModal()">
         <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>
-        เปลี่ยนรหัส PIN
+        <span data-i18n="pm_change_pin">เปลี่ยนรหัส PIN</span>
         <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
       </div>
       <div class="profile-menu-item" onclick="openNotifyPrefModal()">
         <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.7 21a2 2 0 0 1-3.4 0"></path></svg>
-        การแจ้งเตือน
+        <span data-i18n="pm_notifications">การแจ้งเตือน</span>
         <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
       </div>
       <div class="profile-menu-item" onclick="logout()">
         <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-        ออกจากระบบ
+        <span data-i18n="pm_logout">ออกจากระบบ</span>
       </div>
     </div>
   </div>
@@ -1447,24 +1539,24 @@ select.field-sm { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   <div class="leave-modal" id="editProfileModal">
     <div class="leave-box">
       <div class="leave-title">
-        👤 แก้ไขข้อมูลส่วนตัว
+        <span data-i18n="ep_modal_title">👤 แก้ไขข้อมูลส่วนตัว</span>
         <button class="leave-close" onclick="closeEditProfileModal()">✕</button>
       </div>
 
       <div class="avatar-edit-row">
         <div class="avatar-edit-preview" id="epAvatarPreview">?</div>
         <div style="flex:1;">
-          <div class="field-lbl-sm">รูปโปรไฟล์</div>
+          <div class="field-lbl-sm" data-i18n="ep_photo_lbl">รูปโปรไฟล์</div>
           <input class="field-sm" id="epAvatarFile" type="file" accept="image/*" onchange="onEpAvatarFileChange()">
-          <div style="font-size:10.5px;color:var(--muted);margin-top:4px;">อัปโหลดแล้วบันทึกทันที ไม่ต้องรออนุมัติ</div>
+          <div style="font-size:10.5px;color:var(--muted);margin-top:4px;" data-i18n="ep_photo_note">อัปโหลดแล้วบันทึกทันที ไม่ต้องรออนุมัติ</div>
         </div>
       </div>
 
       <div>
-        <div class="leave-section-lbl">ตำแหน่งงาน</div>
+        <div class="leave-section-lbl" data-i18n="ep_position_lbl">ตำแหน่งงาน</div>
         <input class="field-sm" id="epPosition" placeholder="เช่น IT Support">
-        <div style="font-size:10.5px;color:var(--muted);margin-top:4px;">การเปลี่ยนตำแหน่งต้องรอ Admin กดอนุมัติก่อนจึงจะมีผล</div>
-        <div id="epPendingNote" style="display:none;font-size:11px;color:var(--amber);margin-top:6px;">⏳ มีคำขอเปลี่ยนตำแหน่งค้างอยู่ รอ Admin อนุมัติ</div>
+        <div style="font-size:10.5px;color:var(--muted);margin-top:4px;" data-i18n="ep_position_note">การเปลี่ยนตำแหน่งต้องรอ Admin กดอนุมัติก่อนจึงจะมีผล</div>
+        <div id="epPendingNote" style="display:none;font-size:11px;color:var(--amber);margin-top:6px;" data-i18n="ep_pending_note">⏳ มีคำขอเปลี่ยนตำแหน่งค้างอยู่ รอ Admin อนุมัติ</div>
       </div>
 
       <div id="epSchemaWarning" class="leave-warning" style="display:none;flex-direction:column;align-items:stretch;gap:6px;margin-top:8px;">
@@ -1486,8 +1578,8 @@ on profile_change_requests for all using (true) with check (true);</code>
       </div>
 
       <div class="leave-actions">
-        <button class="btn-sm" style="background:var(--surface2);color:var(--muted);border:1px solid var(--border);" onclick="closeEditProfileModal()">ปิด</button>
-        <button class="btn-sm primary" id="epSubmitBtn" onclick="submitPositionChangeRequest()">✓ ส่งคำขอเปลี่ยนตำแหน่ง</button>
+        <button class="btn-sm" style="background:var(--surface2);color:var(--muted);border:1px solid var(--border);" onclick="closeEditProfileModal()" data-i18n="btn_close">ปิด</button>
+        <button class="btn-sm primary" id="epSubmitBtn" onclick="submitPositionChangeRequest()" data-i18n="ep_submit_btn">✓ ส่งคำขอเปลี่ยนตำแหน่ง</button>
       </div>
     </div>
   </div>
@@ -1496,24 +1588,24 @@ on profile_change_requests for all using (true) with check (true);</code>
   <div class="leave-modal" id="changePinModal">
     <div class="leave-box">
       <div class="leave-title">
-        🔐 เปลี่ยนรหัส PIN
+        <span data-i18n="cp_modal_title">🔐 เปลี่ยนรหัส PIN</span>
         <button class="leave-close" onclick="closeChangePinModal()">✕</button>
       </div>
       <div>
-        <div class="leave-section-lbl">PIN ปัจจุบัน</div>
+        <div class="leave-section-lbl" data-i18n="cp_old_pin_lbl">PIN ปัจจุบัน</div>
         <input class="field-sm" id="cpOldPin" type="password" inputmode="numeric" maxlength="4" placeholder="••••">
       </div>
       <div>
-        <div class="leave-section-lbl">PIN ใหม่ (4 หลัก)</div>
+        <div class="leave-section-lbl" data-i18n="cp_new_pin_lbl">PIN ใหม่ (4 หลัก)</div>
         <input class="field-sm" id="cpNewPin" type="password" inputmode="numeric" maxlength="4" placeholder="1234">
       </div>
       <div>
-        <div class="leave-section-lbl">ยืนยัน PIN ใหม่</div>
+        <div class="leave-section-lbl" data-i18n="cp_confirm_pin_lbl">ยืนยัน PIN ใหม่</div>
         <input class="field-sm" id="cpNewPin2" type="password" inputmode="numeric" maxlength="4" placeholder="1234">
       </div>
       <div class="leave-actions">
-        <button class="btn-sm" style="background:var(--surface2);color:var(--muted);border:1px solid var(--border);" onclick="closeChangePinModal()">ยกเลิก</button>
-        <button class="btn-sm primary" id="cpSubmitBtn" onclick="submitChangePin()">✓ บันทึก PIN ใหม่</button>
+        <button class="btn-sm" style="background:var(--surface2);color:var(--muted);border:1px solid var(--border);" onclick="closeChangePinModal()" data-i18n="btn_cancel">ยกเลิก</button>
+        <button class="btn-sm primary" id="cpSubmitBtn" onclick="submitChangePin()" data-i18n="cp_submit_btn">✓ บันทึก PIN ใหม่</button>
       </div>
     </div>
   </div>
@@ -1522,7 +1614,7 @@ on profile_change_requests for all using (true) with check (true);</code>
   <div class="leave-modal" id="notifyPrefModal">
     <div class="leave-box">
       <div class="leave-title">
-        🔔 แจ้งเตือนก่อนมาทำงาน
+        <span data-i18n="np_modal_title">🔔 แจ้งเตือนก่อนมาทำงาน</span>
         <button class="leave-close" onclick="closeNotifyPrefModal()">✕</button>
       </div>
       <div class="toggle-wrap" style="margin-bottom:4px;">
@@ -1530,22 +1622,22 @@ on profile_change_requests for all using (true) with check (true);</code>
           <input type="checkbox" id="npEnabled" onchange="onNpToggleChange()">
           <span class="toggle-slider"></span>
         </label>
-        <span>เปิดใช้งานการแจ้งเตือน</span>
+        <span data-i18n="np_enable_lbl">เปิดใช้งานการแจ้งเตือน</span>
       </div>
       <div>
-        <div class="leave-section-lbl">แจ้งเตือนล่วงหน้า</div>
+        <div class="leave-section-lbl" data-i18n="np_minutes_lbl">แจ้งเตือนล่วงหน้า</div>
         <select class="field-sm" id="npMinutes">
-          <option value="15">15 นาที ก่อนเข้ากะ</option>
-          <option value="30" selected>30 นาที ก่อนเข้ากะ</option>
-          <option value="60">60 นาที ก่อนเข้ากะ</option>
+          <option value="15" data-i18n="np_min_15">15 นาที ก่อนเข้ากะ</option>
+          <option value="30" selected data-i18n="np_min_30">30 นาที ก่อนเข้ากะ</option>
+          <option value="60" data-i18n="np_min_60">60 นาที ก่อนเข้ากะ</option>
         </select>
       </div>
-      <div id="npPermNote" style="font-size:11px;color:var(--muted);line-height:1.6;">
+      <div id="npPermNote" style="font-size:11px;color:var(--muted);line-height:1.6;" data-i18n="np_perm_note">
         ระบบจะเทียบเวลากับ "กะการทำงาน" ที่ใกล้ที่สุดวันนี้ และแจ้งเตือน (ป๊อปอัป + เลขแดงบนไอคอนแอป ถ้าเบราว์เซอร์รองรับ) ตอนที่เปิดแอปอยู่เท่านั้น — เนื่องจากระบบนี้ยังไม่มี Server กลางสำหรับส่ง Push แจ้งเตือนตอนปิดแอป
       </div>
       <div class="leave-actions">
-        <button class="btn-sm" style="background:var(--surface2);color:var(--muted);border:1px solid var(--border);" onclick="closeNotifyPrefModal()">ปิด</button>
-        <button class="btn-sm primary" onclick="saveNotifyPref()">💾 บันทึก</button>
+        <button class="btn-sm" style="background:var(--surface2);color:var(--muted);border:1px solid var(--border);" onclick="closeNotifyPrefModal()" data-i18n="btn_close">ปิด</button>
+        <button class="btn-sm primary" onclick="saveNotifyPref()" data-i18n="np_save_btn">💾 บันทึก</button>
       </div>
     </div>
   </div>
@@ -1554,7 +1646,7 @@ on profile_change_requests for all using (true) with check (true);</code>
   <div class="view" id="view-workcal">
     <div class="screen-back-header">
       <button onclick="switchTab('dashboard')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg></button>
-      <span class="title">ปฏิทินการทำงาน</span>
+      <span class="title" data-i18n="workcal_screen_title">ปฏิทินการทำงาน</span>
     </div>
     <div class="month-picker-row">
       <select class="field-input" id="workcalMonth" onchange="loadWorkCalendar()"></select>
@@ -1562,10 +1654,10 @@ on profile_change_requests for all using (true) with check (true);</code>
     <div class="cal-card">
       <div class="cal-grid" id="calGrid"></div>
       <div class="cal-legend">
-        <span><span class="dot" style="background:var(--green)"></span>มาทำงาน</span>
-        <span><span class="dot" style="background:var(--amber)"></span>มาสาย</span>
-        <span><span class="dot" style="background:var(--primary)"></span>ลา</span>
-        <span><span class="dot" style="background:var(--red)"></span>ขาด</span>
+        <span><span class="dot" style="background:var(--green)"></span><span data-i18n="cal_present">มาทำงาน</span></span>
+        <span><span class="dot" style="background:var(--amber)"></span><span data-i18n="cal_late">มาสาย</span></span>
+        <span><span class="dot" style="background:var(--primary)"></span><span data-i18n="cal_leave">ลา</span></span>
+        <span><span class="dot" style="background:var(--red)"></span><span data-i18n="cal_absent">ขาด</span></span>
       </div>
     </div>
   </div>
@@ -1575,13 +1667,13 @@ on profile_change_requests for all using (true) with check (true);</code>
     <div class="screen-back-header">
       <button onclick="switchTab('dashboard')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg></button>
       <div>
-        <div class="title">ข่าวสารองค์กร</div>
-        <div class="news-hero-sub">อัปเดตข่าวสารและประกาศสำคัญจากองค์กร</div>
+        <div class="title" data-i18n="news_screen_title">ข่าวสารองค์กร</div>
+        <div class="news-hero-sub" data-i18n="news_screen_sub">อัปเดตข่าวสารและประกาศสำคัญจากองค์กร</div>
       </div>
       <div class="news-hero-icon">📢</div>
     </div>
     <div class="news-search-row">
-      <input class="news-search-input" id="newsSearchInput" placeholder="🔍 ค้นหาข่าวสาร…" oninput="renderFilteredNews()">
+      <input class="news-search-input" id="newsSearchInput" placeholder="🔍 ค้นหาข่าวสาร…" oninput="renderFilteredNews()" data-i18n-ph="news_search_ph">
     </div>
     <div class="news-filter-pills" id="newsFilterPills"></div>
     <div class="news-list" id="newsList"><div class="empty-row"><div class="spinner"></div></div></div>
@@ -1601,6 +1693,8 @@ on profile_change_requests for all using (true) with check (true);</code>
         <button class="sub-tab" onclick="switchSubTab('monthly')" id="stab-monthly">รายเดือน</button>
         <button class="sub-tab" onclick="switchSubTab('leave')" id="stab-leave">คำขอลา</button>
         <button class="sub-tab" onclick="switchSubTab('otreq')" id="stab-otreq">คำขอโอที</button>
+        <button class="sub-tab" onclick="switchSubTab('claim')" id="stab-claim">เบิกเงิน</button>
+        <button class="sub-tab" onclick="switchSubTab('payslip')" id="stab-payslip">สลิปเงินเดือน</button>
         <button class="sub-tab" onclick="switchSubTab('employees')" id="stab-employees">พนักงาน</button>
         <button class="sub-tab" onclick="switchSubTab('news')" id="stab-news">ข่าวสาร</button>
         <button class="sub-tab" onclick="switchSubTab('notify')" id="stab-notify">แจ้งเตือน</button>
@@ -1787,6 +1881,67 @@ ALTER TABLE leave_requests ADD CONSTRAINT leave_requests_status_check
         <div id="otAdminList"><div class="empty-row"><div class="spinner"></div></div></div>
       </div><!-- /sv-otreq -->
 
+      <!-- SUB-VIEW: claim (เบิกเงิน) -->
+      <div id="sv-claim" style="display:none">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+          <select id="claimFilterStatus" class="field-sm" style="width:auto;font-size:11px;" onchange="loadClaimRequestsAdmin()">
+            <option value="pending">รอดำเนินการ</option>
+            <option value="approved">อนุมัติแล้ว (รอจ่าย)</option>
+            <option value="paid">จ่ายแล้ว</option>
+            <option value="rejected">ไม่อนุมัติ</option>
+            <option value="">ทั้งหมด</option>
+          </select>
+          <select id="claimFilterEmp" class="field-sm" style="width:auto;font-size:11px;" onchange="loadClaimRequestsAdmin()">
+            <option value="">พนักงานทั้งหมด</option>
+          </select>
+          <button class="btn-sm" style="background:var(--surface2);color:var(--muted);border:1px solid var(--border);font-size:11px;" onclick="loadClaimRequestsAdmin()">↻ รีเฟรช</button>
+        </div>
+        <div class="stats-row" style="margin-bottom:14px;">
+          <div class="stat-card"><div class="stat-num a" id="clStatPending">—</div><div class="stat-lbl">รอดำเนินการ</div></div>
+          <div class="stat-card"><div class="stat-num g" id="clStatApproved">—</div><div class="stat-lbl">รอจ่าย</div></div>
+          <div class="stat-card"><div class="stat-num" style="color:#15803D" id="clStatPaid">—</div><div class="stat-lbl">จ่ายแล้ว (บาท)</div></div>
+        </div>
+        <div id="claimSchemaWarning" class="leave-warning" style="display:none;flex-direction:column;align-items:stretch;gap:6px;margin-bottom:10px;">
+          <div>⚠️ ยังไม่ได้สร้างตาราง <code>expense_claims</code> ในฐานข้อมูล ดู SQL setup ท้ายเอกสารประกอบระบบ</div>
+        </div>
+        <div id="claimAdminList"><div class="empty-row"><div class="spinner"></div></div></div>
+      </div><!-- /sv-claim -->
+
+      <!-- SUB-VIEW: payslip (สลิปเงินเดือน) -->
+      <div id="sv-payslip" style="display:none">
+        <div class="emp-form" style="margin-bottom:14px;">
+          <div style="font-size:13px;font-weight:500;margin-bottom:10px;">📤 อัปโหลดสลิปเงินเดือน</div>
+          <div class="emp-form-row">
+            <div>
+              <div class="field-lbl-sm">พนักงาน</div>
+              <select class="field-sm" id="pyEmp"><option value="">— เลือกพนักงาน —</option></select>
+            </div>
+            <div>
+              <div class="field-lbl-sm">เดือน/ปี (งวดเงินเดือน)</div>
+              <input class="field-sm" id="pyMonth" type="month">
+            </div>
+          </div>
+          <div style="margin-top:8px;">
+            <div class="field-lbl-sm">ไฟล์ PDF สลิปเงินเดือน</div>
+            <input class="field-sm" id="pyFile" type="file" accept="application/pdf">
+          </div>
+          <div style="margin-top:8px;">
+            <div class="field-lbl-sm">หมายเหตุ (ถ้ามี)</div>
+            <input class="field-sm" id="pyNote" placeholder="เช่น รวมโบนัสประจำไตรมาส">
+          </div>
+          <div style="display:flex;gap:8px;margin-top:10px;">
+            <button class="btn-sm primary" id="pySubmitBtn" onclick="uploadPayslipForEmployee()">💾 บันทึกและอัปโหลด</button>
+          </div>
+        </div>
+        <div id="payslipSchemaWarning" class="leave-warning" style="display:none;flex-direction:column;align-items:stretch;gap:6px;margin-bottom:10px;">
+          <div>⚠️ ยังไม่ได้สร้างตาราง <code>payslips</code> หรือ Storage bucket <code>payslips</code> ดู SQL setup ท้ายเอกสารประกอบระบบ</div>
+        </div>
+        <div class="table-card">
+          <div class="history-header"><span>สลิปเงินเดือนที่อัปโหลดแล้ว</span></div>
+          <div id="payslipAdminList"><div class="empty-row"><div class="spinner"></div></div></div>
+        </div>
+      </div><!-- /sv-payslip -->
+
       <!-- SUB-VIEW: employees -->
       <div id="sv-employees" style="display:none">
         <div class="table-card" id="profileReqCard" style="display:none;margin-bottom:12px;">
@@ -1840,14 +1995,18 @@ ALTER TABLE leave_requests ADD CONSTRAINT leave_requests_status_check
               <label style="display:flex;align-items:center;gap:6px;font-size:12px;">
                 <input type="checkbox" id="efCanApproveOt"> ⏰ อนุมัติ/ปฏิเสธคำขอโอที
               </label>
-              <div style="font-size:10px;color:var(--muted);">หากไม่ติ๊ก Super Admin แอดมินคนนี้จะเห็นเฉพาะแท็บ "วันนี้" และแท็บที่ติ๊กไว้ด้านบนเท่านั้น (จัดการพนักงาน/ข่าวสาร/กะ/แจ้งเตือน สงวนไว้สำหรับ Super Admin)</div>
+              <label style="display:flex;align-items:center;gap:6px;font-size:12px;">
+                <input type="checkbox" id="efCanApproveClaim"> 💰 อนุมัติ/จ่ายเงิน คำขอเบิกเงิน
+              </label>
+              <div style="font-size:10px;color:var(--muted);">หากไม่ติ๊ก Super Admin แอดมินคนนี้จะเห็นเฉพาะแท็บ "วันนี้" และแท็บที่ติ๊กไว้ด้านบนเท่านั้น (จัดการพนักงาน/ข่าวสาร/กะ/แจ้งเตือน/สลิปเงินเดือน สงวนไว้สำหรับ Super Admin)</div>
             </div>
           </div>
           <div id="empPermSchemaWarning" class="leave-warning" style="display:none;margin-bottom:10px;flex-direction:column;align-items:stretch;gap:6px;">
             <div>⚠️ ตาราง <code>employees</code> ยังไม่มีคอลัมน์สิทธิ์แอดมิน กรุณารันคำสั่งนี้ใน Supabase SQL editor แล้วลองบันทึกใหม่ (ตั้งค่าเริ่มต้นให้แอดมินเดิมยังคงเป็น Super Admin เหมือนก่อนหน้านี้ ไม่กระทบสิทธิ์เดิม):</div>
             <code style="display:block;background:#00000010;padding:8px;border-radius:6px;font-size:10.5px;user-select:all;white-space:pre-wrap;">ALTER TABLE employees ADD COLUMN IF NOT EXISTS is_super_admin boolean DEFAULT true;
 ALTER TABLE employees ADD COLUMN IF NOT EXISTS can_approve_leave boolean DEFAULT false;
-ALTER TABLE employees ADD COLUMN IF NOT EXISTS can_approve_ot boolean DEFAULT false;</code>
+ALTER TABLE employees ADD COLUMN IF NOT EXISTS can_approve_ot boolean DEFAULT false;
+ALTER TABLE employees ADD COLUMN IF NOT EXISTS can_approve_claim boolean DEFAULT false;</code>
           </div>
           <div class="emp-form-row">
             <div style="grid-column:1/-1;">
@@ -1978,20 +2137,20 @@ ALTER TABLE company_news ADD COLUMN IF NOT EXISTS view_count integer DEFAULT 0;<
   <div class="bottom-nav">
     <button class="bn-item active" data-bn="dashboard" onclick="switchTab('dashboard')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-      <span>หน้าหลัก</span>
+      <span data-i18n="bn_home">หน้าหลัก</span>
     </button>
     <button class="bn-item" data-bn="summary" onclick="switchTab('summary')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><polyline points="12 7 12 12 15 15"></polyline></svg>
-      <span>สรุปเวลา</span>
+      <span data-i18n="bn_summary">สรุปเวลา</span>
     </button>
     <button class="bn-item" data-bn="requests" onclick="switchTab('requests')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="3" width="12" height="18" rx="2"></rect><line x1="9" y1="8" x2="15" y2="8"></line><line x1="9" y1="12" x2="15" y2="12"></line></svg>
-      <span>คำขอ</span>
+      <span data-i18n="bn_requests">คำขอ</span>
       <span class="notif-dot" id="bnLeaveDot"></span>
     </button>
     <button class="bn-item" data-bn="profile" onclick="switchTab('profile')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 20c0-4 3.5-6 8-6s8 2 8 6"></path></svg>
-      <span>โปรไฟล์</span>
+      <span data-i18n="bn_profile">โปรไฟล์</span>
     </button>
   </div>
 </div>
@@ -2066,37 +2225,37 @@ ALTER TABLE company_news ADD COLUMN IF NOT EXISTS view_count integer DEFAULT 0;<
 <div class="leave-modal" id="leaveModal">
   <div class="leave-box">
     <div class="leave-title">
-      🏖️ แจ้งลา / ขอลา
+      🏖️ <span data-i18n="leave_modal_title">แจ้งลา / ขอลา</span>
       <button class="leave-close" onclick="closeLeaveModal()">✕</button>
     </div>
 
     <div>
-      <div class="leave-section-lbl">ประเภทการลา</div>
+      <div class="leave-section-lbl" data-i18n="leave_type_lbl">ประเภทการลา</div>
       <div class="leave-type-grid" id="leaveTypeGrid">
         <div class="leave-type-opt sel" data-type="vacation" onclick="selectLeaveType('vacation')">
-          <span class="ico">🏖️</span>พักร้อน
+          <span class="ico">🏖️</span><span data-i18n="leave_type_vacation">พักร้อน</span>
         </div>
         <div class="leave-type-opt" data-type="sick" onclick="selectLeaveType('sick')">
-          <span class="ico">🤒</span>ป่วย
+          <span class="ico">🤒</span><span data-i18n="leave_type_sick">ป่วย</span>
         </div>
         <div class="leave-type-opt" data-type="personal" onclick="selectLeaveType('personal')">
-          <span class="ico">📌</span>กิจ
+          <span class="ico">📌</span><span data-i18n="leave_type_personal">กิจ</span>
         </div>
         <div class="leave-type-opt" data-type="other" onclick="selectLeaveType('other')">
-          <span class="ico">📝</span>อื่นๆ
+          <span class="ico">📝</span><span data-i18n="leave_type_other">อื่นๆ</span>
         </div>
       </div>
     </div>
 
     <div>
-      <div class="leave-section-lbl">ช่วงวันที่ลา</div>
+      <div class="leave-section-lbl" data-i18n="leave_date_range_lbl">ช่วงวันที่ลา</div>
       <div class="leave-date-row">
         <div>
-          <div class="field-lbl-sm">วันเริ่มลา</div>
+          <div class="field-lbl-sm" data-i18n="leave_start_date_lbl">วันเริ่มลา</div>
           <input type="date" id="leaveStartDate" class="field-sm" onchange="onLeaveDateChange()">
         </div>
         <div>
-          <div class="field-lbl-sm">ถึงวันที่</div>
+          <div class="field-lbl-sm" data-i18n="leave_end_date_lbl">ถึงวันที่</div>
           <input type="date" id="leaveEndDate" class="field-sm" onchange="onLeaveDateChange()">
         </div>
       </div>
@@ -2105,30 +2264,30 @@ ALTER TABLE company_news ADD COLUMN IF NOT EXISTS view_count integer DEFAULT 0;<
     <div>
       <label class="leave-toggle-row">
         <input type="checkbox" id="leavePartialDay" onchange="onLeavePartialToggle()">
-        ลาไม่เต็มวัน (ระบุช่วงเวลา)
+        <span data-i18n="leave_partial_day">ลาไม่เต็มวัน (ระบุช่วงเวลา)</span>
       </label>
       <div class="leave-time-row" id="leaveTimeRow" style="display:none">
         <div>
-          <div class="field-lbl-sm">เวลาเริ่มลา</div>
+          <div class="field-lbl-sm" data-i18n="leave_start_time_lbl">เวลาเริ่มลา</div>
           <input type="time" id="leaveStartTime" class="field-sm" value="09:00">
         </div>
         <div>
-          <div class="field-lbl-sm">เวลาสิ้นสุด</div>
+          <div class="field-lbl-sm" data-i18n="leave_end_time_lbl">เวลาสิ้นสุด</div>
           <input type="time" id="leaveEndTime" class="field-sm" value="12:00">
         </div>
       </div>
     </div>
 
     <div>
-      <div class="leave-section-lbl">เหตุผลการลา</div>
-      <textarea class="leave-textarea" id="leaveReason" placeholder="ระบุเหตุผลการลา…"></textarea>
+      <div class="leave-section-lbl" data-i18n="leave_reason_lbl">เหตุผลการลา</div>
+      <textarea class="leave-textarea" id="leaveReason" placeholder="ระบุเหตุผลการลา…" data-i18n-ph="leave_reason_ph"></textarea>
     </div>
 
     <div>
-      <div class="leave-section-lbl">แนบเอกสาร (ถ้ามี) — PDF, JPG, PNG</div>
+      <div class="leave-section-lbl" data-i18n="leave_attach_lbl">แนบเอกสาร (ถ้ามี) — PDF, JPG, PNG</div>
       <label class="leave-attach-btn" for="leaveAttachFile">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"></path></svg>
-        <span id="leaveAttachLbl">แตะเพื่อแนบไฟล์ (ใบรับรองแพทย์ ฯลฯ)</span>
+        <span id="leaveAttachLbl" data-i18n="attach_tap_generic">แตะเพื่อแนบไฟล์ (ใบรับรองแพทย์ ฯลฯ)</span>
       </label>
       <input type="file" id="leaveAttachFile" accept=".pdf,.png,.jpg,.jpeg,image/png,image/jpeg,application/pdf" style="display:none" onchange="onLeaveAttachChange()">
       <div id="leaveAttachSchemaWarning" class="leave-warning" style="display:none;flex-direction:column;align-items:stretch;gap:6px;margin-top:8px;">
@@ -2147,8 +2306,8 @@ with check ( bucket_id = 'leave-attachments' );</code>
     <div id="leaveNoticeBox"></div>
 
     <div class="leave-actions">
-      <button class="btn-sm" style="background:var(--surface2);color:var(--muted);border:1px solid var(--border);" onclick="closeLeaveModal()">ยกเลิก</button>
-      <button class="btn-sm primary" id="leaveSubmitBtn" onclick="submitLeaveRequest()">✓ ส่งคำขอลา</button>
+      <button class="btn-sm" style="background:var(--surface2);color:var(--muted);border:1px solid var(--border);" onclick="closeLeaveModal()" data-i18n="btn_cancel">ยกเลิก</button>
+      <button class="btn-sm primary" id="leaveSubmitBtn" onclick="submitLeaveRequest()" data-i18n="leave_submit_btn">✓ ส่งคำขอลา</button>
     </div>
   </div>
 </div>
@@ -2157,49 +2316,124 @@ with check ( bucket_id = 'leave-attachments' );</code>
 <div class="leave-modal" id="otModal">
   <div class="leave-box">
     <div class="leave-title">
-      ⏰ ขอโอที (ล่วงเวลา)
+      <span data-i18n="ot_modal_title">⏰ ขอโอที (ล่วงเวลา)</span>
       <button class="leave-close" onclick="closeOtModal()">✕</button>
     </div>
 
     <div>
-      <div class="leave-section-lbl">วันที่ทำโอที</div>
+      <div class="leave-section-lbl" data-i18n="ot_date_lbl">วันที่ทำโอที</div>
       <input type="date" id="otDate" class="field-sm" onchange="onOtFieldChange()">
     </div>
 
     <div>
-      <div class="leave-section-lbl">กะที่ทำงาน</div>
+      <div class="leave-section-lbl" data-i18n="ot_shift_lbl">กะที่ทำงาน</div>
       <select id="otShift" class="field-sm" onchange="onOtShiftChange()"></select>
     </div>
 
     <div>
-      <div class="leave-section-lbl">ช่วงเวลาโอที</div>
+      <div class="leave-section-lbl" data-i18n="ot_range_lbl">ช่วงเวลาโอที</div>
       <div class="leave-date-row">
         <div>
-          <div class="field-lbl-sm">เริ่มโอที</div>
+          <div class="field-lbl-sm" data-i18n="ot_start_lbl">เริ่มโอที</div>
           <input type="time" id="otStartTime" class="field-sm" onchange="onOtFieldChange()">
         </div>
         <div>
-          <div class="field-lbl-sm">ถึงเวลา</div>
+          <div class="field-lbl-sm" data-i18n="ot_end_lbl">ถึงเวลา</div>
           <input type="time" id="otEndTime" class="field-sm" onchange="onOtFieldChange()">
         </div>
       </div>
     </div>
 
     <div>
-      <div class="leave-section-lbl">เหตุผล / งานที่ทำโอที</div>
-      <textarea class="leave-textarea" id="otReason" placeholder="เช่น เร่งปิดยอดขาย, งานด่วนจากลูกค้า…"></textarea>
+      <div class="leave-section-lbl" data-i18n="ot_reason_lbl">เหตุผล / งานที่ทำโอที</div>
+      <textarea class="leave-textarea" id="otReason" placeholder="เช่น เร่งปิดยอดขาย, งานด่วนจากลูกค้า…" data-i18n-ph="ot_reason_ph"></textarea>
     </div>
 
     <div id="otNoticeBox"></div>
 
     <div class="leave-actions">
-      <button class="btn-sm" style="background:var(--surface2);color:var(--muted);border:1px solid var(--border);" onclick="closeOtModal()">ยกเลิก</button>
-      <button class="btn-sm primary" id="otSubmitBtn" onclick="submitOtRequest()">✓ ส่งคำขอโอที</button>
+      <button class="btn-sm" style="background:var(--surface2);color:var(--muted);border:1px solid var(--border);" onclick="closeOtModal()" data-i18n="btn_cancel">ยกเลิก</button>
+      <button class="btn-sm primary" id="otSubmitBtn" onclick="submitOtRequest()" data-i18n="ot_submit_btn">✓ ส่งคำขอโอที</button>
     </div>
   </div>
 </div>
 
-<!-- ══ เหตุผลก่อนเช็คอิน (กรณีมาก่อน/หลังเวลาเกิน 1 ชม.) ══ -->
+<!-- ══ เบิกเงิน / Expense Claim (self-service) ══ -->
+<div class="leave-modal" id="claimModal">
+  <div class="leave-box">
+    <div class="leave-title">
+      <span data-i18n="claim_modal_title">💰 ยื่นคำขอเบิกเงิน</span>
+      <button class="leave-close" onclick="closeClaimModal()">✕</button>
+    </div>
+
+    <div>
+      <div class="leave-section-lbl" data-i18n="claim_category_lbl">หมวดหมู่</div>
+      <select class="field-sm" id="claimCategory">
+        <option value="transport" data-i18n="claim_cat_transport">🚗 ค่าเดินทาง</option>
+        <option value="meal" data-i18n="claim_cat_meal">🍽️ ค่าอาหาร/รับรอง</option>
+        <option value="accommodation" data-i18n="claim_cat_accommodation">🏨 ค่าที่พัก</option>
+        <option value="supplies" data-i18n="claim_cat_supplies">🖇️ อุปกรณ์สำนักงาน</option>
+        <option value="medical" data-i18n="claim_cat_medical">💊 ค่ารักษาพยาบาล</option>
+        <option value="other" data-i18n="claim_cat_other">📝 อื่นๆ</option>
+      </select>
+    </div>
+
+    <div>
+      <div class="leave-section-lbl" data-i18n="claim_title_lbl">หัวข้อ/รายละเอียด</div>
+      <input class="field-sm" id="claimTitle" placeholder="เช่น ค่าน้ำมันไปพบลูกค้าที่ลำพูน" data-i18n-ph="claim_title_ph">
+    </div>
+
+    <div class="leave-date-row">
+      <div>
+        <div class="field-lbl-sm" data-i18n="claim_amount_lbl">จำนวนเงิน (บาท)</div>
+        <input class="field-sm" id="claimAmount" type="number" min="0" step="0.01" placeholder="0.00">
+      </div>
+      <div>
+        <div class="field-lbl-sm" data-i18n="claim_date_lbl">วันที่เกิดค่าใช้จ่าย</div>
+        <input class="field-sm" id="claimDate" type="date">
+      </div>
+    </div>
+
+    <div>
+      <div class="leave-section-lbl" data-i18n="claim_note_lbl">หมายเหตุเพิ่มเติม</div>
+      <textarea class="leave-textarea" id="claimNote" placeholder="รายละเอียดเพิ่มเติม (ถ้ามี)" data-i18n-ph="claim_note_ph"></textarea>
+    </div>
+
+    <div>
+      <div class="leave-section-lbl"><span data-i18n="claim_attach_lbl">แนบใบเสร็จ/หลักฐาน</span> <span style="color:var(--red)" data-i18n="claim_attach_required">*จำเป็น</span></div>
+      <label class="leave-attach-btn" for="claimReceiptFile">
+        <span id="claimReceiptLbl" data-i18n="attach_tap_receipt">แตะเพื่อแนบไฟล์ (รูปใบเสร็จ หรือ PDF)</span>
+      </label>
+      <input type="file" id="claimReceiptFile" accept="application/pdf,image/png,image/jpeg" style="display:none" onchange="onClaimReceiptChange()">
+    </div>
+
+    <div id="claimSchemaWarningModal" class="leave-warning" style="display:none;flex-direction:column;align-items:stretch;gap:6px;">
+      <div>⚠️ ยังไม่ได้ตั้งค่าระบบเบิกเงินในฐานข้อมูล กรุณาแจ้งแอดมินให้รัน SQL setup (ดูเอกสารประกอบระบบ) ก่อนใช้งาน</div>
+    </div>
+
+    <div class="leave-actions">
+      <button class="btn-sm" style="background:var(--surface2);color:var(--muted);border:1px solid var(--border);" onclick="closeClaimModal()" data-i18n="btn_cancel">ยกเลิก</button>
+      <button class="btn-sm primary" id="claimSubmitBtn" onclick="submitClaimRequest()" data-i18n="claim_submit_btn">✓ ส่งคำขอเบิกเงิน</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ สลิปเงินเดือนของฉัน ══ -->
+<div class="leave-modal" id="payslipListModal">
+  <div class="leave-box">
+    <div class="leave-title">
+      <span data-i18n="payslip_modal_title">📄 สลิปเงินเดือนของฉัน</span>
+      <button class="leave-close" onclick="closePayslipListModal()">✕</button>
+    </div>
+    <div style="font-size:11px;color:var(--muted);line-height:1.6;margin-bottom:4px;" data-i18n="payslip_signed_url_note">
+      ไฟล์เปิดผ่านลิงก์ชั่วคราวที่หมดอายุใน 5 นาทีเพื่อความปลอดภัยของข้อมูลเงินเดือน — กดใหม่ทุกครั้งที่ต้องการเปิด
+    </div>
+    <div id="payslipListBox"><div class="empty-row"><div class="spinner"></div></div></div>
+    <div class="leave-actions">
+      <button class="btn-sm" style="background:var(--surface2);color:var(--muted);border:1px solid var(--border);width:100%;" onclick="closePayslipListModal()" data-i18n="btn_close">ปิด</button>
+    </div>
+  </div>
+</div>
 <div class="leave-modal" id="checkinReasonModal">
   <div class="leave-box">
     <div class="leave-title">
@@ -2292,13 +2526,237 @@ const NEWS_CATEGORIES = {
 };
 function newsCategoryInfo(cat) { return NEWS_CATEGORIES[cat] || NEWS_CATEGORIES.other; }
 
-const LEAVE_TYPE_LABELS = {
-  vacation: { icon:'🏖️', label:'พักร้อน' },
-  sick:     { icon:'🤒', label:'ป่วย' },
-  personal: { icon:'📌', label:'กิจ' },
-  other:    { icon:'📝', label:'อื่นๆ' },
+// ══════════════════════════════════════
+//  ระบบ 2 ภาษา (TH/EN) — เฉพาะหน้าจอฝั่งพนักงาน (หน้า Admin ยังเป็นไทยล้วน)
+// ══════════════════════════════════════
+let currentLang = localStorage.getItem('wc_lang') || 'th';
+
+let LEAVE_TYPE_LABELS, LEAVE_STATUS_LABELS, CLAIM_CATEGORY_LABELS, CLAIM_STATUS_LABELS;
+function refreshLabelMaps() {
+  if (currentLang === 'en') {
+    LEAVE_TYPE_LABELS = {
+      vacation: { icon:'🏖️', label:'Vacation' },
+      sick:     { icon:'🤒', label:'Sick Leave' },
+      personal: { icon:'📌', label:'Personal' },
+      other:    { icon:'📝', label:'Other' },
+    };
+    LEAVE_STATUS_LABELS = { pending:'Pending', approved:'Approved', rejected:'Rejected', cancel_requested:'Cancel Requested', cancelled:'Cancelled' };
+    CLAIM_CATEGORY_LABELS = {
+      transport: { icon:'🚗', label:'Transport' },
+      meal: { icon:'🍽️', label:'Meals / Entertainment' },
+      accommodation: { icon:'🏨', label:'Accommodation' },
+      supplies: { icon:'🖇️', label:'Office Supplies' },
+      medical: { icon:'💊', label:'Medical' },
+      other: { icon:'📝', label:'Other' },
+    };
+    CLAIM_STATUS_LABELS = { pending:'Pending', approved:'Approved (Awaiting Payment)', paid:'Paid', rejected:'Rejected' };
+  } else {
+    LEAVE_TYPE_LABELS = {
+      vacation: { icon:'🏖️', label:'พักร้อน' },
+      sick:     { icon:'🤒', label:'ป่วย' },
+      personal: { icon:'📌', label:'กิจ' },
+      other:    { icon:'📝', label:'อื่นๆ' },
+    };
+    LEAVE_STATUS_LABELS = { pending:'รอดำเนินการ', approved:'อนุมัติ', rejected:'ไม่อนุมัติ', cancel_requested:'รออนุมัติยกเลิก', cancelled:'ยกเลิกแล้ว' };
+    CLAIM_CATEGORY_LABELS = {
+      transport: { icon:'🚗', label:'ค่าเดินทาง' },
+      meal: { icon:'🍽️', label:'ค่าอาหาร/รับรอง' },
+      accommodation: { icon:'🏨', label:'ค่าที่พัก' },
+      supplies: { icon:'🖇️', label:'อุปกรณ์สำนักงาน' },
+      medical: { icon:'💊', label:'ค่ารักษาพยาบาล' },
+      other: { icon:'📝', label:'อื่นๆ' },
+    };
+    CLAIM_STATUS_LABELS = { pending:'รอดำเนินการ', approved:'อนุมัติแล้ว (รอจ่าย)', paid:'จ่ายแล้ว', rejected:'ไม่อนุมัติ' };
+  }
+}
+refreshLabelMaps(); // ตั้งค่าเริ่มต้นตาม currentLang (th) ก่อนหน้านี้ — ถูกเรียกซ้ำอีกครั้งใน setLanguage()
+
+// ── พจนานุกรมคำแปล TH/EN — ครอบคลุมเฉพาะหน้าจอฝั่งพนักงาน ──
+const I18N = {
+  th: {
+    // login
+    login_user_lbl: 'User (ผู้ใช้งาน)', login_user_ph: 'เบอร์โทรศัพท์ หรือ E-mail',
+    login_pin_lbl: 'รหัส PIN', login_biometric: 'Face ID / ลายนิ้วมือ', login_clear: 'ล้าง',
+    login_secure: '🔒 Secure Login', login_welcome_back: 'Welcome Back 👋', login_signing_in: 'กำลังเข้าสู่ระบบ...',
+    // dashboard
+    status_title: 'สถานะการทำงานวันนี้', geo_title: 'ตรวจสอบพิกัด',
+    status_not_checked_in: 'ยังไม่ได้เช็คอิน', status_working: 'กำลังทำงาน', status_done: 'เลิกงาน',
+    status_carried_over: '⚠️ เช็คอินค้างจากวันก่อนหน้า',
+    btn_checkin: 'เช็คอิน', btn_checkout: 'เช็คเอ้าท์',
+    st_waiting_gps: 'รอ GPS…', st_no_geofence: 'ไม่มี Geofence',
+    st_must_be_in_area: 'ต้องอยู่ในพื้นที่', st_too_far: 'ห่างเกินไป', unit_m: 'ม.',
+    session_checkin_at: 'เช็คอินเมื่อ', session_coords: 'พิกัด', session_distance: 'ระยะทาง', session_elapsed: 'เวลาทำงาน',
+    cta_leave: 'แจ้งลา / ขอลา', cta_ot: 'ขอโอที',
+    qg_history: 'ประวัติการลงเวลา', qg_requests: 'คำขออนุมัติ', qg_workcal: 'ปฏิทินการทำงาน',
+    qg_claim: 'เบิกเงิน', qg_news: 'ข่าวสารองค์กร', qg_payslip: 'สลิปเงินเดือน',
+    qg_profile: 'โปรไฟล์', qg_settings: 'ตั้งค่า',
+    recent_req_title: 'คำขอล่าสุดของฉัน', history_today: 'ประวัติวันนี้', empty_no_items: 'ยังไม่มีรายการ',
+    // bottom nav
+    bn_home: 'หน้าหลัก', bn_requests: 'คำขอ', bn_summary: 'สรุปเวลา', bn_profile: 'โปรไฟล์',
+    // history / summary screens
+    history_screen_title: 'ประวัติการลงเวลา', stat_days_worked: 'วันมาทำงาน', stat_late: 'มาสาย', stat_total_hours: 'ชั่วโมงรวม',
+    th_date: 'วันที่', th_checkin: 'เช็คอิน', th_checkout: 'เช็คเอ้าท์', th_hours_note: 'ชั่วโมง / หมายเหตุ',
+    summary_screen_title: 'สรุปเวลาการทำงาน', summary_total_hours: 'ชั่วโมงทำงานรวม', summary_daily_hours: 'ชั่วโมงทำงานรายวัน',
+    legend_workday: 'วันทำงาน', legend_weekend: 'วันหยุด (ส-อา)', donut_attendance: 'เข้างาน',
+    legend_days_worked: 'วันมาทำงาน', legend_late: 'มาสาย', legend_absent: 'ขาด/ไม่มา',
+    // requests screen
+    requests_screen_title: 'คำขออนุมัติ', reqtab_pending: 'รออนุมัติ', reqtab_approved: 'อนุมัติแล้ว', reqtab_all: 'ทั้งหมด',
+    req_fab_new: '＋ สร้างคำขอใหม่',
+    // workcal
+    workcal_screen_title: 'ปฏิทินการทำงาน', cal_present: 'มาทำงาน', cal_late: 'มาสาย', cal_leave: 'ลา', cal_absent: 'ขาด',
+    // news
+    news_screen_title: 'ข่าวสารองค์กร', news_screen_sub: 'อัปเดตข่าวสารและประกาศสำคัญจากองค์กร', news_search_ph: '🔍 ค้นหาข่าวสาร…',
+    // leave modal
+    leave_modal_title: 'แจ้งลา / ขอลา', leave_type_lbl: 'ประเภทการลา',
+    leave_type_vacation: 'พักร้อน', leave_type_sick: 'ป่วย', leave_type_personal: 'กิจ', leave_type_other: 'อื่นๆ',
+    leave_date_range_lbl: 'ช่วงวันที่ลา', leave_start_date_lbl: 'วันเริ่มลา', leave_end_date_lbl: 'ถึงวันที่',
+    leave_partial_day: 'ลาไม่เต็มวัน (ระบุช่วงเวลา)', leave_start_time_lbl: 'เวลาเริ่มลา', leave_end_time_lbl: 'เวลาสิ้นสุด',
+    leave_reason_lbl: 'เหตุผลการลา', leave_reason_ph: 'ระบุเหตุผลการลา…',
+    leave_attach_lbl: 'แนบเอกสาร (ถ้ามี) — PDF, JPG, PNG', attach_tap_generic: 'แตะเพื่อแนบไฟล์ (ใบรับรองแพทย์ ฯลฯ)',
+    leave_submit_btn: '✓ ส่งคำขอลา',
+    // ot modal
+    ot_modal_title: '⏰ ขอโอที (ล่วงเวลา)', ot_date_lbl: 'วันที่ทำโอที', ot_shift_lbl: 'กะที่ทำงาน',
+    ot_range_lbl: 'ช่วงเวลาโอที', ot_start_lbl: 'เริ่มโอที', ot_end_lbl: 'ถึงเวลา',
+    ot_reason_lbl: 'เหตุผล / งานที่ทำโอที', ot_reason_ph: 'เช่น เร่งปิดยอดขาย, งานด่วนจากลูกค้า…', ot_submit_btn: '✓ ส่งคำขอโอที',
+    // claim modal
+    claim_modal_title: '💰 ยื่นคำขอเบิกเงิน', claim_category_lbl: 'หมวดหมู่',
+    claim_cat_transport: '🚗 ค่าเดินทาง', claim_cat_meal: '🍽️ ค่าอาหาร/รับรอง', claim_cat_accommodation: '🏨 ค่าที่พัก',
+    claim_cat_supplies: '🖇️ อุปกรณ์สำนักงาน', claim_cat_medical: '💊 ค่ารักษาพยาบาล', claim_cat_other: '📝 อื่นๆ',
+    claim_title_lbl: 'หัวข้อ/รายละเอียด', claim_title_ph: 'เช่น ค่าน้ำมันไปพบลูกค้าที่ลำพูน',
+    claim_amount_lbl: 'จำนวนเงิน (บาท)', claim_date_lbl: 'วันที่เกิดค่าใช้จ่าย',
+    claim_note_lbl: 'หมายเหตุเพิ่มเติม', claim_note_ph: 'รายละเอียดเพิ่มเติม (ถ้ามี)',
+    claim_attach_lbl: 'แนบใบเสร็จ/หลักฐาน', claim_attach_required: '*จำเป็น',
+    attach_tap_receipt: 'แตะเพื่อแนบไฟล์ (รูปใบเสร็จ หรือ PDF)', claim_submit_btn: '✓ ส่งคำขอเบิกเงิน',
+    // payslip modal
+    payslip_modal_title: '📄 สลิปเงินเดือนของฉัน',
+    payslip_signed_url_note: 'ไฟล์เปิดผ่านลิงก์ชั่วคราวที่หมดอายุใน 5 นาทีเพื่อความปลอดภัยของข้อมูลเงินเดือน — กดใหม่ทุกครั้งที่ต้องการเปิด',
+    // profile screen + menu
+    pm_personal_info: 'ข้อมูลส่วนตัว', pm_work_info: 'ข้อมูลการทำงาน', pm_permissions: 'สิทธิ์การใช้งาน',
+    pm_change_pin: 'เปลี่ยนรหัส PIN', pm_notifications: 'การแจ้งเตือน', pm_logout: 'ออกจากระบบ',
+    greet_role_prefix: 'ตำแหน่ง : ', profile_code_prefix: 'รหัสพนักงาน : ',
+    role_admin: 'ผู้ดูแลระบบ', role_employee: 'พนักงานทั่วไป',
+    // edit profile modal
+    ep_modal_title: '👤 แก้ไขข้อมูลส่วนตัว', ep_photo_lbl: 'รูปโปรไฟล์', ep_photo_note: 'อัปโหลดแล้วบันทึกทันที ไม่ต้องรออนุมัติ',
+    ep_position_lbl: 'ตำแหน่งงาน', ep_position_note: 'การเปลี่ยนตำแหน่งต้องรอ Admin กดอนุมัติก่อนจึงจะมีผล',
+    ep_pending_note: '⏳ มีคำขอเปลี่ยนตำแหน่งค้างอยู่ รอ Admin อนุมัติ', ep_submit_btn: '✓ ส่งคำขอเปลี่ยนตำแหน่ง',
+    // change pin modal
+    cp_modal_title: '🔐 เปลี่ยนรหัส PIN', cp_old_pin_lbl: 'PIN ปัจจุบัน', cp_new_pin_lbl: 'PIN ใหม่ (4 หลัก)',
+    cp_confirm_pin_lbl: 'ยืนยัน PIN ใหม่', cp_submit_btn: '✓ บันทึก PIN ใหม่',
+    // notify pref modal
+    np_modal_title: '🔔 แจ้งเตือนก่อนมาทำงาน', np_enable_lbl: 'เปิดใช้งานการแจ้งเตือน', np_minutes_lbl: 'แจ้งเตือนล่วงหน้า',
+    np_min_15: '15 นาที ก่อนเข้ากะ', np_min_30: '30 นาที ก่อนเข้ากะ', np_min_60: '60 นาที ก่อนเข้ากะ',
+    np_perm_note: 'ระบบจะเทียบเวลากับ "กะการทำงาน" ที่ใกล้ที่สุดวันนี้ และแจ้งเตือน (ป๊อปอัป + เลขแดงบนไอคอนแอป ถ้าเบราว์เซอร์รองรับ) ตอนที่เปิดแอปอยู่เท่านั้น — เนื่องจากระบบนี้ยังไม่มี Server กลางสำหรับส่ง Push แจ้งเตือนตอนปิดแอป',
+    np_save_btn: '💾 บันทึก',
+    // generic buttons
+    btn_cancel: 'ยกเลิก', btn_close: 'ปิด',
+  },
+  en: {
+    login_user_lbl: 'User', login_user_ph: 'Phone number or E-mail',
+    login_pin_lbl: 'PIN Code', login_biometric: 'Face ID / Fingerprint', login_clear: 'Clear',
+    login_secure: '🔒 Secure Login', login_welcome_back: 'Welcome Back 👋', login_signing_in: 'Signing in...',
+    status_title: "Today's Status", geo_title: 'Location Check',
+    status_not_checked_in: 'Not checked in yet', status_working: 'Working', status_done: 'Finished',
+    status_carried_over: '⚠️ Carried over from previous day',
+    btn_checkin: 'Check In', btn_checkout: 'Check Out',
+    st_waiting_gps: 'Waiting for GPS…', st_no_geofence: 'No Geofence',
+    st_must_be_in_area: 'Must be on-site', st_too_far: 'Too far', unit_m: 'm',
+    session_checkin_at: 'Checked in at', session_coords: 'Coordinates', session_distance: 'Distance', session_elapsed: 'Time elapsed',
+    cta_leave: 'Request Leave', cta_ot: 'Request OT',
+    qg_history: 'Check-in History', qg_requests: 'My Requests', qg_workcal: 'Work Calendar',
+    qg_claim: 'Expense Claim', qg_news: 'Company News', qg_payslip: 'Payslip',
+    qg_profile: 'Profile', qg_settings: 'Settings',
+    recent_req_title: 'My Recent Request', history_today: "Today's History", empty_no_items: 'No items yet',
+    bn_home: 'Home', bn_requests: 'Requests', bn_summary: 'Summary', bn_profile: 'Profile',
+    history_screen_title: 'Check-in History', stat_days_worked: 'Days Worked', stat_late: 'Late', stat_total_hours: 'Total Hours',
+    th_date: 'Date', th_checkin: 'Check In', th_checkout: 'Check Out', th_hours_note: 'Hours / Note',
+    summary_screen_title: 'Time Summary', summary_total_hours: 'Total Hours Worked', summary_daily_hours: 'Daily Hours',
+    legend_workday: 'Workday', legend_weekend: 'Weekend (Sat-Sun)', donut_attendance: 'Attendance',
+    legend_days_worked: 'Days worked', legend_late: 'Late', legend_absent: 'Absent',
+    requests_screen_title: 'My Requests', reqtab_pending: 'Pending', reqtab_approved: 'Approved', reqtab_all: 'All',
+    req_fab_new: '＋ New Request',
+    workcal_screen_title: 'Work Calendar', cal_present: 'Present', cal_late: 'Late', cal_leave: 'Leave', cal_absent: 'Absent',
+    news_screen_title: 'Company News', news_screen_sub: 'Latest updates and announcements from the company', news_search_ph: '🔍 Search news…',
+    leave_modal_title: 'Request Leave', leave_type_lbl: 'Leave Type',
+    leave_type_vacation: 'Vacation', leave_type_sick: 'Sick Leave', leave_type_personal: 'Personal', leave_type_other: 'Other',
+    leave_date_range_lbl: 'Leave Date Range', leave_start_date_lbl: 'Start Date', leave_end_date_lbl: 'End Date',
+    leave_partial_day: 'Partial day (specify time)', leave_start_time_lbl: 'Start Time', leave_end_time_lbl: 'End Time',
+    leave_reason_lbl: 'Reason for Leave', leave_reason_ph: 'Enter reason for leave…',
+    leave_attach_lbl: 'Attach document (optional) — PDF, JPG, PNG', attach_tap_generic: 'Tap to attach a file (medical certificate, etc.)',
+    leave_submit_btn: '✓ Submit Leave Request',
+    ot_modal_title: '⏰ Request Overtime', ot_date_lbl: 'OT Date', ot_shift_lbl: 'Shift',
+    ot_range_lbl: 'OT Time Range', ot_start_lbl: 'Start', ot_end_lbl: 'End',
+    ot_reason_lbl: 'Reason / Work Description', ot_reason_ph: 'e.g. urgent client deliverable…', ot_submit_btn: '✓ Submit OT Request',
+    claim_modal_title: '💰 Submit Expense Claim', claim_category_lbl: 'Category',
+    claim_cat_transport: '🚗 Transport', claim_cat_meal: '🍽️ Meals / Entertainment', claim_cat_accommodation: '🏨 Accommodation',
+    claim_cat_supplies: '🖇️ Office Supplies', claim_cat_medical: '💊 Medical', claim_cat_other: '📝 Other',
+    claim_title_lbl: 'Title / Description', claim_title_ph: 'e.g. Fuel cost for client visit',
+    claim_amount_lbl: 'Amount (THB)', claim_date_lbl: 'Expense Date',
+    claim_note_lbl: 'Additional Note', claim_note_ph: 'Additional details (optional)',
+    claim_attach_lbl: 'Attach Receipt / Proof', claim_attach_required: '*required',
+    attach_tap_receipt: 'Tap to attach a file (receipt photo or PDF)', claim_submit_btn: '✓ Submit Claim',
+    payslip_modal_title: '📄 My Payslips',
+    payslip_signed_url_note: 'Files open via a temporary link that expires in 5 minutes to protect your salary data — click again each time you need to open it.',
+    pm_personal_info: 'Personal Information', pm_work_info: 'Work Information', pm_permissions: 'Permissions',
+    pm_change_pin: 'Change PIN', pm_notifications: 'Notifications', pm_logout: 'Log Out',
+    greet_role_prefix: 'Position: ', profile_code_prefix: 'Employee ID: ',
+    role_admin: 'Administrator', role_employee: 'Employee',
+    ep_modal_title: '👤 Edit Personal Info', ep_photo_lbl: 'Profile Photo', ep_photo_note: 'Uploads and saves instantly, no approval needed',
+    ep_position_lbl: 'Job Position', ep_position_note: 'Position changes require Admin approval before taking effect',
+    ep_pending_note: '⏳ You have a pending position-change request awaiting Admin approval', ep_submit_btn: '✓ Submit Position Change',
+    cp_modal_title: '🔐 Change PIN', cp_old_pin_lbl: 'Current PIN', cp_new_pin_lbl: 'New PIN (4 digits)',
+    cp_confirm_pin_lbl: 'Confirm New PIN', cp_submit_btn: '✓ Save New PIN',
+    np_modal_title: '🔔 Shift Reminder', np_enable_lbl: 'Enable reminders', np_minutes_lbl: 'Remind me before shift',
+    np_min_15: '15 minutes before shift', np_min_30: '30 minutes before shift', np_min_60: '60 minutes before shift',
+    np_perm_note: 'The system compares against today\'s nearest shift and reminds you (popup + red badge on the app icon, if supported) only while the app is open — this system has no central server to send push notifications when the app is closed.',
+    np_save_btn: '💾 Save',
+    btn_cancel: 'Cancel', btn_close: 'Close',
+  },
 };
-const LEAVE_STATUS_LABELS = { pending:'รอดำเนินการ', approved:'อนุมัติ', rejected:'ไม่อนุมัติ', cancel_requested:'รออนุมัติยกเลิก', cancelled:'ยกเลิกแล้ว' };
+
+// คืนคำแปลของ key ตามภาษาปัจจุบัน — fallback เป็นภาษาไทยถ้าไม่พบ key ในภาษานั้น แล้ว fallback เป็น key เอง
+function t(key) {
+  return (I18N[currentLang] && I18N[currentLang][key]) ?? I18N.th[key] ?? key;
+}
+
+// เดินผ่านทุก element ที่มี data-i18n / data-i18n-ph แล้วอัปเดตข้อความ/placeholder ตามภาษาปัจจุบัน
+function applyI18n() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    el.textContent = t(el.getAttribute('data-i18n'));
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+    el.setAttribute('placeholder', t(el.getAttribute('data-i18n-ph')));
+  });
+  document.documentElement.lang = currentLang;
+  // sync ปุ่มสลับภาษาทั้ง 3 จุด (login / hero / profile)
+  document.querySelectorAll('.lang-toggle button').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-lang') === currentLang);
+  });
+}
+
+// สลับภาษา — เรียกจากปุ่ม TH/EN ทุกจุดในแอป
+function setLanguage(lang) {
+  if (lang !== 'th' && lang !== 'en') return;
+  currentLang = lang;
+  localStorage.setItem('wc_lang', lang);
+  refreshLabelMaps();
+  applyI18n();
+  // รีเฟรชข้อความสถานะ/ปุ่มที่ตั้งค่าแบบไดนามิกไว้ก่อนหน้า ให้เปลี่ยนภาษาทันทีโดยไม่ต้องรีเฟรชหน้า
+  try {
+    if (typeof enableBtn === 'function' && document.getElementById('btnAction') && !document.getElementById('btnAction').disabled) {
+      enableBtn(true, isCheckedIn ? 'checkout' : 'checkin');
+    }
+    const statusLblEl = document.getElementById('statusLbl');
+    if (statusLblEl) {
+      if (isCheckedIn) statusLblEl.textContent = t('status_working');
+      else if (statusLblEl.classList.contains('carried')) statusLblEl.textContent = t('status_carried_over');
+      else statusLblEl.textContent = t('status_not_checked_in');
+    }
+    // รีเฟรช list ที่ใช้ label map ภาษา ถ้าหน้าจอนั้นกำลังเปิดอยู่
+    if (typeof loadTodayHistory === 'function' && document.getElementById('view-history')?.classList.contains('active')) loadTodayHistory();
+    if (typeof renderRecentReq === 'function') renderRecentReq();
+  } catch(e) { console.warn('setLanguage refresh error', e); }
+}
+
 // นโยบายยกเลิกวันลาที่อนุมัติแล้ว:
 // - ถ้าวันเริ่มลายังห่างจากวันนี้มากกว่า LEAVE_CANCEL_NEAR_DAYS วัน  → พนักงานยกเลิกเองได้ทันที (auto)
 // - ถ้าใกล้ถึงวันลาแล้ว (เหลือ ≤ LEAVE_CANCEL_NEAR_DAYS วัน) หรือถึงวันลา/เลยไปแล้ว → ต้องส่งคำขอยกเลิกให้แอดมินอนุมัติก่อน
@@ -2366,6 +2824,7 @@ const SUPABASE_URL = 'https://gmbhjmmjsyfvjuhbparc.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtYmhqbW1qc3lmdmp1aGJwYXJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc3MjM2NTIsImV4cCI6MjEwMzI5OTY1Mn0.63vOrPVMYP4YRcItRVqauBY9VqunyRAmiNsya-NmazE';
 
 window.addEventListener('DOMContentLoaded', () => {
+  applyI18n(); // แปลภาษาตามที่บันทึกไว้ (localStorage) ตั้งแต่แรกโหลด รวมถึงหน้า Login
   initSupabase(SUPABASE_URL, SUPABASE_KEY);
   updateClock();
   updateNetStatus();
@@ -2572,9 +3031,10 @@ async function showApp() {
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('app').style.display = 'flex';
   document.getElementById('app').style.flexDirection = 'column';
+  applyI18n();
   document.getElementById('topbarUser').textContent = currentUser.name;
   document.getElementById('dashGreetName').textContent = currentUser.name || '—';
-  document.getElementById('dashGreetRole').textContent = 'ตำแหน่ง: ' + (currentUser.position || (currentUser.role==='admin' ? 'ผู้ดูแลระบบ' : '—'));
+  document.getElementById('dashGreetRole').textContent = t('greet_role_prefix') + (currentUser.position || (currentUser.role==='admin' ? t('role_admin') : '—'));
   const dashAvEl = document.getElementById('dashGreetAvatar');
   if (dashAvEl) {
     if (currentUser.avatar_url) {
@@ -2595,6 +3055,9 @@ async function showApp() {
   checkLeaveNotifDot(); // เช็คว่ามีผลอนุมัติ/ปฏิเสธลาที่ยังไม่เคยเห็นหรือไม่ (โชว์เลขแจ้งเตือนที่เมนูลัด)
   checkNewsNotifDot(); // เช็คว่ามีข่าวสารใหม่ที่ยังไม่เคยเห็นหรือไม่ (โชว์เลขแจ้งเตือนที่เมนูลัด)
   checkCalendarBadge(); // นับรายการลา/โอทีที่อนุมัติแล้วและยังไม่ถึงวันในเดือนนี้
+  checkClaimBadge(); // นับคำขอเบิกเงินที่ยังไม่เคยเห็นผล
+  checkPayslipBadge(); // นับสลิปเงินเดือนใหม่ที่ยังไม่เคยเปิดดู
+  renderRecentReq(); // การ์ด "คำขอล่าสุดของฉัน"
   // Init shifts
   await loadShiftsFromStorage();
   // ── แจ้งเตือนก่อนมาทำงาน (local, ไม่มี Server) — เช็คทันทีแล้วเช็คซ้ำทุกนาที ──
@@ -2654,11 +3117,12 @@ function updateClock() {
   if (liveDateEl)  liveDateEl.textContent  = dateStr;
   if (greetEl) {
     const h = now.getHours();
-    let greet = 'สวัสดีตอนดึก 🌙';
-    if (h >= 5 && h < 12)       greet = 'สวัสดีตอนเช้า ☀️';
-    else if (h >= 12 && h < 16) greet = 'สวัสดีตอนบ่าย 🌤️';
-    else if (h >= 16 && h < 19) greet = 'สวัสดีตอนเย็น 🌇';
-    else if (h >= 19 && h < 24) greet = 'สวัสดีตอนค่ำ 🌙';
+    let key = 'greet_night';
+    if (h >= 5 && h < 12)       key = '☀️Greet Morning';
+    else if (h >= 12 && h < 16) key = '🌞Greet Afternoon';
+    else if (h >= 16 && h < 19) key = '🌅Greet Evening';
+    else if (h >= 19 && h < 24) key = '🌇Greet Dusk';
+    const greet = t(key);
     greetEl.textContent = greet;
     const dashHiEl = document.getElementById('dashGreetHi');
     if (dashHiEl) dashHiEl.textContent = greet;
@@ -2699,7 +3163,7 @@ function initGPS() {
       currentCoords = null;
       setGeoStatus('fail', msg, 'ต้องเปิด GPS เพื่อเช็คอิน/เอ้าท์');
       document.getElementById('btnAction').disabled = true;
-      document.getElementById('btnText').textContent = 'รอ GPS…';
+      document.getElementById('btnText').textContent = t('st_waiting_gps');
     },
     {enableHighAccuracy: true, timeout: 15000, maximumAge: 30000}
   );
@@ -2724,7 +3188,7 @@ function checkGeofence() {
   if (!activeZones.length) {
     setGeoStatus('fail','⚠️ ยังไม่ได้ตั้งค่าพื้นที่ทำงาน','กรุณาให้ Admin ตั้งค่า Geofence ก่อน');
     document.getElementById('btnAction').disabled = true;
-    document.getElementById('btnText').textContent = 'ไม่มี Geofence';
+    document.getElementById('btnText').textContent = t('st_no_geofence');
     return;
   }
   const coords = `${currentCoords.latitude.toFixed(4)}°N, ${currentCoords.longitude.toFixed(4)}°E`;
@@ -2750,12 +3214,12 @@ function checkGeofence() {
       setGeoStatus('fail', `🚫 อยู่นอกพื้นที่ — ไม่สามารถเช็คเอ้าท์ได้`,
         `ใกล้สุด: "${nearestZone?.name}" ห่าง ${nearestDist} ม. | ${coords}`);
       document.getElementById('btnAction').disabled = true;
-      document.getElementById('btnText').textContent = `ต้องอยู่ในพื้นที่ (${nearestDist} ม.)`;
+      document.getElementById('btnText').textContent = `${t('st_must_be_in_area')} (${nearestDist} ${t('unit_m')})`;
     } else {
       setGeoStatus('fail', `🚫 อยู่นอกพื้นที่ทุกสาขา`,
         `ใกล้สุด: "${nearestZone?.name}" ห่าง ${nearestDist} ม. | ${coords}`);
       document.getElementById('btnAction').disabled = true;
-      document.getElementById('btnText').textContent = `ห่างเกินไป (${nearestDist} ม.)`;
+      document.getElementById('btnText').textContent = `${t('st_too_far')} (${nearestDist} ${t('unit_m')})`;
     }
   }
   return nearestDist;
@@ -2775,10 +3239,10 @@ function enableBtn(enabled, type) {
   btn.className = 'dash-action-btn ' + type;
   if (type === 'checkin') {
     document.getElementById('btnIcon').textContent = '↓';
-    document.getElementById('btnText').textContent = 'เช็คอิน';
+    document.getElementById('btnText').textContent = t('btn_checkin');
   } else {
     document.getElementById('btnIcon').textContent = '↑';
-    document.getElementById('btnText').textContent = 'เช็คเอ้าท์';
+    document.getElementById('btnText').textContent = t('btn_checkout');
   }
 }
 
@@ -2983,7 +3447,7 @@ async function performAction(photoDataUrl) {
       saveCheckinState();
       document.getElementById('statusRing').className = 'status-ring in';
       document.getElementById('statusLbl').className = 'dash-status-value in';
-      document.getElementById('statusLbl').textContent = 'กำลังทำงาน';
+      document.getElementById('statusLbl').textContent = t('status_working');
       document.getElementById('ciTime').textContent = timeStr;
       document.getElementById('ciCoord').textContent = `${currentCoords.latitude.toFixed(4)}°N, ${currentCoords.longitude.toFixed(4)}°E`;
       document.getElementById('ciDist').textContent = dist ? `${dist} ม. จากสำนักงาน` : '—';
@@ -3030,7 +3494,7 @@ async function performAction(photoDataUrl) {
       if (elapsedTimer) clearInterval(elapsedTimer);
       document.getElementById('statusRing').className = 'status-ring out';
       document.getElementById('statusLbl').className = 'dash-status-value out';
-      document.getElementById('statusLbl').textContent = 'เลิกงาน';
+      document.getElementById('statusLbl').textContent = t('status_done');
       document.getElementById('sessionCard').style.display = 'none';
       hideCarriedOverWarning();
       checkGeofence();
@@ -3283,11 +3747,11 @@ async function syncCheckinStateFromDB() {
 
       const isCarriedOver = toLocalDateStr(ciDateObj) !== toLocalDateStr(new Date());
       if (isCarriedOver) {
-        document.getElementById('statusLbl').textContent = '⚠️ เช็คอินค้างจากวันก่อนหน้า';
+        document.getElementById('statusLbl').textContent = t('status_carried_over');
         const dateLabel = ciDateObj.toLocaleDateString('th-TH', { day:'numeric', month:'long', year:'numeric' });
         showCarriedOverWarning(dateLabel, t);
       } else {
-        document.getElementById('statusLbl').textContent = 'กำลังทำงาน';
+        document.getElementById('statusLbl').textContent = t('status_working');
         hideCarriedOverWarning();
       }
     } else {
@@ -3298,7 +3762,7 @@ async function syncCheckinStateFromDB() {
       if (elapsedTimer) clearInterval(elapsedTimer);
       document.getElementById('statusRing').className = 'status-ring out';
       document.getElementById('statusLbl').className = 'dash-status-value out';
-      document.getElementById('statusLbl').textContent = 'ยังไม่เช็คอิน';
+      document.getElementById('statusLbl').textContent = t('status_not_checked_in');
       document.getElementById('sessionCard').style.display = 'none';
       enableBtn(true, 'checkin');
       hideCarriedOverWarning();
@@ -3342,7 +3806,7 @@ function restoreCheckinStateLocal() {
     const t = new Date(ciTimestamp).toLocaleTimeString('th-TH',{hour12:false});
     document.getElementById('statusRing').className = 'status-ring in';
     document.getElementById('statusLbl').className = 'dash-status-value in';
-    document.getElementById('statusLbl').textContent = 'กำลังทำงาน';
+    document.getElementById('statusLbl').textContent = t('status_working');
     document.getElementById('ciTime').textContent = t;
     if (s.ciCoord) document.getElementById('ciCoord').textContent =
       `${s.ciCoord.lat.toFixed(4)}°N, ${s.ciCoord.lng.toFixed(4)}°E`;
@@ -4970,9 +5434,9 @@ async function fetchEmployeePickerList() {
 
 function getAdminPermissions() {
   if (!currentUser || currentUser.role !== 'admin') return null;
-  const hasPermSystem = ('is_super_admin' in currentUser) || ('can_approve_leave' in currentUser) || ('can_approve_ot' in currentUser);
+  const hasPermSystem = ('is_super_admin' in currentUser) || ('can_approve_leave' in currentUser) || ('can_approve_ot' in currentUser) || ('can_approve_claim' in currentUser);
   if (!hasPermSystem) {
-    return { superAdmin:true, leave:true, ot:true, employees:true, news:true, notify:true };
+    return { superAdmin:true, leave:true, ot:true, employees:true, news:true, notify:true, claim:true, payslip:true };
   }
   const superAdmin = !!currentUser.is_super_admin;
   return {
@@ -4982,6 +5446,8 @@ function getAdminPermissions() {
     employees: superAdmin,
     news: superAdmin,
     notify: superAdmin,
+    claim: superAdmin || !!currentUser.can_approve_claim, // เบิกเงิน — สิทธิ์แยกเฉพาะ ไม่ผูกกับสิทธิ์อนุมัติลา
+    payslip: superAdmin, // สลิปเงินเดือนเป็นข้อมูลอ่อนไหว — จำกัดเฉพาะ super admin เท่านั้น
   };
 }
 
@@ -4989,7 +5455,7 @@ function getAdminPermissions() {
 function applyAdminPermissionsUI() {
   const perm = getAdminPermissions();
   if (!perm) return;
-  const visMap = { today:true, monthly:true, leave:perm.leave, otreq:perm.ot, employees:perm.employees, news:perm.news, notify:perm.notify };
+  const visMap = { today:true, monthly:true, leave:perm.leave, otreq:perm.ot, employees:perm.employees, news:perm.news, notify:perm.notify, claim:perm.claim, payslip:perm.payslip };
   Object.keys(visMap).forEach(n => {
     const btn = document.getElementById('stab-'+n);
     if (btn) btn.style.display = visMap[n] ? '' : 'none';
@@ -4999,13 +5465,13 @@ function applyAdminPermissionsUI() {
 
 function switchSubTab(name) {
   const perm = getAdminPermissions();
-  const visMap = { today:true, monthly:true, leave: !perm || perm.leave, otreq: !perm || perm.ot, employees: !perm || perm.employees, news: !perm || perm.news, notify: !perm || perm.notify };
+  const visMap = { today:true, monthly:true, leave: !perm || perm.leave, otreq: !perm || perm.ot, employees: !perm || perm.employees, news: !perm || perm.news, notify: !perm || perm.notify, claim: !perm || perm.claim, payslip: !perm || perm.payslip };
   // กันแอดมินย่อยเข้าแท็บที่ไม่มีสิทธิ์ผ่านการเรียกฟังก์ชันตรงๆ (เผื่อ URL/console) — สลับไปแท็บแรกที่มีสิทธิ์แทน
   if (!visMap[name]) {
-    const fallback = ['today','monthly','leave','otreq','employees','news','notify'].find(n => visMap[n]);
+    const fallback = ['today','monthly','leave','otreq','employees','news','notify','claim','payslip'].find(n => visMap[n]);
     name = fallback || 'today';
   }
-  ['today','monthly','leave','otreq','employees','news','notify'].forEach(n => {
+  ['today','monthly','leave','otreq','employees','news','notify','claim','payslip'].forEach(n => {
     document.getElementById('sv-'+n).style.display = n === name ? '' : 'none';
     const btn = document.getElementById('stab-'+n);
     if (btn) btn.classList.toggle('active', n === name);
@@ -5016,6 +5482,8 @@ function switchSubTab(name) {
   if (name === 'employees') { loadEmployeeList().then(() => loadPendingProfileRequests()); }
   if (name === 'news') loadCompanyNewsAdmin();
   if (name === 'notify') loadNotifySettings();
+  if (name === 'claim') loadClaimRequestsAdmin();
+  if (name === 'payslip') { populatePayslipEmployeeSelect(); loadPayslipsAdminList(); }
 }
 
 // ══════════════════════════════════════
@@ -5236,14 +5704,14 @@ async function loadEmployeeList() {
   document.getElementById('empList').innerHTML = '<div class="empty-row"><div class="spinner"></div></div>';
   let data, error;
   let empQuery = sb.from('employees')
-    .select('id,name,email,role,position,employee_code,avatar_url,is_super_admin,can_approve_leave,can_approve_ot');
+    .select('id,name,email,role,position,employee_code,avatar_url,is_super_admin,can_approve_leave,can_approve_ot,can_approve_claim');
   if (currentCompany?.id) empQuery = empQuery.eq('company_id', currentCompany.id);
   ({ data, error } = await empQuery.order('name'));
   if (error && isMissingColumnError(error, 'company_id')) {
     ({ data, error } = await sb.from('employees')
-      .select('id,name,email,role,position,employee_code,avatar_url,is_super_admin,can_approve_leave,can_approve_ot').order('name'));
+      .select('id,name,email,role,position,employee_code,avatar_url,is_super_admin,can_approve_leave,can_approve_ot,can_approve_claim').order('name'));
   }
-  if (error && (isMissingColumnError(error, 'is_super_admin') || isMissingColumnError(error, 'can_approve_leave') || isMissingColumnError(error, 'can_approve_ot'))) {
+  if (error && (isMissingColumnError(error, 'is_super_admin') || isMissingColumnError(error, 'can_approve_leave') || isMissingColumnError(error, 'can_approve_ot') || isMissingColumnError(error, 'can_approve_claim'))) {
     document.getElementById('empPermSchemaWarning').style.display = 'flex';
     let fallbackQuery = sb.from('employees').select('id,name,email,role,position,employee_code,avatar_url');
     if (currentCompany?.id) fallbackQuery = fallbackQuery.eq('company_id', currentCompany.id);
@@ -5278,11 +5746,12 @@ async function loadEmployeeList() {
 // ป้ายบทบาทในตารางพนักงาน — แยกให้เห็นชัดว่าแอดมินคนนี้เป็น Super Admin หรือแอดมินย่อย (เห็นเฉพาะลา/โอที)
 function roleBadgeLabel(e) {
   if (e.role !== 'admin') return 'พนักงาน';
-  const hasPermSystem = ('is_super_admin' in e) || ('can_approve_leave' in e) || ('can_approve_ot' in e);
+  const hasPermSystem = ('is_super_admin' in e) || ('can_approve_leave' in e) || ('can_approve_ot' in e) || ('can_approve_claim' in e);
   if (!hasPermSystem || e.is_super_admin) return '👑 Super Admin';
   const bits = [];
   if (e.can_approve_leave) bits.push('ลา');
   if (e.can_approve_ot) bits.push('โอที');
+  if (e.can_approve_claim) bits.push('เบิกเงิน');
   return bits.length ? `Admin (${bits.join('/')})` : 'Admin (ไม่มีสิทธิ์อนุมัติ)';
 }
 
@@ -5301,6 +5770,7 @@ function editEmployee(id) {
   document.getElementById('efIsSuperAdmin').checked = e.is_super_admin !== false; // ค่าเริ่มต้นถ้ายังไม่มีคอลัมน์นี้ = ถือเป็น Super Admin (พฤติกรรมเดิม)
   document.getElementById('efCanApproveLeave').checked = !!e.can_approve_leave;
   document.getElementById('efCanApproveOt').checked = !!e.can_approve_ot;
+  document.getElementById('efCanApproveClaim').checked = !!e.can_approve_claim;
   document.getElementById('empFormTitle').textContent = '✏️ แก้ไขข้อมูลพนักงาน';
   document.getElementById('empCancelBtn').style.display = '';
   document.getElementById('efPin').placeholder = 'เว้นว่างถ้าไม่ต้องการเปลี่ยน PIN';
@@ -5320,6 +5790,7 @@ function onEfSuperAdminToggle() {
   document.getElementById('efPermSubRow').style.opacity = isSuper ? '.45' : '1';
   document.getElementById('efCanApproveLeave').disabled = isSuper;
   document.getElementById('efCanApproveOt').disabled = isSuper;
+  document.getElementById('efCanApproveClaim').disabled = isSuper;
 }
 
 function resetEmpForm() {
@@ -5335,6 +5806,7 @@ function resetEmpForm() {
   document.getElementById('efIsSuperAdmin').checked = false;
   document.getElementById('efCanApproveLeave').checked = false;
   document.getElementById('efCanApproveOt').checked = false;
+  document.getElementById('efCanApproveClaim').checked = false;
   document.getElementById('empFormTitle').textContent = '➕ เพิ่มพนักงานใหม่';
   document.getElementById('empCancelBtn').style.display = 'none';
   document.getElementById('efPin').placeholder = '1234';
@@ -5371,6 +5843,7 @@ async function saveEmployee() {
       payload.is_super_admin = document.getElementById('efIsSuperAdmin').checked;
       payload.can_approve_leave = document.getElementById('efCanApproveLeave').checked;
       payload.can_approve_ot = document.getElementById('efCanApproveOt').checked;
+      payload.can_approve_claim = document.getElementById('efCanApproveClaim').checked;
     }
     try {
       const avatarUrl = await uploadAvatarIfNeeded();
@@ -5395,10 +5868,10 @@ async function saveEmployee() {
       workingPayload = rest;
       ({ error } = await runSave(workingPayload));
     }
-    if (error && (isMissingColumnError(error, 'is_super_admin') || isMissingColumnError(error, 'can_approve_leave') || isMissingColumnError(error, 'can_approve_ot'))) {
+    if (error && (isMissingColumnError(error, 'is_super_admin') || isMissingColumnError(error, 'can_approve_leave') || isMissingColumnError(error, 'can_approve_ot') || isMissingColumnError(error, 'can_approve_claim'))) {
       // ฐานข้อมูลยังไม่มีคอลัมน์สิทธิ์แอดมิน — บันทึกข้อมูลส่วนอื่นตามปกติก่อน แล้วแจ้งให้รัน SQL เพื่อเปิดใช้ระบบสิทธิ์ย่อย
       document.getElementById('empPermSchemaWarning').style.display = 'flex';
-      const { is_super_admin, can_approve_leave, can_approve_ot, ...basicPayload } = workingPayload;
+      const { is_super_admin, can_approve_leave, can_approve_ot, can_approve_claim, ...basicPayload } = workingPayload;
       workingPayload = basicPayload;
       ({ error } = await runSave(workingPayload));
       if (!error) showToast('✅ บันทึกสำเร็จ (ยังไม่ได้ตั้งค่าสิทธิ์แอดมินย่อย ดูคำแนะนำ SQL ด้านบน)', 'a');
@@ -5975,7 +6448,7 @@ async function switchTab(name) {
     await loadShiftsFromStorage();
     const visMap = applyAdminPermissionsUI();
     // ถ้าแอดมินคนนี้ไม่มีสิทธิ์เห็นแท็บ "วันนี้" (ไม่ควรเกิดขึ้น เพราะ today เปิดให้ทุกแอดมินเสมอ) กันไว้ ให้ไปแท็บแรกที่มีสิทธิ์
-    const firstAllowed = visMap ? (['today','monthly','leave','otreq','employees','news','notify'].find(n => visMap[n]) || 'today') : 'today';
+    const firstAllowed = visMap ? (['today','monthly','leave','otreq','claim','payslip','employees','news','notify'].find(n => visMap[n]) || 'today') : 'today';
     switchSubTab(firstAllowed);
     loadAdminData();
   }
@@ -6180,8 +6653,8 @@ function renderProfile() {
     avEl.textContent = initial || '?';
   }
   document.getElementById('profileName').textContent = currentUser.name || '—';
-  document.getElementById('profileRole').textContent = 'ตำแหน่ง: ' + (currentUser.position || (currentUser.role==='admin' ? 'ผู้ดูแลระบบ' : '—'));
-  document.getElementById('profileCode').textContent = 'รหัสพนักงาน: ' + (currentUser.employee_code || '—');
+  document.getElementById('profileRole').textContent = t('greet_role_prefix') + (currentUser.position || (currentUser.role==='admin' ? t('role_admin') : '—'));
+  document.getElementById('profileCode').textContent = t('profile_code_prefix') + (currentUser.employee_code || '—');
   checkPendingPositionRequest();
 }
 
@@ -7086,6 +7559,616 @@ async function checkCalendarBadge() {
 
     setBadgeNum('calBadge', total);
   } catch(e) { console.warn('checkCalendarBadge error', e); }
+}
+
+// ══════════════════════════════════════════════════════════════
+//  เบิกเงิน / EXPENSE CLAIM (self-service + admin)
+// ══════════════════════════════════════════════════════════════
+// หมายเหตุ: CLAIM_CATEGORY_LABELS และ CLAIM_STATUS_LABELS ถูกประกาศแบบ
+// language-aware (let + refreshLabelMaps()) ไว้ที่ต้นไฟล์แล้ว — ไม่ต้อง redeclare ที่นี่
+const CLAIM_ATTACH_MAX_MB = 8;
+let claimReceiptFileRef = null;
+
+function openClaimModal() {
+  document.getElementById('claimCategory').value = 'transport';
+  document.getElementById('claimTitle').value = '';
+  document.getElementById('claimAmount').value = '';
+  document.getElementById('claimDate').value = toLocalDateStr(new Date());
+  document.getElementById('claimNote').value = '';
+  document.getElementById('claimReceiptFile').value = '';
+  document.getElementById('claimReceiptLbl').textContent = 'แตะเพื่อแนบไฟล์ (รูปใบเสร็จ หรือ PDF)';
+  document.querySelector('#claimModal .leave-attach-btn')?.classList.remove('has-file');
+  document.getElementById('claimSchemaWarningModal').style.display = 'none';
+  claimReceiptFileRef = null;
+  document.getElementById('claimModal').classList.add('show');
+}
+function closeClaimModal() {
+  document.getElementById('claimModal').classList.remove('show');
+}
+
+function onClaimReceiptChange() {
+  const input = document.getElementById('claimReceiptFile');
+  const lbl = document.getElementById('claimReceiptLbl');
+  const btn = document.querySelector('#claimModal .leave-attach-btn');
+  const file = input.files?.[0];
+  if (!file) { lbl.textContent = 'แตะเพื่อแนบไฟล์ (รูปใบเสร็จ หรือ PDF)'; btn.classList.remove('has-file'); claimReceiptFileRef = null; return; }
+  const okType = ['application/pdf','image/png','image/jpeg'].includes(file.type);
+  if (!okType) {
+    showToast('⚠️ รองรับเฉพาะไฟล์ PDF, JPG, PNG เท่านั้น','a');
+    input.value = ''; lbl.textContent = 'แตะเพื่อแนบไฟล์ (รูปใบเสร็จ หรือ PDF)'; btn.classList.remove('has-file'); claimReceiptFileRef = null;
+    return;
+  }
+  if (file.size > CLAIM_ATTACH_MAX_MB * 1024 * 1024) {
+    showToast(`⚠️ ไฟล์ต้องไม่เกิน ${CLAIM_ATTACH_MAX_MB}MB`,'a');
+    input.value = ''; lbl.textContent = 'แตะเพื่อแนบไฟล์ (รูปใบเสร็จ หรือ PDF)'; btn.classList.remove('has-file'); claimReceiptFileRef = null;
+    return;
+  }
+  lbl.textContent = '📎 ' + file.name;
+  btn.classList.add('has-file');
+  claimReceiptFileRef = file;
+}
+
+async function submitClaimRequest() {
+  const category = document.getElementById('claimCategory').value;
+  const title = document.getElementById('claimTitle').value.trim();
+  const amountStr = document.getElementById('claimAmount').value;
+  const dateVal = document.getElementById('claimDate').value;
+  const note = document.getElementById('claimNote').value.trim();
+
+  if (!title) { showToast('⚠️ กรุณากรอกหัวข้อ/รายละเอียด','a'); return; }
+  const amount = parseFloat(amountStr);
+  if (!amountStr || isNaN(amount) || amount <= 0) { showToast('⚠️ กรุณากรอกจำนวนเงินให้ถูกต้อง','a'); return; }
+  if (!dateVal) { showToast('⚠️ กรุณาเลือกวันที่เกิดค่าใช้จ่าย','a'); return; }
+  if (!claimReceiptFileRef) { showToast('⚠️ กรุณาแนบใบเสร็จ/หลักฐานก่อนส่งคำขอ','a'); return; }
+  if (isDemo) { showToast('📋 Demo: ไม่บันทึกจริง','g'); closeClaimModal(); return; }
+
+  const btn = document.getElementById('claimSubmitBtn');
+  btn.disabled = true; btn.textContent = '⏳ กำลังส่ง…';
+  try {
+    // ── อัปโหลดใบเสร็จ ──
+    let attachmentUrl = null, attachmentName = null;
+    try {
+      const ext = (claimReceiptFileRef.name.split('.').pop() || 'dat').toLowerCase();
+      const fileName = `${currentCompany?.id || 'shared'}/${currentUser.id}_${Date.now()}.${ext}`;
+      const { error: upErr } = await sb.storage.from('claim-attachments')
+        .upload(fileName, claimReceiptFileRef, { contentType: claimReceiptFileRef.type, upsert: false });
+      if (upErr) throw upErr;
+      const { data: urlData } = sb.storage.from('claim-attachments').getPublicUrl(fileName);
+      attachmentUrl = urlData?.publicUrl || null;
+      attachmentName = claimReceiptFileRef.name;
+    } catch(upErr) {
+      console.error('claim receipt upload error', upErr);
+      showToast('❌ อัปโหลดไฟล์แนบไม่สำเร็จ: ' + upErr.message, 'r');
+      btn.disabled = false; btn.textContent = '✓ ส่งคำขอเบิกเงิน';
+      return;
+    }
+
+    const payload = {
+      company_id: currentCompany?.id,
+      employee_id: currentUser.id,
+      category, title, amount,
+      expense_date: dateVal,
+      note: note || null,
+      attachment_url: attachmentUrl,
+      attachment_name: attachmentName,
+      status: 'pending',
+    };
+    let { error } = await sb.from('expense_claims').insert(payload);
+    if (error && isMissingColumnError(error, 'company_id')) {
+      const { company_id, ...fallbackPayload } = payload;
+      ({ error } = await sb.from('expense_claims').insert(fallbackPayload));
+    }
+    if (error) throw error;
+
+    showToast('✅ ส่งคำขอเบิกเงินสำเร็จ รอ Admin อนุมัติ', 'g');
+    closeClaimModal();
+    checkClaimBadge();
+    renderRecentReq();
+
+    try {
+      await sendTelegramNotify(
+        `💰 <b>ขอเบิกเงิน</b>\n👤 ${escapeHtml(currentUser?.name || 'พนักงาน')}\n${CLAIM_CATEGORY_LABELS[category]?.icon || ''} ${CLAIM_CATEGORY_LABELS[category]?.label || category}: ${escapeHtml(title)}\n💵 จำนวน: ${amount.toLocaleString('th-TH',{minimumFractionDigits:2})} บาท`
+      );
+    } catch(e) { console.warn('claim telegram notify error', e); }
+  } catch(e) {
+    console.error('submitClaimRequest error', e);
+    if (isMissingTableError(e, 'expense_claims')) {
+      document.getElementById('claimSchemaWarningModal').style.display = 'flex';
+      showToast('⚠️ ยังไม่ได้ตั้งค่าระบบเบิกเงินในฐานข้อมูล — ดู SQL setup', 'r');
+    } else {
+      showToast('❌ ส่งคำขอไม่สำเร็จ: ' + e.message, 'r');
+    }
+  } finally {
+    btn.disabled = false; btn.textContent = '✓ ส่งคำขอเบิกเงิน';
+  }
+}
+
+// เช็คจำนวนคำขอเบิกเงินที่ยังไม่เคยเห็นผล (approved/rejected/paid) — แสดงเป็นตัวเลขที่เมนูลัด
+async function checkClaimBadge() {
+  if (!currentUser || isDemo) return;
+  try {
+    const { data, error } = await sb.from('expense_claims')
+      .select('id')
+      .eq('employee_id', currentUser.id)
+      .in('status', ['approved','rejected','paid'])
+      .eq('employee_seen', false);
+    if (error) throw error;
+    setBadgeNum('claimBadge', (data || []).length);
+  } catch(e) {
+    if (!isMissingTableError(e, 'expense_claims')) console.warn('checkClaimBadge error', e);
+  }
+}
+
+// ══════════════════════════════════════
+//  ADMIN: อนุมัติ/จ่ายเงิน คำขอเบิกเงิน
+// ══════════════════════════════════════
+async function loadClaimRequestsAdmin() {
+  const list = document.getElementById('claimAdminList');
+  if (!list) return;
+  list.innerHTML = '<div class="empty-row"><div class="spinner"></div></div>';
+  document.getElementById('claimSchemaWarning').style.display = 'none';
+
+  if (isDemo) {
+    document.getElementById('clStatPending').textContent = '1';
+    document.getElementById('clStatApproved').textContent = '1';
+    document.getElementById('clStatPaid').textContent = '850.00';
+    list.innerHTML = renderClaimAdminCard({
+      id:'demo1', category:'transport', title:'ตัวอย่างคำขอเบิกเงิน (โหมดทดลอง)', amount:350,
+      expense_date: toLocalDateStr(new Date()), status:'pending', note:'',
+      created_at: new Date().toISOString(), employees:{name:'สมชาย ใจดี'}
+    });
+    return;
+  }
+
+  const empFilterEl = document.getElementById('claimFilterEmp');
+  if (empFilterEl && empFilterEl.options.length <= 1) {
+    try {
+      const { data: emps } = await fetchEmployeePickerList();
+      (emps || []).forEach(e => {
+        const opt = document.createElement('option');
+        opt.value = e.id; opt.textContent = e.name;
+        empFilterEl.appendChild(opt);
+      });
+    } catch(e) { console.warn('loadClaimRequestsAdmin: employees fetch error', e); }
+  }
+
+  const statusFilter = document.getElementById('claimFilterStatus')?.value || '';
+  const empFilter     = document.getElementById('claimFilterEmp')?.value || '';
+
+  try {
+    let q = sb.from('expense_claims').select('*, employees!expense_claims_employee_id_fkey(id,name)').order('created_at', { ascending:false });
+    if (statusFilter) q = q.eq('status', statusFilter);
+    if (empFilter)    q = q.eq('employee_id', empFilter);
+    const { data: claims, error } = await q;
+    if (error) throw error;
+
+    const { data: allForStats } = await sb.from('expense_claims').select('status,amount');
+    const pendingCount  = (allForStats||[]).filter(r => r.status === 'pending').length;
+    const approvedCount = (allForStats||[]).filter(r => r.status === 'approved').length;
+    const paidTotal     = (allForStats||[]).filter(r => r.status === 'paid').reduce((s,r) => s + (Number(r.amount)||0), 0);
+    document.getElementById('clStatPending').textContent  = pendingCount;
+    document.getElementById('clStatApproved').textContent = approvedCount;
+    document.getElementById('clStatPaid').textContent     = paidTotal.toLocaleString('th-TH',{minimumFractionDigits:2});
+
+    if (!claims || !claims.length) {
+      list.innerHTML = '<div class="empty-row">ไม่มีคำขอเบิกเงินในเงื่อนไขนี้</div>';
+      return;
+    }
+    list.innerHTML = claims.map(renderClaimAdminCard).join('');
+  } catch(e) {
+    console.error('loadClaimRequestsAdmin error', e);
+    if (isMissingTableError(e, 'expense_claims')) {
+      document.getElementById('claimSchemaWarning').style.display = 'flex';
+      list.innerHTML = '';
+    } else {
+      list.innerHTML = `<div class="empty-row" style="color:var(--red);">❌ โหลดข้อมูลไม่ได้: ${e.message}</div>`;
+    }
+  }
+}
+
+function renderClaimAdminCard(cl) {
+  const cInfo = CLAIM_CATEGORY_LABELS[cl.category] || CLAIM_CATEGORY_LABELS.other;
+  const statusLabel = CLAIM_STATUS_LABELS[cl.status] || CLAIM_STATUS_LABELS.pending;
+  const dateStr = cl.expense_date ? new Date(cl.expense_date+'T00:00:00').toLocaleDateString('th-TH', {day:'numeric', month:'short', year:'2-digit'}) : '—';
+  const empName = cl.employees?.name || 'พนักงาน';
+  const createdStr = cl.created_at ? new Date(cl.created_at).toLocaleString('th-TH', {dateStyle:'short', timeStyle:'short'}) : '';
+  const amountStr = Number(cl.amount || 0).toLocaleString('th-TH', {minimumFractionDigits:2});
+  const attachStr = cl.attachment_url
+    ? `<a class="leave-attachment-chip" href="${cl.attachment_url}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"></path></svg>📎 ${escapeHtml(cl.attachment_name || 'เปิดใบเสร็จ')}</a>`
+    : '';
+
+  let actions;
+  if (cl.status === 'pending') {
+    actions = `<div class="leave-admin-actions">
+        <button class="btn-sm" style="background:var(--green-dim);color:var(--green);border:1px solid var(--green);" onclick="updateClaimStatus('${cl.id}','approved')">✓ อนุมัติ</button>
+        <button class="btn-sm" style="background:var(--red-dim);color:var(--red);border:1px solid var(--red);" onclick="updateClaimStatus('${cl.id}','rejected')">✕ ไม่อนุมัติ</button>
+      </div>`;
+  } else if (cl.status === 'approved') {
+    actions = `<div class="leave-admin-actions">
+        <button class="btn-sm" style="background:var(--green-dim);color:var(--green);border:1px solid var(--green);" onclick="markClaimPaid('${cl.id}')">💵 บันทึกว่าจ่ายแล้ว</button>
+        <span class="leave-admin-reset" onclick="updateClaimStatus('${cl.id}','pending')">↺ กลับเป็นรอดำเนินการ</span>
+      </div>`;
+  } else {
+    actions = `<span class="leave-admin-reset" onclick="updateClaimStatus('${cl.id}','pending')">↺ เปลี่ยนกลับเป็นรอดำเนินการ</span>`;
+  }
+
+  return `<div class="leave-admin-card">
+    <div class="leave-admin-top">
+      <div class="leave-admin-name">👤 ${escapeHtml(empName)}</div>
+      <span class="badge-s ${cl.status}">${statusLabel}</span>
+    </div>
+    <div class="leave-admin-detail">${cInfo.icon} ${cInfo.label} · ${escapeHtml(cl.title)} · ${dateStr}</div>
+    <div class="leave-admin-reason">จำนวนเงิน: <b>${amountStr} บาท</b>${cl.note ? ' — ' + escapeHtml(cl.note) : ''}</div>
+    ${attachStr}
+    ${actions}
+    <div class="leave-admin-meta">ส่งคำขอเมื่อ ${createdStr}</div>
+  </div>`;
+}
+
+async function updateClaimStatus(id, status) {
+  if (isDemo) { showToast('📋 Demo: ไม่บันทึกจริง','g'); return; }
+  try {
+    const { data, error } = await sb.from('expense_claims')
+      .update({ status, employee_seen: false })
+      .eq('id', id)
+      .select('*, employees!expense_claims_employee_id_fkey(id,name)')
+      .single();
+    if (error) throw error;
+    const labelMap = { approved:'✅ อนุมัติคำขอเบิกเงินแล้ว', rejected:'❌ ปฏิเสธคำขอเบิกเงินแล้ว', pending:'↺ เปลี่ยนกลับเป็นรอดำเนินการ' };
+    showToast(labelMap[status] || 'อัปเดตสถานะแล้ว', status === 'rejected' ? 'r' : 'g');
+
+    // แจ้งเตือนผ่าน Telegram เมื่อมีการอนุมัติ/ปฏิเสธ
+    if (data && (status === 'approved' || status === 'rejected')) {
+      try {
+        const cInfo = CLAIM_CATEGORY_LABELS[data.category] || CLAIM_CATEGORY_LABELS.other;
+        const empName = data.employees?.name || 'พนักงาน';
+        const amountStr = Number(data.amount || 0).toLocaleString('th-TH',{minimumFractionDigits:2});
+        const iconMap = { approved:'✅', rejected:'❌' };
+        const labelTgMap = { approved:'อนุมัติคำขอเบิกเงิน', rejected:'ไม่อนุมัติคำขอเบิกเงิน' };
+        await sendTelegramNotify(
+          `${iconMap[status]} <b>${labelTgMap[status]}</b>\n👤 ${empName}\n${cInfo.icon} ${cInfo.label}: ${escapeHtml(data.title || '')}\n💵 จำนวน: ${amountStr} บาท`
+        );
+      } catch(e) { console.warn('claim status telegram notify error', e); }
+    }
+
+    await loadClaimRequestsAdmin();
+  } catch(e) {
+    console.error('updateClaimStatus error', e);
+    showToast('❌ อัปเดตไม่สำเร็จ: ' + e.message, 'r');
+  }
+}
+
+async function markClaimPaid(id) {
+  if (isDemo) { showToast('📋 Demo: ไม่บันทึกจริง','g'); return; }
+  if (!confirm('ยืนยันว่าโอนจ่ายเงินให้พนักงานเรียบร้อยแล้ว?')) return;
+  try {
+    const { data, error } = await sb.from('expense_claims')
+      .update({ status:'paid', employee_seen:false, paid_at: new Date().toISOString() })
+      .eq('id', id)
+      .select('*, employees!expense_claims_employee_id_fkey(id,name)')
+      .single();
+    if (error) throw error;
+    showToast('✅ บันทึกว่าจ่ายเงินแล้ว', 'g');
+
+    // แจ้งเตือนผ่าน Telegram เมื่อจ่ายเงินแล้ว
+    if (data) {
+      try {
+        const cInfo = CLAIM_CATEGORY_LABELS[data.category] || CLAIM_CATEGORY_LABELS.other;
+        const empName = data.employees?.name || 'พนักงาน';
+        const amountStr = Number(data.amount || 0).toLocaleString('th-TH',{minimumFractionDigits:2});
+        await sendTelegramNotify(
+          `💵 <b>จ่ายเงินเบิกแล้ว</b>\n👤 ${empName}\n${cInfo.icon} ${cInfo.label}: ${escapeHtml(data.title || '')}\n💵 จำนวน: ${amountStr} บาท`
+        );
+      } catch(e) { console.warn('claim paid telegram notify error', e); }
+    }
+
+    await loadClaimRequestsAdmin();
+  } catch(e) {
+    console.error('markClaimPaid error', e);
+    showToast('❌ บันทึกไม่สำเร็จ: ' + e.message, 'r');
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+//  สลิปเงินเดือน / PAYSLIP (private bucket + signed URL)
+// ══════════════════════════════════════════════════════════════
+
+// ── พนักงาน: ดูสลิปของตัวเอง ──
+function openPayslipListModal() {
+  document.getElementById('payslipListModal').classList.add('show');
+  loadMyPayslips();
+}
+function closePayslipListModal() {
+  document.getElementById('payslipListModal').classList.remove('show');
+}
+
+async function loadMyPayslips() {
+  const box = document.getElementById('payslipListBox');
+  if (!box) return;
+  box.innerHTML = '<div class="empty-row"><div class="spinner"></div></div>';
+
+  if (isDemo) {
+    box.innerHTML = `<div class="profile-req-row"><div><b>สิงหาคม 2569</b></div>
+      <button class="btn-sm primary" style="padding:5px 9px;font-size:11px;" onclick="showToast('📋 Demo: ไม่มีไฟล์จริง','a')">📄 เปิดไฟล์</button></div>`;
+    return;
+  }
+
+  try {
+    const { data, error } = await sb.from('payslips')
+      .select('id, period, note, uploaded_at, file_path')
+      .eq('employee_id', currentUser.id)
+      .order('period', { ascending:false });
+    if (error) throw error;
+
+    if (!data || !data.length) { box.innerHTML = '<div class="empty-row">ยังไม่มีสลิปเงินเดือน</div>'; return; }
+
+    box.innerHTML = data.map(p => {
+      const label = formatPayslipPeriod(p.period);
+      return `<div class="profile-req-row">
+        <div><b>${escapeHtml(label)}</b>${p.note ? `<br><span style="color:var(--muted);font-size:11px;">${escapeHtml(p.note)}</span>` : ''}</div>
+        <button class="btn-sm primary" style="padding:5px 9px;font-size:11px;flex-shrink:0;" onclick="openPayslipFile('${p.file_path}')">📄 เปิดไฟล์</button>
+      </div>`;
+    }).join('');
+
+    // mark ว่าเห็นสลิปทั้งหมดแล้ว (ล้างเลขแจ้งเตือน)
+    const unseenIds = data.filter(p => p.employee_seen === false).map(p => p.id);
+    if (unseenIds.length) {
+      await sb.from('payslips').update({ employee_seen: true }).in('id', unseenIds);
+    }
+    setBadgeNum('payslipBadge', 0);
+  } catch(e) {
+    console.error('loadMyPayslips error', e);
+    if (isMissingTableError(e, 'payslips')) {
+      box.innerHTML = '<div class="empty-row">ยังไม่ได้ตั้งค่าระบบสลิปเงินเดือน กรุณาติดต่อแอดมิน</div>';
+    } else {
+      box.innerHTML = `<div class="empty-row" style="color:var(--red);">❌ โหลดข้อมูลไม่ได้: ${e.message}</div>`;
+    }
+  }
+}
+
+function formatPayslipPeriod(period) {
+  if (!period) return '—';
+  const [y, m] = period.split('-').map(Number);
+  if (!y || !m) return period;
+  const d = new Date(y, m - 1, 1);
+  return d.toLocaleDateString('th-TH', { year:'numeric', month:'long' });
+}
+
+async function openPayslipFile(filePath) {
+  try {
+    const { data, error } = await sb.storage.from('payslips').createSignedUrl(filePath, 300); // ลิงก์ชั่วคราว 5 นาที
+    if (error) throw error;
+    if (data?.signedUrl) window.open(data.signedUrl, '_blank', 'noopener');
+  } catch(e) {
+    console.error('openPayslipFile error', e);
+    showToast('❌ เปิดไฟล์ไม่สำเร็จ: ' + e.message, 'r');
+  }
+}
+
+// เช็คจำนวนสลิปเงินเดือนใหม่ที่ยังไม่เคยเปิดดู — แสดงเป็นตัวเลขที่เมนูลัด
+async function checkPayslipBadge() {
+  if (!currentUser || isDemo) return;
+  try {
+    const { data, error } = await sb.from('payslips')
+      .select('id')
+      .eq('employee_id', currentUser.id)
+      .eq('employee_seen', false);
+    if (error) throw error;
+    setBadgeNum('payslipBadge', (data || []).length);
+  } catch(e) {
+    if (!isMissingTableError(e, 'payslips')) console.warn('checkPayslipBadge error', e);
+  }
+}
+
+// ── แอดมิน: อัปโหลดสลิปเงินเดือนให้พนักงาน ──
+async function populatePayslipEmployeeSelect() {
+  const sel = document.getElementById('pyEmp');
+  if (!sel || sel.options.length > 1) return; // เติมแค่ครั้งแรก
+  try {
+    const { data: emps } = await fetchEmployeePickerList();
+    (emps || []).forEach(e => {
+      const opt = document.createElement('option');
+      opt.value = e.id; opt.textContent = e.name;
+      sel.appendChild(opt);
+    });
+  } catch(e) { console.warn('populatePayslipEmployeeSelect error', e); }
+}
+
+async function uploadPayslipForEmployee() {
+  const empId = document.getElementById('pyEmp').value;
+  const monthVal = document.getElementById('pyMonth').value; // "YYYY-MM"
+  const note = document.getElementById('pyNote').value.trim();
+  const file = document.getElementById('pyFile').files?.[0];
+
+  if (!empId) { showToast('⚠️ กรุณาเลือกพนักงาน','a'); return; }
+  if (!monthVal) { showToast('⚠️ กรุณาเลือกเดือน/ปีของงวดเงินเดือน','a'); return; }
+  if (!file) { showToast('⚠️ กรุณาแนบไฟล์ PDF สลิปเงินเดือน','a'); return; }
+  if (file.type !== 'application/pdf') { showToast('⚠️ รองรับเฉพาะไฟล์ PDF เท่านั้น','a'); return; }
+  if (isDemo) { showToast('📋 Demo: ไม่บันทึกจริง','g'); return; }
+
+  const btn = document.getElementById('pySubmitBtn');
+  btn.disabled = true; btn.textContent = '⏳ กำลังอัปโหลด…';
+  try {
+    const filePath = `${empId}/${monthVal}.pdf`;
+    const { error: upErr } = await sb.storage.from('payslips')
+      .upload(filePath, file, { contentType: 'application/pdf', upsert: true });
+    if (upErr) throw upErr;
+
+    const payload = {
+      company_id: currentCompany?.id,
+      employee_id: empId,
+      period: monthVal,
+      file_path: filePath,
+      note: note || null,
+      uploaded_by: currentUser.id,
+      employee_seen: false,
+    };
+    let { error } = await sb.from('payslips')
+      .upsert(payload, { onConflict: 'employee_id,period' });
+    if (error && isMissingColumnError(error, 'company_id')) {
+      const { company_id, ...fallbackPayload } = payload;
+      ({ error } = await sb.from('payslips').upsert(fallbackPayload, { onConflict: 'employee_id,period' }));
+    }
+    if (error) throw error;
+
+    showToast('✅ อัปโหลดสลิปเงินเดือนสำเร็จ', 'g');
+    document.getElementById('pyFile').value = '';
+    document.getElementById('pyNote').value = '';
+    document.getElementById('payslipSchemaWarning').style.display = 'none';
+    await loadPayslipsAdminList();
+  } catch(e) {
+    console.error('uploadPayslipForEmployee error', e);
+    if (isMissingTableError(e, 'payslips') || isStorageBucketMissingError(e)) {
+      document.getElementById('payslipSchemaWarning').style.display = 'flex';
+      showToast('⚠️ ยังไม่ได้ตั้งค่าระบบสลิปเงินเดือนในฐานข้อมูล — ดู SQL setup', 'r');
+    } else {
+      showToast('❌ อัปโหลดไม่สำเร็จ: ' + e.message, 'r');
+    }
+  } finally {
+    btn.disabled = false; btn.textContent = '💾 บันทึกและอัปโหลด';
+  }
+}
+
+async function loadPayslipsAdminList() {
+  const list = document.getElementById('payslipAdminList');
+  if (!list) return;
+  list.innerHTML = '<div class="empty-row"><div class="spinner"></div></div>';
+  document.getElementById('payslipSchemaWarning').style.display = 'none';
+
+  if (isDemo) {
+    list.innerHTML = `<div class="profile-req-row"><div><b>สมชาย ใจดี</b> — สิงหาคม 2569</div>
+      <button class="btn-sm danger" style="padding:5px 9px;font-size:11px;" onclick="showToast('📋 Demo','a')">ลบ</button></div>`;
+    return;
+  }
+
+  try {
+    const { data, error } = await sb.from('payslips')
+      .select('id, employee_id, period, note, uploaded_at, file_path, employees!payslips_employee_id_fkey(id,name)')
+      .order('period', { ascending:false })
+      .order('uploaded_at', { ascending:false });
+    if (error) throw error;
+
+    if (!data || !data.length) { list.innerHTML = '<div class="empty-row">ยังไม่มีสลิปเงินเดือนที่อัปโหลด</div>'; return; }
+
+    list.innerHTML = data.map(p => {
+      const empName = p.employees?.name || p.employee_id;
+      const label = formatPayslipPeriod(p.period);
+      return `<div class="profile-req-row">
+        <div><b>${escapeHtml(empName)}</b> — ${escapeHtml(label)}${p.note ? `<br><span style="color:var(--muted);font-size:11px;">${escapeHtml(p.note)}</span>` : ''}</div>
+        <div style="display:flex;gap:4px;flex-shrink:0;">
+          <button class="btn-sm primary" style="padding:5px 9px;font-size:11px;" onclick="openPayslipFile('${p.file_path}')">📄 ดู</button>
+          <button class="btn-sm danger" style="padding:5px 9px;font-size:11px;" onclick="deletePayslip('${p.id}','${p.file_path}')">✕ ลบ</button>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    console.error('loadPayslipsAdminList error', e);
+    if (isMissingTableError(e, 'payslips')) {
+      document.getElementById('payslipSchemaWarning').style.display = 'flex';
+      list.innerHTML = '';
+    } else {
+      list.innerHTML = `<div class="empty-row" style="color:var(--red);">❌ โหลดข้อมูลไม่ได้: ${e.message}</div>`;
+    }
+  }
+}
+
+async function deletePayslip(id, filePath) {
+  if (!confirm('ลบสลิปเงินเดือนนี้? การลบไม่สามารถย้อนกลับได้')) return;
+  try {
+    await sb.storage.from('payslips').remove([filePath]);
+    const { error } = await sb.from('payslips').delete().eq('id', id);
+    if (error) throw error;
+    showToast('✅ ลบสลิปเงินเดือนแล้ว', 'a');
+    await loadPayslipsAdminList();
+  } catch(e) {
+    console.error('deletePayslip error', e);
+    showToast('❌ ลบไม่สำเร็จ: ' + e.message, 'r');
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+//  คำขอล่าสุดของฉัน (การ์ดสไตล์ "นัดหมายของฉัน" บนหน้าแรก)
+// ══════════════════════════════════════════════════════════════
+async function renderRecentReq() {
+  const section = document.getElementById('recentReqSection');
+  const card = document.getElementById('recentReqCard');
+  if (!section || !card || !currentUser || isDemo) return;
+
+  try {
+    const [leaveRes, otRes, claimRes] = await Promise.allSettled([
+      sb.from('leave_requests').select('id,leave_type,status,start_date,end_date,created_at')
+        .eq('employee_id', currentUser.id).order('created_at', {ascending:false}).limit(1),
+      sb.from('ot_requests').select('id,status,request_date,ot_start,ot_end,created_at')
+        .eq('employee_id', currentUser.id).order('created_at', {ascending:false}).limit(1),
+      sb.from('expense_claims').select('id,category,title,amount,status,created_at')
+        .eq('employee_id', currentUser.id).order('created_at', {ascending:false}).limit(1),
+    ]);
+
+    const candidates = [];
+    if (leaveRes.status === 'fulfilled' && leaveRes.value.data?.[0]) {
+      const r = leaveRes.value.data[0];
+      candidates.push({ kind:'leave', created_at:r.created_at, data:r });
+    }
+    if (otRes.status === 'fulfilled' && otRes.value.data?.[0]) {
+      const r = otRes.value.data[0];
+      candidates.push({ kind:'ot', created_at:r.created_at, data:r });
+    }
+    if (claimRes.status === 'fulfilled' && claimRes.value.data?.[0]) {
+      const r = claimRes.value.data[0];
+      candidates.push({ kind:'claim', created_at:r.created_at, data:r });
+    }
+
+    if (!candidates.length) { section.style.display = 'none'; card.innerHTML = ''; return; }
+
+    candidates.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+    const top = candidates[0];
+    card.innerHTML = renderRecentReqCard(top);
+    section.style.display = '';
+  } catch(e) {
+    console.warn('renderRecentReq error', e);
+    section.style.display = 'none';
+  }
+}
+
+function renderRecentReqCard(item) {
+  const statusChipClass = { pending:'a', approved:'g', paid:'g', rejected:'r', cancel_requested:'a', cancelled:'r' };
+  let icon, name, sub, statusText, status;
+
+  if (item.kind === 'leave') {
+    const r = item.data;
+    const tInfo = LEAVE_TYPE_LABELS[r.leave_type] || LEAVE_TYPE_LABELS.other;
+    icon = tInfo.icon;
+    name = 'คำขอลา: ' + tInfo.label;
+    const fmt = (s) => new Date(s+'T00:00:00').toLocaleDateString('th-TH', {day:'numeric', month:'short'});
+    sub = r.start_date === r.end_date ? fmt(r.start_date) : `${fmt(r.start_date)} – ${fmt(r.end_date)}`;
+    status = r.status; statusText = LEAVE_STATUS_LABELS[r.status] || r.status;
+  } else if (item.kind === 'ot') {
+    const r = item.data;
+    icon = '⏰';
+    name = 'คำขอโอที';
+    const dateStr = new Date(r.request_date+'T00:00:00').toLocaleDateString('th-TH', {day:'numeric', month:'short'});
+    sub = `${dateStr} · ${(r.ot_start||'').slice(0,5)}-${(r.ot_end||'').slice(0,5)}`;
+    status = r.status; statusText = LEAVE_STATUS_LABELS[r.status] || r.status;
+  } else {
+    const r = item.data;
+    const cInfo = CLAIM_CATEGORY_LABELS[r.category] || CLAIM_CATEGORY_LABELS.other;
+    icon = cInfo.icon;
+    name = 'เบิกเงิน: ' + escapeHtml(r.title || cInfo.label);
+    sub = `${Number(r.amount||0).toLocaleString('th-TH',{minimumFractionDigits:2})} บาท`;
+    status = r.status; statusText = CLAIM_STATUS_LABELS[r.status] || r.status;
+  }
+
+  const chipClass = statusChipClass[status] || 'a';
+  return `<div class="recent-req-card">
+    <div class="recent-req-ic">${icon}</div>
+    <div class="recent-req-body">
+      <div class="recent-req-name">${name}</div>
+      <div class="recent-req-sub">${sub}</div>
+      <div class="recent-req-chip-row">
+        <span class="hi-badge ${status}" style="padding:3px 9px;">${statusText}</span>
+      </div>
+    </div>
+  </div>`;
 }
 
 // ══════════════════════════════════════
