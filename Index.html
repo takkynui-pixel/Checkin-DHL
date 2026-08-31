@@ -2113,12 +2113,12 @@ ALTER TABLE company_news ADD COLUMN IF NOT EXISTS view_count integer DEFAULT 0;<
         </div>
       </div><!-- /sv-news -->
 
-      <!-- SUB-VIEW: announce (ประกาศเด้งหลัง login) -->
+      <!-- SUB-VIEW: announce (ประกาศหลัง login) -->
       <div id="sv-announce" style="display:none">
         <div class="emp-form" id="announceForm">
-          <div style="font-size:13px;font-weight:500;margin-bottom:4px;" id="announceFormTitle">📣 สร้างประกาศเด้งใหม่</div>
+          <div style="font-size:13px;font-weight:500;margin-bottom:4px;" id="announceFormTitle">📣 สร้างประกาศใหม่</div>
           <div style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.6;">
-            ประกาศนี้จะเด้งขึ้นเป็น pop-up ให้พนักงานเห็นทันทีหลังล็อกอิน (ครั้งเดียวต่อคน จนกว่าจะกด "รับทราบ") ในช่วงวันเวลาที่กำหนดเท่านั้น
+            ประกาศนี้จะขึ้นเป็น pop-up ให้พนักงานเห็นทันทีหลังล็อกอิน (ครั้งเดียวต่อคน จนกว่าจะกด "รับทราบ") ในช่วงวันเวลาที่กำหนดเท่านั้น
           </div>
           <div class="field-lbl-sm">หัวข้อประกาศ</div>
           <input class="field-sm" id="annTitle" placeholder="เช่น ปิดทำการวันหยุดพิเศษ" style="width:100%;margin-bottom:8px;">
@@ -2531,7 +2531,7 @@ with check ( bucket_id = 'leave-attachments' );</code>
     </div>
   </div>
 </div>
-<!-- ══ ประกาศเด้งหลัง login (Admin กำหนดหัวข้อ/ช่วงเวลาไว้) ══ -->
+<!-- ══ ประกาศหลัง login (Admin กำหนดหัวข้อ/ช่วงเวลาไว้) ══ -->
 <div class="leave-modal" id="announceModal">
   <div class="leave-box">
     <div class="leave-title">
@@ -3168,7 +3168,7 @@ async function showApp() {
   checkClaimBadge(); // นับคำขอเบิกเงินที่ยังไม่เคยเห็นผล
   checkPayslipBadge(); // นับสลิปเงินเดือนใหม่ที่ยังไม่เคยเปิดดู
   renderRecentReq(); // การ์ด "คำขอล่าสุดของฉัน"
-  checkAndShowAnnouncement(); // เช็คประกาศเด้งหลัง login ที่ Admin กำหนดไว้
+  checkAndShowAnnouncement(); // เช็คประกาศหลัง login ที่ Admin กำหนดไว้
   // Init shifts
   await loadShiftsFromStorage();
   // ── แจ้งเตือนก่อนมาทำงาน (local, ไม่มี Server) — เช็คทันทีแล้วเช็คซ้ำทุกนาที ──
@@ -5438,7 +5438,7 @@ async function exportCSV() {
     // ── ดึงข้อมูลเช็คอิน/เช็คเอาท์ และคำขอลาที่อนุมัติแล้ว พร้อมกัน ──
     const [attRes, leaveRes] = await Promise.all([
       sb.from('attendance')
-        .select('*, employees(name)')
+        .select('*, employees!attendance_employee_id_fkey(name)')
         .gte('checked_at', from.toISOString())
         .lte('checked_at', to.toISOString())
         .order('checked_at', {ascending: true}),
@@ -6192,7 +6192,7 @@ async function loadCompanyNewsAdmin() {
 
 
 // ══════════════════════════════════════════════════════════════
-//  ประกาศเด้งหลัง login (Admin จัดการ)
+//  ประกาศหลัง login (Admin จัดการ)
 // ══════════════════════════════════════════════════════════════
 let editingAnnounceId = null;
 
@@ -6344,7 +6344,7 @@ async function loadAnnouncementsAdmin() {
 }
 
 // ══════════════════════════════════════════════════════════════
-//  ประกาศเด้งหลัง login (ฝั่งพนักงาน)
+//  ประกาศหลัง login (ฝั่งพนักงาน)
 // ══════════════════════════════════════════════════════════════
 let currentAnnouncementId = null;
 
@@ -6673,7 +6673,7 @@ function scheduleNotifications(s) {
           if (!isDemo && sb) {
             const dayStart = new Date(now); dayStart.setHours(0,0,0,0);
             const {data: logs} = await sb.from('attendance')
-              .select('employee_id, type, employees(name)')
+              .select('employee_id, type, employees!attendance_employee_id_fkey(name)')
               .gte('checked_at', dayStart.toISOString())
               .order('checked_at');
             const allEmpsRes = await fetchEmployeePickerList();
