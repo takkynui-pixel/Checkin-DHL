@@ -685,6 +685,7 @@ body {
   background:var(--bg); border:1px solid var(--border); border-radius:8px;
   padding:11px 12px; color:var(--text); font-family:var(--mono); font-size:15px;
   outline:none; width:100%; font-family:var(--font); min-height:44px; box-sizing:border-box;
+  min-width:0; max-width:100%;
 }
 select.field-sm { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .field-sm:focus { border-color:var(--green); }
@@ -999,9 +1000,11 @@ select.field-sm { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 }
 .leave-type-opt .ico { font-size:20px; }
 .leave-type-opt.sel { border-color:var(--green); background:var(--green-dim); color:var(--green); }
-.leave-date-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.leave-date-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; min-width:0; }
+.leave-date-row > div { min-width:0; }
 .leave-toggle-row { display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text); }
-.leave-time-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:8px; }
+.leave-time-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:8px; min-width:0; }
+.leave-time-row > div { min-width:0; }
 .leave-warning {
   display:flex; gap:8px; align-items:flex-start; padding:10px 12px;
   background:var(--amber-dim); border:1px solid #f59e0b33; border-radius:8px;
@@ -1283,7 +1286,7 @@ select.field-sm { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
         <button type="button" data-lang="en" onclick="setLanguage('en')">EN</button>
       </div>
       <div style="font-size:12px;color:var(--muted);" data-i18n="login_secure">🔒 Secure Login</div>
-      <div class="login-footer-ver">Version 2.65.064 · Powered by VTA-Service</div>
+      <div class="login-footer-ver">Version 2.65.066 · Powered by VTA-Service</div>
     </div>
   </div>
 </div>
@@ -1697,6 +1700,7 @@ on profile_change_requests for all using (true) with check (true);</code>
         <button class="sub-tab" onclick="switchSubTab('payslip')" id="stab-payslip">สลิปเงินเดือน</button>
         <button class="sub-tab" onclick="switchSubTab('employees')" id="stab-employees">พนักงาน</button>
         <button class="sub-tab" onclick="switchSubTab('news')" id="stab-news">ข่าวสาร</button>
+        <button class="sub-tab" onclick="switchSubTab('announce')" id="stab-announce">ประกาศ</button>
         <button class="sub-tab" onclick="switchSubTab('notify')" id="stab-notify">แจ้งเตือน</button>
       </div>
 
@@ -1909,30 +1913,71 @@ ALTER TABLE leave_requests ADD CONSTRAINT leave_requests_status_check
 
       <!-- SUB-VIEW: payslip (สลิปเงินเดือน) -->
       <div id="sv-payslip" style="display:none">
-        <div class="emp-form" style="margin-bottom:14px;">
-          <div style="font-size:13px;font-weight:500;margin-bottom:10px;">📤 อัปโหลดสลิปเงินเดือน</div>
-          <div class="emp-form-row">
-            <div>
-              <div class="field-lbl-sm">พนักงาน</div>
-              <select class="field-sm" id="pyEmp"><option value="">— เลือกพนักงาน —</option></select>
+        <div class="req-subtabs" style="margin-bottom:10px;">
+          <button class="req-subtab active" id="pyModeTab-single" onclick="switchPayslipUploadMode('single')">📄 อัปโหลดทีละคน</button>
+          <button class="req-subtab" id="pyModeTab-bulk" onclick="switchPayslipUploadMode('bulk')">📚 อัปโหลดหลายไฟล์พร้อมกัน</button>
+        </div>
+
+        <!-- โหมด: อัปโหลดทีละคน -->
+        <div id="pyMode-single">
+          <div class="emp-form" style="margin-bottom:14px;">
+            <div style="font-size:13px;font-weight:500;margin-bottom:10px;">📤 อัปโหลดสลิปเงินเดือน</div>
+            <div class="emp-form-row">
+              <div>
+                <div class="field-lbl-sm">พนักงาน</div>
+                <select class="field-sm" id="pyEmp"><option value="">— เลือกพนักงาน —</option></select>
+              </div>
+              <div>
+                <div class="field-lbl-sm">เดือน/ปี (งวดเงินเดือน)</div>
+                <input class="field-sm" id="pyMonth" type="month">
+              </div>
             </div>
-            <div>
-              <div class="field-lbl-sm">เดือน/ปี (งวดเงินเดือน)</div>
-              <input class="field-sm" id="pyMonth" type="month">
+            <div style="margin-top:8px;">
+              <div class="field-lbl-sm">ไฟล์ PDF สลิปเงินเดือน</div>
+              <input class="field-sm" id="pyFile" type="file" accept="application/pdf">
             </div>
-          </div>
-          <div style="margin-top:8px;">
-            <div class="field-lbl-sm">ไฟล์ PDF สลิปเงินเดือน</div>
-            <input class="field-sm" id="pyFile" type="file" accept="application/pdf">
-          </div>
-          <div style="margin-top:8px;">
-            <div class="field-lbl-sm">หมายเหตุ (ถ้ามี)</div>
-            <input class="field-sm" id="pyNote" placeholder="เช่น รวมโบนัสประจำไตรมาส">
-          </div>
-          <div style="display:flex;gap:8px;margin-top:10px;">
-            <button class="btn-sm primary" id="pySubmitBtn" onclick="uploadPayslipForEmployee()">💾 บันทึกและอัปโหลด</button>
+            <div style="margin-top:8px;">
+              <div class="field-lbl-sm">หมายเหตุ (ถ้ามี)</div>
+              <input class="field-sm" id="pyNote" placeholder="เช่น รวมโบนัสประจำไตรมาส">
+            </div>
+            <div style="display:flex;gap:8px;margin-top:10px;">
+              <button class="btn-sm primary" id="pySubmitBtn" onclick="uploadPayslipForEmployee()">💾 บันทึกและอัปโหลด</button>
+            </div>
           </div>
         </div>
+
+        <!-- โหมด: อัปโหลดหลายไฟล์พร้อมกัน (Bulk) -->
+        <div id="pyMode-bulk" style="display:none;">
+          <div class="emp-form" style="margin-bottom:14px;">
+            <div style="font-size:13px;font-weight:500;margin-bottom:6px;">📚 อัปโหลดสลิปเงินเดือนหลายไฟล์พร้อมกัน</div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.7;margin-bottom:10px;">
+              ทุกไฟล์ในการอัปโหลดครั้งนี้จะถือเป็นงวดเดือนเดียวกัน — ระบบจะพยายามจับคู่ไฟล์กับพนักงานอัตโนมัติจาก <b>รหัสพนักงาน</b> หรือ <b>ชื่อ</b> ที่ปรากฏอยู่ในชื่อไฟล์
+              (เช่น <code>EMP001.pdf</code>, <code>EMP001_สิงหาคม.pdf</code>) ไฟล์ที่จับคู่ไม่ได้ ให้เลือกพนักงานเองในตารางด้านล่างก่อนกดอัปโหลด
+            </div>
+            <div class="emp-form-row">
+              <div>
+                <div class="field-lbl-sm">เดือน/ปี (งวดเงินเดือน) — ใช้กับทุกไฟล์ในชุดนี้</div>
+                <input class="field-sm" id="bulkPyMonth" type="month">
+              </div>
+              <div>
+                <div class="field-lbl-sm">เลือกไฟล์ PDF (เลือกได้หลายไฟล์)</div>
+                <input class="field-sm" id="bulkPyFiles" type="file" accept="application/pdf" multiple onchange="onBulkPyFilesChange()">
+              </div>
+            </div>
+            <div id="bulkPyPreviewWrap" style="display:none;margin-top:12px;">
+              <div class="field-lbl-sm" style="margin-bottom:6px;">
+                ตรวจสอบการจับคู่ก่อนอัปโหลด (<span id="bulkPyMatchCount">0</span>/<span id="bulkPyTotalCount">0</span> จับคู่ได้อัตโนมัติ)
+              </div>
+              <div id="bulkPyPreviewList"></div>
+              <div id="bulkPyProgress" style="display:none;font-size:12px;color:var(--muted);margin-top:8px;"></div>
+              <div style="display:flex;gap:8px;margin-top:10px;">
+                <button class="btn-sm primary" id="bulkPyUploadBtn" onclick="uploadBulkPayslips()">💾 อัปโหลดทั้งหมด</button>
+                <button class="btn-sm" style="background:var(--surface2);color:var(--muted);border:1px solid var(--border);" onclick="resetBulkPayslipForm()">ยกเลิก</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div id="payslipSchemaWarning" class="leave-warning" style="display:none;flex-direction:column;align-items:stretch;gap:6px;margin-bottom:10px;">
           <div>⚠️ ยังไม่ได้สร้างตาราง <code>payslips</code> หรือ Storage bucket <code>payslips</code> ดู SQL setup ท้ายเอกสารประกอบระบบ</div>
         </div>
@@ -2067,6 +2112,58 @@ ALTER TABLE company_news ADD COLUMN IF NOT EXISTS view_count integer DEFAULT 0;<
           <div id="newsAdminList"><div class="empty-row"><div class="spinner"></div></div></div>
         </div>
       </div><!-- /sv-news -->
+
+      <!-- SUB-VIEW: announce (ประกาศเด้งหลัง login) -->
+      <div id="sv-announce" style="display:none">
+        <div class="emp-form" id="announceForm">
+          <div style="font-size:13px;font-weight:500;margin-bottom:4px;" id="announceFormTitle">📣 สร้างประกาศเด้งใหม่</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.6;">
+            ประกาศนี้จะเด้งขึ้นเป็น pop-up ให้พนักงานเห็นทันทีหลังล็อกอิน (ครั้งเดียวต่อคน จนกว่าจะกด "รับทราบ") ในช่วงวันเวลาที่กำหนดเท่านั้น
+          </div>
+          <div class="field-lbl-sm">หัวข้อประกาศ</div>
+          <input class="field-sm" id="annTitle" placeholder="เช่น ปิดทำการวันหยุดพิเศษ" style="width:100%;margin-bottom:8px;">
+          <div class="field-lbl-sm">ข้อความ</div>
+          <textarea class="field-sm" id="annMessage" rows="4" placeholder="รายละเอียดประกาศ…" style="width:100%;margin-bottom:8px;font-family:var(--font);"></textarea>
+          <div class="emp-form-row" style="margin-bottom:8px;">
+            <div>
+              <div class="field-lbl-sm">เริ่มแสดง</div>
+              <input class="field-sm" id="annStart" type="datetime-local">
+            </div>
+            <div>
+              <div class="field-lbl-sm">สิ้นสุดการแสดง</div>
+              <input class="field-sm" id="annEnd" type="datetime-local">
+            </div>
+          </div>
+          <label style="display:flex;align-items:center;gap:6px;font-size:12px;margin-bottom:10px;">
+            <input type="checkbox" id="annActive" checked> เปิดใช้งานประกาศนี้
+          </label>
+          <div id="announceSchemaWarning" class="leave-warning" style="display:none;margin-bottom:10px;flex-direction:column;align-items:stretch;gap:6px;">
+            <div>⚠️ ยังไม่ได้สร้างตาราง <code>announcements</code> ใน Supabase กรุณาแจ้งแอดมินให้รันคำสั่งนี้ใน Supabase SQL editor:</div>
+            <code style="display:block;background:#00000010;padding:8px;border-radius:6px;font-size:10.5px;user-select:all;white-space:pre-wrap;">create table if not exists announcements (
+  id uuid primary key default gen_random_uuid(),
+  company_id uuid references companies(id) on delete cascade,
+  title text not null,
+  message text not null,
+  start_at timestamptz not null default now(),
+  end_at timestamptz not null default now() + interval '30 days',
+  active boolean not null default true,
+  created_by uuid references employees(id),
+  created_at timestamptz not null default now()
+);
+alter table announcements enable row level security;
+create policy "Allow all access to announcements"
+on announcements for all using (true) with check (true);</code>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn-sm primary" onclick="saveAnnouncement()">💾 บันทึกประกาศ</button>
+            <button class="btn-sm" id="annCancelBtn" style="display:none;background:var(--surface2);color:var(--muted);border:1px solid var(--border);" onclick="resetAnnounceForm()">ยกเลิก</button>
+          </div>
+        </div>
+        <div class="table-card" style="margin-top:12px;">
+          <div class="history-header"><span>รายการประกาศทั้งหมด</span></div>
+          <div id="announceAdminList"><div class="empty-row"><div class="spinner"></div></div></div>
+        </div>
+      </div><!-- /sv-announce -->
 
       <!-- SUB-VIEW: notify -->
       <div id="sv-notify" style="display:none">
@@ -2434,6 +2531,19 @@ with check ( bucket_id = 'leave-attachments' );</code>
     </div>
   </div>
 </div>
+<!-- ══ ประกาศเด้งหลัง login (Admin กำหนดหัวข้อ/ช่วงเวลาไว้) ══ -->
+<div class="leave-modal" id="announceModal">
+  <div class="leave-box">
+    <div class="leave-title">
+      📣 <span id="annModalTitle">ประกาศ</span>
+    </div>
+    <div id="annModalMessage" style="font-size:13px;color:var(--text);line-height:1.7;white-space:pre-wrap;"></div>
+    <div class="leave-actions">
+      <button class="btn-sm primary" style="width:100%;" onclick="dismissAnnouncement()">✓ รับทราบ</button>
+    </div>
+  </div>
+</div>
+
 <div class="leave-modal" id="checkinReasonModal">
   <div class="leave-box">
     <div class="leave-title">
@@ -3058,6 +3168,7 @@ async function showApp() {
   checkClaimBadge(); // นับคำขอเบิกเงินที่ยังไม่เคยเห็นผล
   checkPayslipBadge(); // นับสลิปเงินเดือนใหม่ที่ยังไม่เคยเปิดดู
   renderRecentReq(); // การ์ด "คำขอล่าสุดของฉัน"
+  checkAndShowAnnouncement(); // เช็คประกาศเด้งหลัง login ที่ Admin กำหนดไว้
   // Init shifts
   await loadShiftsFromStorage();
   // ── แจ้งเตือนก่อนมาทำงาน (local, ไม่มี Server) — เช็คทันทีแล้วเช็คซ้ำทุกนาที ──
@@ -5455,7 +5566,7 @@ function getAdminPermissions() {
 function applyAdminPermissionsUI() {
   const perm = getAdminPermissions();
   if (!perm) return;
-  const visMap = { today:true, monthly:true, leave:perm.leave, otreq:perm.ot, employees:perm.employees, news:perm.news, notify:perm.notify, claim:perm.claim, payslip:perm.payslip };
+  const visMap = { today:true, monthly:true, leave:perm.leave, otreq:perm.ot, employees:perm.employees, news:perm.news, announce:perm.news, notify:perm.notify, claim:perm.claim, payslip:perm.payslip };
   Object.keys(visMap).forEach(n => {
     const btn = document.getElementById('stab-'+n);
     if (btn) btn.style.display = visMap[n] ? '' : 'none';
@@ -5465,13 +5576,13 @@ function applyAdminPermissionsUI() {
 
 function switchSubTab(name) {
   const perm = getAdminPermissions();
-  const visMap = { today:true, monthly:true, leave: !perm || perm.leave, otreq: !perm || perm.ot, employees: !perm || perm.employees, news: !perm || perm.news, notify: !perm || perm.notify, claim: !perm || perm.claim, payslip: !perm || perm.payslip };
+  const visMap = { today:true, monthly:true, leave: !perm || perm.leave, otreq: !perm || perm.ot, employees: !perm || perm.employees, news: !perm || perm.news, announce: !perm || perm.news, notify: !perm || perm.notify, claim: !perm || perm.claim, payslip: !perm || perm.payslip };
   // กันแอดมินย่อยเข้าแท็บที่ไม่มีสิทธิ์ผ่านการเรียกฟังก์ชันตรงๆ (เผื่อ URL/console) — สลับไปแท็บแรกที่มีสิทธิ์แทน
   if (!visMap[name]) {
-    const fallback = ['today','monthly','leave','otreq','employees','news','notify','claim','payslip'].find(n => visMap[n]);
+    const fallback = ['today','monthly','leave','otreq','employees','news','announce','notify','claim','payslip'].find(n => visMap[n]);
     name = fallback || 'today';
   }
-  ['today','monthly','leave','otreq','employees','news','notify','claim','payslip'].forEach(n => {
+  ['today','monthly','leave','otreq','employees','news','announce','notify','claim','payslip'].forEach(n => {
     document.getElementById('sv-'+n).style.display = n === name ? '' : 'none';
     const btn = document.getElementById('stab-'+n);
     if (btn) btn.classList.toggle('active', n === name);
@@ -5481,6 +5592,7 @@ function switchSubTab(name) {
   if (name === 'otreq') loadOtRequestsAdmin();
   if (name === 'employees') { loadEmployeeList().then(() => loadPendingProfileRequests()); }
   if (name === 'news') loadCompanyNewsAdmin();
+  if (name === 'announce') loadAnnouncementsAdmin();
   if (name === 'notify') loadNotifySettings();
   if (name === 'claim') loadClaimRequestsAdmin();
   if (name === 'payslip') { populatePayslipEmployeeSelect(); loadPayslipsAdminList(); }
@@ -6038,6 +6150,7 @@ async function deleteCompanyNews(id) {
 
 async function loadCompanyNewsAdmin() {
   const box = document.getElementById('newsAdminList');
+
   if (!box) return;
   if (isDemo) { box.innerHTML = '<div class="empty-row">โหมดทดลอง — ไม่มีข่าวสารตัวอย่าง</div>'; return; }
   box.innerHTML = '<div class="empty-row"><div class="spinner"></div></div>';
@@ -6077,6 +6190,202 @@ async function loadCompanyNewsAdmin() {
   }).join('');
 }
 
+
+// ══════════════════════════════════════════════════════════════
+//  ประกาศเด้งหลัง login (Admin จัดการ)
+// ══════════════════════════════════════════════════════════════
+let editingAnnounceId = null;
+
+function toLocalDatetimeInputValue(d) {
+  const pad = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function resetAnnounceForm() {
+  editingAnnounceId = null;
+  document.getElementById('annTitle').value = '';
+  document.getElementById('annMessage').value = '';
+  const now = new Date();
+  const in30d = new Date(now.getTime() + 30*86400000);
+  document.getElementById('annStart').value = toLocalDatetimeInputValue(now);
+  document.getElementById('annEnd').value = toLocalDatetimeInputValue(in30d);
+  document.getElementById('annActive').checked = true;
+  document.getElementById('announceFormTitle').textContent = '📣 สร้างประกาศใหม่';
+  document.getElementById('annCancelBtn').style.display = 'none';
+  document.getElementById('announceSchemaWarning').style.display = 'none';
+}
+
+function editAnnouncement(id) {
+  const a = (window._announceCache || {})[id];
+  if (!a) return;
+  editingAnnounceId = id;
+  document.getElementById('annTitle').value = a.title || '';
+  document.getElementById('annMessage').value = a.message || '';
+  document.getElementById('annStart').value = a.start_at ? toLocalDatetimeInputValue(new Date(a.start_at)) : '';
+  document.getElementById('annEnd').value = a.end_at ? toLocalDatetimeInputValue(new Date(a.end_at)) : '';
+  document.getElementById('annActive').checked = !!a.active;
+  document.getElementById('announceFormTitle').textContent = '✏️ แก้ไขประกาศ';
+  document.getElementById('annCancelBtn').style.display = '';
+}
+
+async function saveAnnouncement() {
+  const title = document.getElementById('annTitle').value.trim();
+  const message = document.getElementById('annMessage').value.trim();
+  const startVal = document.getElementById('annStart').value;
+  const endVal = document.getElementById('annEnd').value;
+  const active = document.getElementById('annActive').checked;
+
+  if (!title || !message) { showToast('⚠️ กรอกหัวข้อและข้อความประกาศ','a'); return; }
+  if (!startVal || !endVal) { showToast('⚠️ กรุณาระบุช่วงวันเวลาที่แสดงประกาศ','a'); return; }
+  if (new Date(endVal) <= new Date(startVal)) { showToast('⚠️ วันเวลาสิ้นสุดต้องอยู่หลังวันเวลาเริ่มแสดง','a'); return; }
+  if (isDemo) { showToast('⚠️ ไม่สามารถแก้ไขในโหมด Demo','a'); return; }
+
+  try {
+    const payload = {
+      title, message, active,
+      start_at: new Date(startVal).toISOString(),
+      end_at: new Date(endVal).toISOString(),
+    };
+    if (!editingAnnounceId) {
+      if (currentCompany?.id) payload.company_id = currentCompany.id;
+      payload.created_by = currentUser?.id || null;
+    }
+
+    let error;
+    if (editingAnnounceId) {
+      ({ error } = await sb.from('announcements').update(payload).eq('id', editingAnnounceId));
+    } else {
+      ({ error } = await sb.from('announcements').insert(payload));
+    }
+    if (error && isMissingColumnError(error, 'company_id')) {
+      delete payload.company_id;
+      if (editingAnnounceId) ({ error } = await sb.from('announcements').update(payload).eq('id', editingAnnounceId));
+      else ({ error } = await sb.from('announcements').insert(payload));
+    }
+    if (error) throw error;
+
+    showToast(editingAnnounceId ? '✅ อัปเดตประกาศสำเร็จ' : '✅ สร้างประกาศสำเร็จ', 'g');
+    resetAnnounceForm();
+    loadAnnouncementsAdmin();
+  } catch(e) {
+    console.error('saveAnnouncement error', e);
+    if (isMissingTableError(e, 'announcements')) {
+      document.getElementById('announceSchemaWarning').style.display = 'flex';
+      showToast('⚠️ ยังไม่ได้ตั้งค่าระบบประกาศในฐานข้อมูล — ดู SQL setup ด้านบน', 'r');
+    } else {
+      showToast('❌ '+e.message, 'r');
+    }
+  }
+}
+
+async function deleteAnnouncement(id) {
+  if (!confirm('ลบประกาศนี้?')) return;
+  if (isDemo) { showToast('⚠️ Demo mode','a'); return; }
+  const { error } = await sb.from('announcements').delete().eq('id', id);
+  if (error) { showToast('❌ '+error.message,'r'); return; }
+  showToast('✅ ลบประกาศสำเร็จ','g');
+  loadAnnouncementsAdmin();
+}
+
+async function toggleAnnouncementActive(id, newVal) {
+  if (isDemo) { showToast('⚠️ Demo mode','a'); return; }
+  const { error } = await sb.from('announcements').update({ active:newVal }).eq('id', id);
+  if (error) { showToast('❌ '+error.message,'r'); return; }
+  loadAnnouncementsAdmin();
+}
+
+async function loadAnnouncementsAdmin() {
+  const list = document.getElementById('announceAdminList');
+  if (!list) return;
+  document.getElementById('announceSchemaWarning').style.display = 'none';
+  if (!document.getElementById('annStart').value) resetAnnounceForm(); // ตั้งค่าเริ่มต้นครั้งแรกที่เปิดแท็บ
+
+  if (isDemo) {
+    list.innerHTML = '<div class="empty-row">โหมด Demo — ไม่มีข้อมูลจริง</div>';
+    return;
+  }
+
+  list.innerHTML = '<div class="empty-row"><div class="spinner"></div></div>';
+  try {
+    const { data, error } = await sb.from('announcements').select('*').order('created_at', { ascending:false });
+    if (error) throw error;
+
+    window._announceCache = {};
+    (data || []).forEach(a => window._announceCache[a.id] = a);
+
+    if (!data || !data.length) { list.innerHTML = '<div class="empty-row">ยังไม่มีประกาศ</div>'; return; }
+
+    const now = new Date();
+    list.innerHTML = data.map(a => {
+      const isLive = a.active && new Date(a.start_at) <= now && now <= new Date(a.end_at);
+      const rangeStr = `${new Date(a.start_at).toLocaleString('th-TH',{dateStyle:'short',timeStyle:'short'})} – ${new Date(a.end_at).toLocaleString('th-TH',{dateStyle:'short',timeStyle:'short'})}`;
+      return `<div class="profile-req-row">
+        <div>
+          <b>${escapeHtml(a.title)}</b> ${isLive ? '<span class="hi-badge approved" style="margin-left:4px;">🟢 กำลังแสดง</span>' : (a.active ? '' : '<span class="hi-badge rejected" style="margin-left:4px;">ปิดใช้งาน</span>')}
+          <br><span style="color:var(--muted);font-size:11px;">${escapeHtml((a.message||'').slice(0,80))}${(a.message||'').length>80?'…':''}</span>
+          <br><span style="color:var(--muted);font-size:10.5px;">📅 ${rangeStr}</span>
+        </div>
+        <div style="display:flex;gap:4px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;">
+          <button class="btn-sm" style="padding:5px 9px;font-size:11px;background:var(--surface2);color:var(--muted);border:1px solid var(--border);" onclick="editAnnouncement('${a.id}')">✏️</button>
+          <button class="btn-sm" style="padding:5px 9px;font-size:11px;background:var(--surface2);color:var(--muted);border:1px solid var(--border);" onclick="toggleAnnouncementActive('${a.id}', ${!a.active})">${a.active ? '⏸ ปิด' : '▶ เปิด'}</button>
+          <button class="btn-sm danger" style="padding:5px 9px;font-size:11px;" onclick="deleteAnnouncement('${a.id}')">✕</button>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    console.error('loadAnnouncementsAdmin error', e);
+    if (isMissingTableError(e, 'announcements')) {
+      document.getElementById('announceSchemaWarning').style.display = 'flex';
+      list.innerHTML = '';
+    } else {
+      list.innerHTML = `<div class="empty-row" style="color:var(--red);">❌ โหลดข้อมูลไม่ได้: ${e.message}</div>`;
+    }
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+//  ประกาศเด้งหลัง login (ฝั่งพนักงาน)
+// ══════════════════════════════════════════════════════════════
+let currentAnnouncementId = null;
+
+function announcementSeenKey(id) {
+  return `wc_ann_seen_${currentUser?.id || 'guest'}_${id}`;
+}
+
+async function checkAndShowAnnouncement() {
+  if (!currentUser || isDemo) return;
+  try {
+    const nowIso = new Date().toISOString();
+    const { data, error } = await sb.from('announcements')
+      .select('id, title, message, start_at, end_at')
+      .eq('active', true)
+      .lte('start_at', nowIso)
+      .gte('end_at', nowIso)
+      .order('created_at', { ascending:false })
+      .limit(5);
+    if (error) throw error;
+    if (!data || !data.length) return;
+
+    // แสดงประกาศแรกที่ยังไม่เคยกด "รับทราบ" บนอุปกรณ์นี้
+    const unseen = data.find(a => !localStorage.getItem(announcementSeenKey(a.id)));
+    if (!unseen) return;
+
+    currentAnnouncementId = unseen.id;
+    document.getElementById('annModalTitle').textContent = unseen.title;
+    document.getElementById('annModalMessage').textContent = unseen.message;
+    document.getElementById('announceModal').classList.add('show');
+  } catch(e) {
+    if (!isMissingTableError(e, 'announcements')) console.warn('checkAndShowAnnouncement error', e);
+  }
+}
+
+function dismissAnnouncement() {
+  if (currentAnnouncementId) {
+    localStorage.setItem(announcementSeenKey(currentAnnouncementId), '1');
+  }
+  document.getElementById('announceModal').classList.remove('show');
+  currentAnnouncementId = null;
+}
 // ══════════════════════════════════════
 //  TELEGRAM NOTIFY
 // ══════════════════════════════════════
@@ -6448,7 +6757,7 @@ async function switchTab(name) {
     await loadShiftsFromStorage();
     const visMap = applyAdminPermissionsUI();
     // ถ้าแอดมินคนนี้ไม่มีสิทธิ์เห็นแท็บ "วันนี้" (ไม่ควรเกิดขึ้น เพราะ today เปิดให้ทุกแอดมินเสมอ) กันไว้ ให้ไปแท็บแรกที่มีสิทธิ์
-    const firstAllowed = visMap ? (['today','monthly','leave','otreq','claim','payslip','employees','news','notify'].find(n => visMap[n]) || 'today') : 'today';
+    const firstAllowed = visMap ? (['today','monthly','leave','otreq','claim','payslip','employees','news','announce','notify'].find(n => visMap[n]) || 'today') : 'today';
     switchSubTab(firstAllowed);
     loadAdminData();
   }
@@ -7974,6 +8283,191 @@ async function populatePayslipEmployeeSelect() {
   } catch(e) { console.warn('populatePayslipEmployeeSelect error', e); }
 }
 
+// ══════════════════════════════════════════════════════════════
+//  สลิปเงินเดือน — อัปโหลดหลายไฟล์พร้อมกัน (Bulk Upload)
+// ══════════════════════════════════════════════════════════════
+function switchPayslipUploadMode(mode) {
+  document.getElementById('pyMode-single').style.display = mode === 'single' ? '' : 'none';
+  document.getElementById('pyMode-bulk').style.display = mode === 'bulk' ? '' : 'none';
+  document.getElementById('pyModeTab-single').classList.toggle('active', mode === 'single');
+  document.getElementById('pyModeTab-bulk').classList.toggle('active', mode === 'bulk');
+}
+
+let bulkPayslipRows = [];     // [{ file, employeeId, employeeName, matched }]
+let bulkPayslipEmpList = null; // แคชรายชื่อพนักงาน (id, name, employee_code) สำหรับจับคู่/dropdown
+
+async function fetchEmployeeListWithCode() {
+  if (bulkPayslipEmpList) return bulkPayslipEmpList;
+  try {
+    let q = sb.from('employees').select('id,name,employee_code').neq('role','admin');
+    if (currentCompany?.id) q = q.eq('company_id', currentCompany.id);
+    let { data, error } = await q.order('name');
+    if (error && isMissingColumnError(error, 'company_id')) {
+      ({ data, error } = await sb.from('employees').select('id,name,employee_code').neq('role','admin').order('name'));
+    }
+    if (error) throw error;
+    bulkPayslipEmpList = data || [];
+    return bulkPayslipEmpList;
+  } catch(e) {
+    console.warn('fetchEmployeeListWithCode error', e);
+    return [];
+  }
+}
+
+// พยายามจับคู่ชื่อไฟล์กับพนักงาน — เทียบรหัสพนักงานก่อน แล้วค่อยเทียบชื่อ (ตัดช่องว่าง/ขีดออกก่อนเทียบ)
+function matchEmployeeByFilename(filename, employees) {
+  const base = filename.replace(/\.[^/.]+$/, '');
+  const normalized = base.toLowerCase().replace(/[\s_\-]+/g, '');
+  if (!normalized) return null;
+  for (const emp of employees) {
+    if (emp.employee_code) {
+      const code = String(emp.employee_code).toLowerCase().replace(/[\s_\-]+/g, '');
+      if (code && normalized.includes(code)) return emp;
+    }
+  }
+  for (const emp of employees) {
+    if (emp.name) {
+      const name = emp.name.toLowerCase().replace(/[\s_\-]+/g, '');
+      if (name && normalized.includes(name)) return emp;
+    }
+  }
+  return null;
+}
+
+async function onBulkPyFilesChange() {
+  const input = document.getElementById('bulkPyFiles');
+  const files = Array.from(input.files || []);
+  if (!files.length) { document.getElementById('bulkPyPreviewWrap').style.display = 'none'; return; }
+
+  const nonPdf = files.filter(f => f.type !== 'application/pdf');
+  const pdfFiles = files.filter(f => f.type === 'application/pdf');
+  if (nonPdf.length) showToast(`⚠️ ข้ามไฟล์ที่ไม่ใช่ PDF ${nonPdf.length} ไฟล์`, 'a');
+  if (!pdfFiles.length) { document.getElementById('bulkPyPreviewWrap').style.display = 'none'; return; }
+
+  const employees = await fetchEmployeeListWithCode();
+  bulkPayslipRows = pdfFiles.map(file => {
+    const matched = matchEmployeeByFilename(file.name, employees);
+    return { file, employeeId: matched?.id || '', employeeName: matched?.name || '', matched: !!matched };
+  });
+
+  renderBulkPyPreview(employees);
+  document.getElementById('bulkPyPreviewWrap').style.display = '';
+}
+
+function renderBulkPyPreview(employees) {
+  const list = document.getElementById('bulkPyPreviewList');
+  const matchedCount = bulkPayslipRows.filter(r => r.employeeId).length;
+  document.getElementById('bulkPyMatchCount').textContent = matchedCount;
+  document.getElementById('bulkPyTotalCount').textContent = bulkPayslipRows.length;
+
+  const optsHtml = (selectedId) => '<option value="">— เลือกพนักงาน —</option>' + employees.map(e =>
+    `<option value="${e.id}" ${e.id === selectedId ? 'selected' : ''}>${escapeHtml(e.name)}${e.employee_code ? ' ('+escapeHtml(e.employee_code)+')' : ''}</option>`
+  ).join('');
+
+  list.innerHTML = bulkPayslipRows.map((row, idx) => `
+    <div class="profile-req-row">
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">📄 ${escapeHtml(row.file.name)}</div>
+        <select class="field-sm" style="margin-top:5px;font-size:12px;padding:6px 8px;min-height:32px;" onchange="onBulkPyRowAssign(${idx}, this.value)">
+          ${optsHtml(row.employeeId)}
+        </select>
+      </div>
+      <div style="flex-shrink:0;">
+        <span class="badge-s ${row.employeeId ? 'in' : 'out'}">${row.employeeId ? '✓ จับคู่แล้ว' : '⚠ ยังไม่จับคู่'}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function onBulkPyRowAssign(idx, employeeId) {
+  if (!bulkPayslipRows[idx]) return;
+  bulkPayslipRows[idx].employeeId = employeeId;
+  const emp = (bulkPayslipEmpList || []).find(e => e.id === employeeId);
+  bulkPayslipRows[idx].employeeName = emp?.name || '';
+  document.getElementById('bulkPyMatchCount').textContent = bulkPayslipRows.filter(r => r.employeeId).length;
+  const badges = document.querySelectorAll('#bulkPyPreviewList .badge-s');
+  if (badges[idx]) {
+    badges[idx].className = `badge-s ${employeeId ? 'in' : 'out'}`;
+    badges[idx].textContent = employeeId ? '✓ จับคู่แล้ว' : '⚠ ยังไม่จับคู่';
+  }
+}
+
+function resetBulkPayslipForm() {
+  bulkPayslipRows = [];
+  document.getElementById('bulkPyFiles').value = '';
+  document.getElementById('bulkPyMonth').value = '';
+  document.getElementById('bulkPyPreviewWrap').style.display = 'none';
+  document.getElementById('bulkPyPreviewList').innerHTML = '';
+  document.getElementById('bulkPyProgress').style.display = 'none';
+}
+
+async function uploadBulkPayslips() {
+  const period = document.getElementById('bulkPyMonth').value;
+  if (!period) { showToast('⚠️ กรุณาเลือกเดือน/ปีของงวดเงินเดือนก่อน','a'); return; }
+  const assigned = bulkPayslipRows.filter(r => r.employeeId);
+  if (!assigned.length) { showToast('⚠️ ยังไม่มีไฟล์ไหนถูกจับคู่กับพนักงาน','a'); return; }
+  if (isDemo) { showToast('📋 Demo: ไม่บันทึกจริง','g'); return; }
+
+  const btn = document.getElementById('bulkPyUploadBtn');
+  const progressEl = document.getElementById('bulkPyProgress');
+  btn.disabled = true;
+  progressEl.style.display = 'block';
+
+  let success = 0, failed = 0;
+  const failedNames = [];
+
+  for (let i = 0; i < assigned.length; i++) {
+    const row = assigned[i];
+    progressEl.textContent = `กำลังอัปโหลด ${i + 1}/${assigned.length}: ${row.file.name}…`;
+    try {
+      const filePath = `${row.employeeId}/${period}.pdf`;
+      const { error: upErr } = await sb.storage.from('payslips')
+        .upload(filePath, row.file, { contentType: 'application/pdf', upsert: true });
+      if (upErr) throw upErr;
+
+      const payload = {
+        company_id: currentCompany?.id,
+        employee_id: row.employeeId,
+        period,
+        file_path: filePath,
+        uploaded_by: currentUser.id,
+        employee_seen: false,
+      };
+      let { error } = await sb.from('payslips').upsert(payload, { onConflict: 'employee_id,period' });
+      if (error && isMissingColumnError(error, 'company_id')) {
+        const { company_id, ...fallbackPayload } = payload;
+        ({ error } = await sb.from('payslips').upsert(fallbackPayload, { onConflict: 'employee_id,period' }));
+      }
+      if (error) throw error;
+      success++;
+    } catch(e) {
+      console.error('uploadBulkPayslips error for', row.file.name, e);
+      if (isMissingTableError(e, 'payslips') || isStorageBucketMissingError(e)) {
+        document.getElementById('payslipSchemaWarning').style.display = 'flex';
+        showToast('⚠️ ยังไม่ได้ตั้งค่าระบบสลิปเงินเดือนในฐานข้อมูล — ดู SQL setup', 'r');
+        failed += (assigned.length - i);
+        break;
+      }
+      failed++;
+      failedNames.push(row.file.name);
+    }
+  }
+
+  progressEl.style.display = 'none';
+  btn.disabled = false;
+
+  if (failed === 0) {
+    showToast(`✅ อัปโหลดสำเร็จทั้งหมด ${success} ไฟล์`, 'g');
+  } else if (success === 0) {
+    showToast(`❌ อัปโหลดไม่สำเร็จเลย (${failed} ไฟล์)`, 'r');
+  } else {
+    showToast(`⚠️ สำเร็จ ${success} ไฟล์ · ล้มเหลว ${failed} ไฟล์${failedNames.length ? ' (' + failedNames.slice(0,3).join(', ') + (failedNames.length>3?'…':'') + ')' : ''}`, 'a');
+  }
+
+  resetBulkPayslipForm();
+  await loadPayslipsAdminList();
+}
+
 async function uploadPayslipForEmployee() {
   const empId = document.getElementById('pyEmp').value;
   const monthVal = document.getElementById('pyMonth').value; // "YYYY-MM"
@@ -8138,7 +8632,7 @@ function renderRecentReqCard(item) {
     const r = item.data;
     const tInfo = LEAVE_TYPE_LABELS[r.leave_type] || LEAVE_TYPE_LABELS.other;
     icon = tInfo.icon;
-    name = 'คำขอลา: ' + tInfo.label;
+    name = 'คำขอลา : ' + tInfo.label;
     const fmt = (s) => new Date(s+'T00:00:00').toLocaleDateString('th-TH', {day:'numeric', month:'short'});
     sub = r.start_date === r.end_date ? fmt(r.start_date) : `${fmt(r.start_date)} – ${fmt(r.end_date)}`;
     status = r.status; statusText = LEAVE_STATUS_LABELS[r.status] || r.status;
@@ -8153,7 +8647,7 @@ function renderRecentReqCard(item) {
     const r = item.data;
     const cInfo = CLAIM_CATEGORY_LABELS[r.category] || CLAIM_CATEGORY_LABELS.other;
     icon = cInfo.icon;
-    name = 'เบิกเงิน: ' + escapeHtml(r.title || cInfo.label);
+    name = 'เบิกเงิน : ' + escapeHtml(r.title || cInfo.label);
     sub = `${Number(r.amount||0).toLocaleString('th-TH',{minimumFractionDigits:2})} บาท`;
     status = r.status; statusText = CLAIM_STATUS_LABELS[r.status] || r.status;
   }
