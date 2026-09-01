@@ -1005,6 +1005,12 @@ select.field-sm { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .leave-toggle-row { display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text); }
 .leave-time-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:8px; min-width:0; }
 .leave-time-row > div { min-width:0; }
+/* มือถือส่วนใหญ่ (iPhone/Android ทุกรุ่น) แคบกว่า 480px — native input[type=date/time]
+   มีความกว้างขั้นต่ำในตัวที่ CSS สั่งหดไม่ได้แม้จะใส่ min-width:0 ที่ container แล้วก็ตาม
+   ทางแก้ที่ชัวร์ที่สุดคือเปลี่ยนเป็นวางซ้อนกันแนวตั้ง (1 คอลัมน์) แทนแนวนอนบนจอแคบ */
+@media (max-width: 480px) {
+  .leave-date-row, .leave-time-row { grid-template-columns: 1fr; }
+}
 .leave-warning {
   display:flex; gap:8px; align-items:flex-start; padding:10px 12px;
   background:var(--amber-dim); border:1px solid #f59e0b33; border-radius:8px;
@@ -1286,7 +1292,7 @@ select.field-sm { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
         <button type="button" data-lang="en" onclick="setLanguage('en')">EN</button>
       </div>
       <div style="font-size:12px;color:var(--muted);" data-i18n="login_secure">🔒 Secure Login</div>
-      <div class="login-footer-ver">Version 2.65.066 · Powered by VTA-Service</div>
+      <div class="login-footer-ver">Version 2.65.067 · Powered by VTA-Service</div>
     </div>
   </div>
 </div>
@@ -2688,6 +2694,7 @@ const I18N = {
     login_user_lbl: 'User (ผู้ใช้งาน)', login_user_ph: 'เบอร์โทรศัพท์ หรือ E-mail',
     login_pin_lbl: 'รหัส PIN', login_biometric: 'Face ID / ลายนิ้วมือ', login_clear: 'ล้าง',
     login_secure: '🔒 Secure Login', login_welcome_back: 'Welcome Back 👋', login_signing_in: 'กำลังเข้าสู่ระบบ...',
+    greet_morning: 'สวัสดีตอนเช้า ☀️', greet_afternoon: 'สวัสดีตอนบ่าย 🌞', greet_evening: 'สวัสดีตอนเย็น 🌅', greet_dusk: 'สวัสดีตอนค่ำ 🌇', greet_night: 'สวัสดีตอนดึก 🌙',
     // dashboard
     status_title: 'สถานะการทำงานวันนี้', geo_title: 'ตรวจสอบพิกัด',
     status_not_checked_in: 'ยังไม่ได้เช็คอิน', status_working: 'กำลังทำงาน', status_done: 'เลิกงาน',
@@ -2764,6 +2771,7 @@ const I18N = {
     login_user_lbl: 'User', login_user_ph: 'Phone number or E-mail',
     login_pin_lbl: 'PIN Code', login_biometric: 'Face ID / Fingerprint', login_clear: 'Clear',
     login_secure: '🔒 Secure Login', login_welcome_back: 'Welcome Back 👋', login_signing_in: 'Signing in...',
+    greet_morning: 'Good Morning ☀️', greet_afternoon: 'Good Afternoon 🌞', greet_evening: 'Good Evening 🌅', greet_dusk: 'Good Evening 🌇', greet_night: 'Good Night 🌙',
     status_title: "Today's Status", geo_title: 'Location Check',
     status_not_checked_in: 'Not checked in yet', status_working: 'Working', status_done: 'Finished',
     status_carried_over: '⚠️ Carried over from previous day',
@@ -3229,10 +3237,10 @@ function updateClock() {
   if (greetEl) {
     const h = now.getHours();
     let key = 'greet_night';
-    if (h >= 5 && h < 12)       key = '☀️Greet Morning';
-    else if (h >= 12 && h < 16) key = '🌞Greet Afternoon';
-    else if (h >= 16 && h < 19) key = '🌅Greet Evening';
-    else if (h >= 19 && h < 24) key = '🌇Greet Dusk';
+    if (h >= 5 && h < 12)       key = 'greet_morning';
+    else if (h >= 12 && h < 16) key = 'greet_afternoon';
+    else if (h >= 16 && h < 19) key = 'greet_evening';
+    else if (h >= 19 && h < 24) key = 'greet_dusk';
     const greet = t(key);
     greetEl.textContent = greet;
     const dashHiEl = document.getElementById('dashGreetHi');
