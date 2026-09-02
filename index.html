@@ -1011,6 +1011,24 @@ select.field-sm { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 @media (max-width: 480px) {
   .leave-date-row, .leave-time-row { grid-template-columns: 1fr; }
 }
+
+/* ── ช่องวันที่/เวลาแบบกำหนดเอง ──────────────────────────────────────
+   ปัญหา: input[type=date/time] บน iOS Safari มีความกว้าง "เนื้อหาขั้นต่ำ" ที่
+   render โดย native control ของ OS เอง ซึ่ง CSS width/min-width สั่งหดไม่ได้เลย
+   ต่อให้อยู่คนเดียวเต็มแถวก็ยังล้นจอได้ (ยืนยันจากรูปจริงบนมือถือ)
+   ทางแก้ที่ชัวร์ 100%: ซ่อน native input ไว้ (โปร่งใสแต่ยังกดเปิด picker ได้ปกติ)
+   แล้ววาดกล่องข้อความของเราเองทับไว้ด้านบนให้ควบคุมขนาด/ตัดคำได้เต็มที่ */
+.dt-field-wrap { position:relative; width:100%; }
+.dt-field-wrap input[type="date"], .dt-field-wrap input[type="time"] {
+  position:absolute; inset:0; width:100%; height:100%;
+  opacity:0; margin:0; padding:0; border:none; background:transparent;
+  box-sizing:border-box; font-size:16px; /* 16px กัน iOS auto-zoom ตอน focus */
+}
+.dt-field-display {
+  pointer-events:none; display:flex; align-items:center;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.dt-field-display.placeholder { color:var(--muted); }
 .leave-warning {
   display:flex; gap:8px; align-items:flex-start; padding:10px 12px;
   background:var(--amber-dim); border:1px solid #f59e0b33; border-radius:8px;
@@ -1292,7 +1310,7 @@ select.field-sm { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
         <button type="button" data-lang="en" onclick="setLanguage('en')">EN</button>
       </div>
       <div style="font-size:12px;color:var(--muted);" data-i18n="login_secure">🔒 Secure Login</div>
-      <div class="login-footer-ver">Version 2.65.067 · Powered by VTA-Service</div>
+      <div class="login-footer-ver">Version 2.65.068 · Powered by VTA-Service</div>
     </div>
   </div>
 </div>
@@ -2903,6 +2921,54 @@ function toLocalDateStr(d) {
   return `${y}-${m}-${day}`;
 }
 
+// ══════════════════════════════════════════════════════════════
+//  ช่องวันที่/เวลาแบบกำหนดเอง — ซ่อน native input (แต่ยังกดเปิด picker ได้
+//  ปกติ) แล้ววาดกล่องข้อความของเราเองทับไว้ เพื่อเลี่ยงบั๊ก native date/time
+//  control ของ iOS Safari ที่มีความกว้างขั้นต่ำ CSS สั่งหดไม่ได้ ทำให้ล้นจอ
+//  แม้จะอยู่คนเดียวเต็มแถวก็ตาม (ยืนยันจากภาพหน้าจอจริงบนมือถือ)
+// ══════════════════════════════════════════════════════════════
+function formatDtDisplay(type, value) {
+  if (!value) return null; // ให้ผู้เรียกใส่ placeholder เอง
+  if (type === 'date') {
+    const d = new Date(value + 'T00:00:00');
+    if (isNaN(d)) return value;
+    return d.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+  }
+  return value; // type=time ค่าเป็น "HH:MM" อยู่แล้ว โชว์ตรงๆ ได้เลย
+}
+
+// แปลง input[type=date/time] ธรรมดาให้กลายเป็นช่องแบบกำหนดเอง (เรียกครั้งเดียวต่อ id พอ)
+function makeDateTimeFieldCustom(id, placeholder) {
+  const input = document.getElementById(id);
+  if (!input || input.dataset.dtCustomized) return;
+  input.dataset.dtCustomized = '1';
+
+  const wrap = document.createElement('div');
+  wrap.className = 'dt-field-wrap';
+  input.parentNode.insertBefore(wrap, input);
+  wrap.appendChild(input);
+
+  const display = document.createElement('div');
+  display.className = 'field-sm dt-field-display';
+  display.id = id + 'Display';
+  wrap.appendChild(display);
+
+  function sync() {
+    const formatted = formatDtDisplay(input.type, input.value);
+    display.textContent = formatted || placeholder || (input.type === 'date' ? 'เลือกวันที่' : 'เลือกเวลา');
+    display.classList.toggle('placeholder', !formatted);
+  }
+  input.addEventListener('input', sync);
+  input.addEventListener('change', sync);
+  input._dtSync = sync;
+  sync();
+}
+
+// เรียกหลังตั้งค่า .value ของ input[type=date/time] ผ่าน JS โดยตรง (ไม่ยิง change event เอง)
+function syncDtField(id) {
+  document.getElementById(id)?._dtSync?.();
+}
+
 function escapeHtml(str) {
   return String(str ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
@@ -2947,6 +3013,10 @@ window.addEventListener('DOMContentLoaded', () => {
   updateClock();
   updateNetStatus();
   setInterval(updateClock, 1000);
+  // แปลงช่องวันที่/เวลาในฟอร์มฝั่งพนักงาน (ลา/โอที/เบิกเงิน) ให้เป็นแบบกำหนดเอง
+  // เพื่อเลี่ยงบั๊ก native date/time control ล้นจอบนมือถือ
+  ['leaveStartDate','leaveEndDate','leaveStartTime','leaveEndTime','otDate','otStartTime','otEndTime','claimDate']
+    .forEach(id => makeDateTimeFieldCustom(id));
 });
 
 function saveConfig() {
@@ -4133,6 +4203,8 @@ function openLeaveModal() {
   document.getElementById('leaveTimeRow').style.display = 'none';
   document.getElementById('leaveStartTime').value = '09:00';
   document.getElementById('leaveEndTime').value = '12:00';
+  syncDtField('leaveStartDate'); syncDtField('leaveEndDate');
+  syncDtField('leaveStartTime'); syncDtField('leaveEndTime');
   document.getElementById('leaveReason').value = '';
   document.getElementById('leaveAttachFile').value = '';
   document.getElementById('leaveAttachLbl').textContent = 'แตะเพื่อแนบไฟล์ (ใบรับรองแพทย์ ฯลฯ)';
@@ -4157,7 +4229,7 @@ function onLeaveDateChange() {
   const startEl = document.getElementById('leaveStartDate');
   const endEl = document.getElementById('leaveEndDate');
   // กัน end < start
-  if (endEl.value && startEl.value && endEl.value < startEl.value) endEl.value = startEl.value;
+  if (endEl.value && startEl.value && endEl.value < startEl.value) { endEl.value = startEl.value; syncDtField('leaveEndDate'); }
   updateLeaveNotice();
 }
 
@@ -4463,6 +4535,7 @@ async function openOtModal() {
   document.getElementById('otDate').value = todayStr;
   document.getElementById('otDate').min = todayStr;
   document.getElementById('otReason').value = '';
+  syncDtField('otDate');
 
   const suggested = nearestShiftByEnd(todayStr) || allShifts[0];
   if (suggested) {
@@ -4471,6 +4544,7 @@ async function openOtModal() {
     const [eh, em] = suggested.end.split(':').map(Number);
     const endGuess = new Date(); endGuess.setHours(eh, em + 60, 0, 0); // เดา OT 1 ชม.
     document.getElementById('otEndTime').value = `${String(endGuess.getHours()).padStart(2,'0')}:${String(endGuess.getMinutes()).padStart(2,'0')}`;
+    syncDtField('otStartTime'); syncDtField('otEndTime');
   }
 
   document.getElementById('otSubmitBtn').disabled = false;
@@ -4484,7 +4558,7 @@ function closeOtModal() {
 
 function onOtShiftChange() {
   const shift = (allShifts || []).find(s => s.id === document.getElementById('otShift').value);
-  if (shift) document.getElementById('otStartTime').value = shift.end;
+  if (shift) { document.getElementById('otStartTime').value = shift.end; syncDtField('otStartTime'); }
   updateOtNotice();
 }
 
@@ -7891,6 +7965,7 @@ function openClaimModal() {
   document.getElementById('claimTitle').value = '';
   document.getElementById('claimAmount').value = '';
   document.getElementById('claimDate').value = toLocalDateStr(new Date());
+  syncDtField('claimDate');
   document.getElementById('claimNote').value = '';
   document.getElementById('claimReceiptFile').value = '';
   document.getElementById('claimReceiptLbl').textContent = 'แตะเพื่อแนบไฟล์ (รูปใบเสร็จ หรือ PDF)';
