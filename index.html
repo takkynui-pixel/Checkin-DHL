@@ -433,6 +433,7 @@ body {
 .bar-chart .bar-val { position:absolute; top:-16px; left:50%; transform:translateX(-50%); font-size:9.5px; font-weight:600; color:var(--text); white-space:nowrap; }
 .quota-cell { font-size:10.5px; line-height:1.5; }
 .quota-cell b { font-family:var(--mono); }
+.quota-lbl { display:none; }
 .quota-bar-track { height:4px; border-radius:2px; background:var(--surface2); margin-top:2px; overflow:hidden; }
 .quota-bar-fill { height:100%; border-radius:2px; background: linear-gradient(90deg, var(--secondary), var(--primary)); }
 .quota-bar-fill.quota-warn { background: linear-gradient(90deg, #FBBF24, #DC2626); }
@@ -1149,22 +1150,54 @@ select.field-sm { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .geo-config-row .btn-sm { grid-column:1/-1; }
   .geo-config-row.shift-row { grid-template-columns:1fr 1fr; }
 
-  /* ── ตาราง "ประวัติของฉัน" (เช็คอิน/เอาท์ + รายการลา): แสดงคอลัมน์ที่ 4
-     (ชั่วโมงทำงาน / สถานะการลา) เป็นบรรทัดที่ 2 แทนการซ่อนไปเลย
-     เพราะเป็นข้อมูลสำคัญ (เช่น สถานะอนุมัติลา) ที่ผู้ใช้ต้องเห็น ── */
-  .hist-row {
-    grid-template-columns: 66px 60px 60px !important;
-    row-gap: 4px;
+  /* ── ตาราง "ประวัติของฉัน" (เช็คอิน/เอาท์ + รายการลา): แสดงครบ 4 คอลัมน์เหมือนจอคอมพิวเตอร์
+     เสมอ (วันที่ / เช็คอิน / เช็คเอ้าท์ / ชั่วโมง-หมายเหตุ) แค่ลดความกว้างคอลัมน์ให้พอดีจอมือถือ
+     แทนการซ่อนหรือดันคอลัมน์ที่ 4 ลงไปเป็นบรรทัดใหม่ ── */
+  .hist-head, .hist-row {
+    grid-template-columns: 40px 46px 46px 1fr !important;
+    gap: 6px !important;
   }
-  .hist-row > *:nth-child(4) {
+  .hist-head > *:nth-child(4), .hist-row > *:nth-child(4) {
     display: block !important;
-    grid-column: 1 / -1;
-    padding-top: 4px;
-    margin-top: 2px;
-    border-top: 1px dashed var(--border);
-    font-size: 11px;
-    white-space: normal;
+    grid-column: auto !important;
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+    border-top: none !important;
+    font-size: 10px !important;
+    white-space: normal !important;
   }
+  .hist-head { font-size: 9.5px; }
+  .hist-date-cell { font-size: 9.5px; }
+  .hist-time-cell { font-size: 10.5px !important; white-space: normal; padding:0 2px; }
+
+  /* ── แดชบอร์ดแอดมิน "รายเดือน": จัดใหม่เป็นการ์ดวางซ้อนกันบนมือถือ แทนตารางคอลัมน์แน่นๆ ── */
+  .dash-top-row { flex-direction: column; }
+
+  /* ตาราง "สรุปรายเดือน" (พนักงาน/งาน/สาย/ลา/ขาด/ชม.) → การ์ด: ชื่อเต็มบรรทัดบน + ชิปสถิติไล่บรรทัดล่าง */
+  .emp-month-head { display:none !important; }
+  .emp-month-row {
+    display:flex !important; flex-wrap:wrap; align-items:center; gap:6px 8px;
+  }
+  .emp-month-name { flex:1 0 100%; font-size:13px; font-weight:500; margin-bottom:2px; }
+  .emp-month-stat {
+    display:flex; align-items:center; gap:3px; background:var(--surface2);
+    border-radius:6px; padding:3px 8px; font-size:11px !important;
+  }
+  .emp-month-stat::before { content: attr(data-lbl); color:var(--muted); font-family:var(--font); }
+  .emp-month-row > *:nth-child(4), .emp-month-row > *:nth-child(5) { display:flex !important; }
+
+  /* ตาราง "สิทธิ์การลาคงเหลือ" (พนักงาน + 4 ประเภทลา) → การ์ด: ชื่อเต็มบรรทัดบน + กล่องประเภทลา 2 คอลัมน์ */
+  .quota-head { display:none !important; }
+  .quota-row {
+    display:flex !important; flex-wrap:wrap; gap:8px 10px;
+  }
+  .quota-name { flex:1 0 100%; font-size:13px; font-weight:500; }
+  .quota-cell {
+    flex:1 1 calc(50% - 5px); min-width:128px; background:var(--surface2);
+    border-radius:8px; padding:7px 9px;
+  }
+  .quota-lbl { display:block; font-size:9.5px; color:var(--muted); margin-bottom:2px; }
+  .quota-row > *:nth-child(4), .quota-row > *:nth-child(5) { display:block !important; }
 }
 
 /* ── TABS (admin sub-tabs) ── */
@@ -1355,7 +1388,7 @@ select.field-sm { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
         <button type="button" data-lang="en" onclick="setLanguage('en')">EN</button>
       </div>
       <div style="font-size:12px;color:var(--muted);" data-i18n="login_secure">🔒 Secure Login</div>
-      <div class="login-footer-ver">Version 2.65.070 · Powered by VTA-Service</div>
+      <div class="login-footer-ver">Version 2.65.072 · Powered by VTA-Service</div>
     </div>
   </div>
 </div>
@@ -1511,7 +1544,7 @@ select.field-sm { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
         <div class="stat-card"><div class="stat-num" style="color:var(--blue)" id="myStatHours">&#x2014;</div><div class="stat-lbl" data-i18n="stat_total_hours">ชั่วโมงรวม</div></div>
       </div>
       <div class="table-card" style="margin-bottom:24px;">
-        <div class="table-head" style="grid-template-columns:90px 80px 80px 1fr;">
+        <div class="table-head hist-head" style="grid-template-columns:90px 80px 80px 1fr;">
           <div data-i18n="th_date">วันที่</div><div data-i18n="th_checkin">เช็คอิน</div><div data-i18n="th_checkout">เช็คเอ้าท์</div><div data-i18n="th_hours_note">ชั่วโมง / หมายเหตุ</div>
         </div>
         <div id="myHistoryTable"><div class="empty-row"><div class="spinner"></div></div></div>
@@ -1927,7 +1960,7 @@ CREATE POLICY "Allow all access to shifts" ON shifts FOR ALL USING (true) WITH C
           <div class="history-header">
             <span>🏖️ สิทธิ์การลาคงเหลือรายพนักงาน — ปี <span id="quotaYearLbl">—</span></span>
           </div>
-          <div class="table-head" style="grid-template-columns:1fr 1fr 1fr 1fr 1fr;font-size:10px;">
+          <div class="table-head quota-head" style="grid-template-columns:1fr 1fr 1fr 1fr 1fr;font-size:10px;">
             <div>พนักงาน</div><div>🏖️ พักร้อน</div><div>🤒 ป่วย</div><div>📌 กิจ</div><div>📝 อื่นๆ</div>
           </div>
           <div id="leaveQuotaTable"><div class="empty-row"><div class="spinner"></div></div></div>
@@ -1941,7 +1974,7 @@ CREATE POLICY "Allow all access to shifts" ON shifts FOR ALL USING (true) WITH C
               <option value="">ทั้งหมด</option>
             </select>
           </div>
-          <div class="table-head" style="grid-template-columns:1fr 60px 55px 55px 55px 70px;">
+          <div class="table-head emp-month-head" style="grid-template-columns:1fr 60px 55px 55px 55px 70px;">
             <div>พนักงาน</div><div>งาน</div><div>สาย</div><div>ลา</div><div>ขาด</div><div>ชม.</div>
           </div>
           <div id="monthlyTable"><div class="empty-row"><div class="spinner"></div></div></div>
@@ -5911,8 +5944,8 @@ async function loadMonthlyData() {
     document.getElementById('mStatAbsent').textContent = '2';
     document.getElementById('mStatHours').textContent  = '144h';
     document.getElementById('monthlyTable').innerHTML = `
-      <div class="table-row" style="grid-template-columns:1fr 60px 55px 55px 55px 70px;">
-        <div>สมชาย ใจดี</div><div>18</div><div>1</div><div>1</div><div>0</div><div>144h</div>
+      <div class="table-row emp-month-row" style="grid-template-columns:1fr 60px 55px 55px 55px 70px;">
+        <div class="emp-month-name">สมชาย ใจดี</div><div class="emp-month-stat" data-lbl="งาน">18</div><div class="emp-month-stat" data-lbl="สาย">1</div><div class="emp-month-stat" data-lbl="ลา">1</div><div class="emp-month-stat" data-lbl="ขาด">0</div><div class="emp-month-stat" data-lbl="ชม.">144h</div>
       </div>`;
     renderMonthlyDashboard([{name:'สมชาย ใจดี', daysIn:18, daysLate:1, leaveDays:1, absent:0}], []);
     loadLeaveQuotaTable(yr, '');
@@ -6011,13 +6044,13 @@ async function loadMonthlyData() {
     return;
   }
   document.getElementById('monthlyTable').innerHTML = summary.map(e => `
-    <div class="table-row" style="grid-template-columns:1fr 60px 55px 55px 55px 70px;">
-      <div>${e.name}</div>
-      <div class="mono-xs">${e.daysIn}</div>
-      <div class="mono-xs" style="color:${e.daysLate>0?'var(--amber)':'var(--muted)'}">${e.daysLate}</div>
-      <div class="mono-xs" style="color:${e.leaveDays>0?'var(--blue)':'var(--muted)'}">${e.leaveDays}</div>
-      <div class="mono-xs" style="color:${e.absent>0?'var(--red)':'var(--muted)'}">${e.absent}</div>
-      <div class="mono-xs">${e.hours}h</div>
+    <div class="table-row emp-month-row" style="grid-template-columns:1fr 60px 55px 55px 55px 70px;">
+      <div class="emp-month-name">${e.name}</div>
+      <div class="mono-xs emp-month-stat" data-lbl="งาน">${e.daysIn}</div>
+      <div class="mono-xs emp-month-stat" data-lbl="สาย" style="color:${e.daysLate>0?'var(--amber)':'var(--muted)'}">${e.daysLate}</div>
+      <div class="mono-xs emp-month-stat" data-lbl="ลา" style="color:${e.leaveDays>0?'var(--blue)':'var(--muted)'}">${e.leaveDays}</div>
+      <div class="mono-xs emp-month-stat" data-lbl="ขาด" style="color:${e.absent>0?'var(--red)':'var(--muted)'}">${e.absent}</div>
+      <div class="mono-xs emp-month-stat" data-lbl="ชม.">${e.hours}h</div>
     </div>`).join('');
 }
 
@@ -6112,13 +6145,14 @@ async function loadLeaveQuotaTable(year, filterEmpId) {
   const yearLbl = document.getElementById('quotaYearLbl');
   if (yearLbl) yearLbl.textContent = year;
   if (!tbl) return;
+  const QUOTA_TYPE_LABELS = { vacation:'🏖️ พักร้อน', sick:'🤒 ป่วย', personal:'📌 กิจ', other:'📝 อื่นๆ' };
   if (isDemo) {
-    tbl.innerHTML = `<div class="table-row" style="grid-template-columns:1fr 1fr 1fr 1fr 1fr;">
-      <div>สมชาย ใจดี</div>
-      <div class="quota-cell">4/6 <b>เหลือ 2</b></div>
-      <div class="quota-cell">1/30 <b>เหลือ 29</b></div>
-      <div class="quota-cell">0/3 <b>เหลือ 3</b></div>
-      <div class="quota-cell">0/0 <b>เหลือ 0</b></div>
+    tbl.innerHTML = `<div class="table-row quota-row" style="grid-template-columns:1fr 1fr 1fr 1fr 1fr;">
+      <div class="quota-name">สมชาย ใจดี</div>
+      <div class="quota-cell"><span class="quota-lbl">${QUOTA_TYPE_LABELS.vacation}</span>4/6 <b>เหลือ 2</b></div>
+      <div class="quota-cell"><span class="quota-lbl">${QUOTA_TYPE_LABELS.sick}</span>1/30 <b>เหลือ 29</b></div>
+      <div class="quota-cell"><span class="quota-lbl">${QUOTA_TYPE_LABELS.personal}</span>0/3 <b>เหลือ 3</b></div>
+      <div class="quota-cell"><span class="quota-lbl">${QUOTA_TYPE_LABELS.other}</span>0/0 <b>เหลือ 0</b></div>
     </div>`;
     return;
   }
@@ -6143,12 +6177,12 @@ async function loadLeaveQuotaTable(year, filterEmpId) {
         const remaining = Math.max(0, quota - u);
         const pct = quota > 0 ? Math.min(100, (u / quota) * 100) : (u > 0 ? 100 : 0);
         const warn = quota > 0 && u >= quota;
-        return `<div class="quota-cell">${u}/${quota} <b style="color:${warn?'var(--red)':'var(--text)'}">เหลือ ${remaining}</b>
+        return `<div class="quota-cell"><span class="quota-lbl">${QUOTA_TYPE_LABELS[type]}</span>${u}/${quota} <b style="color:${warn?'var(--red)':'var(--text)'}">เหลือ ${remaining}</b>
           <div class="quota-bar-track"><div class="quota-bar-fill${warn?' quota-warn':''}" style="width:${pct}%"></div></div>
         </div>`;
       }).join('');
-      return `<div class="table-row" style="grid-template-columns:1fr 1fr 1fr 1fr 1fr;align-items:start;padding-top:9px;padding-bottom:9px;">
-        <div style="padding-top:2px;">${emp.name}</div>${cells}
+      return `<div class="table-row quota-row" style="grid-template-columns:1fr 1fr 1fr 1fr 1fr;align-items:start;padding-top:9px;padding-bottom:9px;">
+        <div class="quota-name" style="padding-top:2px;">${emp.name}</div>${cells}
       </div>`;
     }).join('');
   } catch(e) {
