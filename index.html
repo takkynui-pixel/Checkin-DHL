@@ -434,6 +434,7 @@ body {
 .quota-cell { font-size:10.5px; line-height:1.5; }
 .quota-cell b { font-family:var(--mono); }
 .quota-lbl { display:none; }
+.payroll-rate { font-size:10px; color:var(--muted); font-weight:400; margin-top:2px; }
 .quota-bar-track { height:4px; border-radius:2px; background:var(--surface2); margin-top:2px; overflow:hidden; }
 .quota-bar-fill { height:100%; border-radius:2px; background: linear-gradient(90deg, var(--secondary), var(--primary)); }
 .quota-bar-fill.quota-warn { background: linear-gradient(90deg, #FBBF24, #DC2626); }
@@ -1198,6 +1199,18 @@ select.field-sm { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   }
   .quota-lbl { display:block; font-size:9.5px; color:var(--muted); margin-bottom:2px; }
   .quota-row > *:nth-child(4), .quota-row > *:nth-child(5) { display:block !important; }
+
+  /* ตาราง "คำนวณเงินเดือน" (พนักงาน/ควรได้/หักขาด/หักลา/หักสาย/สุทธิ) → การ์ดเช่นเดียวกัน */
+  .payroll-head { display:none !important; }
+  .payroll-row { display:flex !important; flex-wrap:wrap; align-items:center; gap:6px 8px; }
+  .payroll-name { flex:1 0 100%; font-size:13px; font-weight:500; margin-bottom:2px; }
+  .payroll-stat {
+    display:flex; align-items:center; gap:3px; background:var(--surface2);
+    border-radius:6px; padding:3px 8px; font-size:11px !important;
+  }
+  .payroll-stat::before { content: attr(data-lbl) ': '; color:var(--muted); font-family:var(--font); }
+  .payroll-stat.net { background:var(--surface2); font-weight:600; }
+  .payroll-row > *:nth-child(4), .payroll-row > *:nth-child(5) { display:flex !important; }
 }
 
 /* ── TABS (admin sub-tabs) ── */
@@ -1388,7 +1401,7 @@ select.field-sm { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
         <button type="button" data-lang="en" onclick="setLanguage('en')">EN</button>
       </div>
       <div style="font-size:12px;color:var(--muted);" data-i18n="login_secure">🔒 Secure Login</div>
-      <div class="login-footer-ver">Version 2.65.072 · Powered by VTA-Service</div>
+      <div class="login-footer-ver">Version 2.65.081 · Powered by VTA-Service</div>
     </div>
   </div>
 </div>
@@ -1802,10 +1815,13 @@ on profile_change_requests for all using (true) with check (true);</code>
       <div class="sub-tabs">
         <button class="sub-tab active" onclick="switchSubTab('today')" id="stab-today">วันนี้</button>
         <button class="sub-tab" onclick="switchSubTab('monthly')" id="stab-monthly">รายเดือน</button>
+        <button class="sub-tab" onclick="switchSubTab('holidays')" id="stab-holidays">วันหยุด</button>
+        <button class="sub-tab" onclick="switchSubTab('shiftschedule')" id="stab-shiftschedule">ตารางเวร</button>
         <button class="sub-tab" onclick="switchSubTab('leave')" id="stab-leave">คำขอลา</button>
         <button class="sub-tab" onclick="switchSubTab('otreq')" id="stab-otreq">คำขอโอที</button>
         <button class="sub-tab" onclick="switchSubTab('claim')" id="stab-claim">เบิกเงิน</button>
         <button class="sub-tab" onclick="switchSubTab('payslip')" id="stab-payslip">สลิปเงินเดือน</button>
+        <button class="sub-tab" onclick="switchSubTab('payroll')" id="stab-payroll">คำนวณเงินเดือน</button>
         <button class="sub-tab" onclick="switchSubTab('employees')" id="stab-employees">พนักงาน</button>
         <button class="sub-tab" onclick="switchSubTab('news')" id="stab-news">ข่าวสาร</button>
         <button class="sub-tab" onclick="switchSubTab('announce')" id="stab-announce">ประกาศ</button>
@@ -1961,7 +1977,7 @@ CREATE POLICY "Allow all access to shifts" ON shifts FOR ALL USING (true) WITH C
             <span>🏖️ สิทธิ์การลาคงเหลือรายพนักงาน — ปี <span id="quotaYearLbl">—</span></span>
           </div>
           <div class="table-head quota-head" style="grid-template-columns:1fr 1fr 1fr 1fr 1fr;font-size:10px;">
-            <div>พนักงาน</div><div>🏖️ พักร้อน</div><div>🤒 ป่วย</div><div>📌 กิจ</div><div>📝 อื่นๆ</div>
+            <div>พนักงาน</div><div>🏖️ พักร้อน</div><div>🤒 ป่วย</div><div>📌 กิจ</div><div>📝 ลากิจพิเศษ</div>
           </div>
           <div id="leaveQuotaTable"><div class="empty-row"><div class="spinner"></div></div></div>
           <div style="font-size:10px;color:var(--muted);padding:8px 14px;">แก้ไขจำนวนสิทธิ์ต่อคนได้ที่แท็บ "พนักงาน" (คงเหลือ = สิทธิ์ − วันลาที่อนุมัติแล้วในปีนี้)</div>
@@ -1980,6 +1996,96 @@ CREATE POLICY "Allow all access to shifts" ON shifts FOR ALL USING (true) WITH C
           <div id="monthlyTable"><div class="empty-row"><div class="spinner"></div></div></div>
         </div>
       </div><!-- /sv-monthly -->
+
+      <!-- SUB-VIEW: holidays (วันหยุดประจำสัปดาห์ + วันหยุดนักขัตฤกษ์) -->
+      <div id="sv-holidays" style="display:none">
+        <div class="leave-warning" style="margin-bottom:10px;">
+          ℹ️ ตั้งค่าที่นี่มีผลกับการนับ "วันทำงาน" ทั้งระบบ — แดชบอร์ดรายเดือน, สิทธิ์การลาคงเหลือ, และคำนวณเงินเดือน จะไม่นับวันหยุดเหล่านี้เป็นวันขาดงานอีกต่อไป
+        </div>
+        <div id="attendanceSettingsSchemaWarning" class="leave-warning" style="display:none;flex-direction:column;align-items:stretch;gap:6px;margin-bottom:10px;">
+          <div>⚠️ ยังไม่ได้สร้างตาราง <code>attendance_settings</code> — การตั้งค่าวันหยุดประจำสัปดาห์จะยังบันทึกไม่ได้ถาวร กรุณารันคำสั่งนี้ใน Supabase SQL editor:</div>
+          <code style="display:block;background:#00000010;padding:8px;border-radius:6px;font-size:10.5px;user-select:all;white-space:pre-wrap;">CREATE TABLE IF NOT EXISTS attendance_settings (
+  id int PRIMARY KEY DEFAULT 1,
+  weekly_off_days text NOT NULL DEFAULT '0,6',
+  updated_at timestamptz DEFAULT now()
+);
+ALTER TABLE attendance_settings ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow all access to attendance_settings" ON attendance_settings FOR ALL USING (true) WITH CHECK (true);</code>
+        </div>
+        <div id="holidaysSchemaWarning" class="leave-warning" style="display:none;flex-direction:column;align-items:stretch;gap:6px;margin-bottom:10px;">
+          <div>⚠️ ยังไม่ได้สร้างตาราง <code>company_holidays</code> — ปฏิทินวันหยุดนักขัตฤกษ์จะยังบันทึกไม่ได้ถาวร กรุณารันคำสั่งนี้ใน Supabase SQL editor:</div>
+          <code style="display:block;background:#00000010;padding:8px;border-radius:6px;font-size:10.5px;user-select:all;white-space:pre-wrap;">create table if not exists company_holidays (
+  id uuid primary key default gen_random_uuid(),
+  company_id uuid references companies(id) on delete cascade,
+  date date not null,
+  name text not null,
+  created_at timestamptz not null default now()
+);
+alter table company_holidays enable row level security;
+create policy "Allow all access to company_holidays" on company_holidays for all using (true) with check (true);</code>
+        </div>
+
+        <div class="table-card" style="margin-bottom:12px;padding:14px 16px;">
+          <div style="font-size:13px;font-weight:500;margin-bottom:10px;">📅 วันหยุดประจำสัปดาห์ (ใช้เหมือนกันทั้งบริษัท)</div>
+          <div style="display:flex;flex-wrap:wrap;gap:14px;margin-bottom:12px;">
+            <label style="display:flex;align-items:center;gap:6px;font-size:12px;"><input type="checkbox" id="offDay0"> อาทิตย์</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:12px;"><input type="checkbox" id="offDay1"> จันทร์</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:12px;"><input type="checkbox" id="offDay2"> อังคาร</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:12px;"><input type="checkbox" id="offDay3"> พุธ</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:12px;"><input type="checkbox" id="offDay4"> พฤหัสบดี</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:12px;"><input type="checkbox" id="offDay5"> ศุกร์</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:12px;"><input type="checkbox" id="offDay6"> เสาร์</label>
+          </div>
+          <button class="btn-sm primary" style="font-size:11px;" onclick="saveWeeklyOffDays()">💾 บันทึกวันหยุดประจำสัปดาห์</button>
+        </div>
+
+        <div class="table-card" style="padding:14px 16px;">
+          <div style="font-size:13px;font-weight:500;margin-bottom:10px;">🎌 วันหยุดนักขัตฤกษ์ (เฉพาะวันที่)</div>
+          <div class="emp-form-row" style="margin-bottom:10px;">
+            <div>
+              <div class="field-lbl-sm">วันที่</div>
+              <input class="field-sm" id="newHolidayDate" type="date">
+            </div>
+            <div>
+              <div class="field-lbl-sm">ชื่อวันหยุด</div>
+              <input class="field-sm" id="newHolidayName" type="text" placeholder="เช่น วันสงกรานต์">
+            </div>
+          </div>
+          <button class="btn-sm primary" style="font-size:11px;margin-bottom:12px;" onclick="addHoliday()">➕ เพิ่มวันหยุด</button>
+          <div id="holidayListBox"><div class="empty-row" style="padding:10px 0;font-size:11px;">—</div></div>
+        </div>
+      </div><!-- /sv-holidays -->
+
+      <!-- SUB-VIEW: shiftschedule (จัดตารางเวรรายสัปดาห์ต่อพนักงาน) -->
+      <div id="sv-shiftschedule" style="display:none">
+        <div class="leave-warning" style="margin-bottom:10px;">
+          ℹ️ วันไหนไม่ได้กำหนดกะให้พนักงานคนไหน = ถือเป็นวันหยุดของคนนั้น (ไม่นับขาด ไม่หักเงิน) ระบบจะใช้เวลาเริ่มกะที่กำหนดไว้ที่นี่แทนเวลามาตรฐาน 9:00 น. ในการตัดสิน "สาย" ของพนักงานที่มีตารางเวรแล้ว
+        </div>
+        <div id="shiftScheduleSchemaWarning" class="leave-warning" style="display:none;flex-direction:column;align-items:stretch;gap:6px;margin-bottom:10px;">
+          <div>⚠️ ยังไม่ได้สร้างตาราง <code>shift_schedule</code> — การกำหนดกะจะยังบันทึกไม่ได้ถาวร กรุณารันคำสั่งนี้ใน Supabase SQL editor:</div>
+          <code style="display:block;background:#00000010;padding:8px;border-radius:6px;font-size:10.5px;user-select:all;white-space:pre-wrap;">create table if not exists shift_schedule (
+  id uuid primary key default gen_random_uuid(),
+  company_id uuid references companies(id) on delete cascade,
+  employee_id uuid not null references employees(id) on delete cascade,
+  date date not null,
+  shift_id uuid not null references shifts(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  unique (employee_id, date)
+);
+alter table shift_schedule enable row level security;
+create policy "Allow all access to shift_schedule" on shift_schedule for all using (true) with check (true);</code>
+        </div>
+        <div class="table-card" style="margin-bottom:12px;padding:10px 14px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+            <button class="btn-sm" style="font-size:11px;" onclick="shiftScheduleChangeWeek(-1)">‹ สัปดาห์ก่อน</button>
+            <div id="shiftScheduleWeekLabel" style="font-size:12px;font-weight:500;"></div>
+            <button class="btn-sm" style="font-size:11px;" onclick="shiftScheduleChangeWeek(1)">สัปดาห์ถัดไป ›</button>
+          </div>
+        </div>
+        <div class="table-card" style="padding:10px;">
+          <div id="shiftScheduleGrid"><div class="empty-row"><div class="spinner"></div></div></div>
+        </div>
+      </div><!-- /sv-shiftschedule -->
 
       <!-- SUB-VIEW: leave (คำขอลา) -->
       <div id="sv-leave" style="display:none">
@@ -2136,8 +2242,83 @@ ALTER TABLE leave_requests ADD CONSTRAINT leave_requests_status_check
         </div>
       </div><!-- /sv-payslip -->
 
+      <!-- SUB-VIEW: payroll (คำนวณเงินเดือนโดยประมาณ) -->
+      <div id="sv-payroll" style="display:none">
+        <div class="leave-warning" style="margin-bottom:10px;">
+          ⚠️ นี่คือ "ยอดประมาณการ" จากเวลาทำงาน/วันลาในระบบเท่านั้น — ยังไม่รวมประกันสังคม ภาษี ณ ที่จ่าย กองทุนสำรองเลี้ยงชีพ หรือค่า OT ใช้เป็นตัวช่วยลดงานฝ่ายบัญชี ไม่ใช่สลิปเงินเดือนที่ถูกต้องตามกฎหมาย
+        </div>
+        <div id="empPaySchemaWarning2" class="leave-warning" style="display:none;flex-direction:column;align-items:stretch;gap:6px;margin-bottom:10px;">
+          <div>⚠️ ตาราง <code>employees</code> ยังไม่มีคอลัมน์อัตราค่าจ้าง กรุณารันคำสั่งนี้ใน Supabase SQL editor:</div>
+          <code style="display:block;background:#00000010;padding:8px;border-radius:6px;font-size:10.5px;user-select:all;white-space:pre-wrap;">ALTER TABLE employees ADD COLUMN IF NOT EXISTS pay_type text NOT NULL DEFAULT 'monthly';
+ALTER TABLE employees ADD COLUMN IF NOT EXISTS pay_rate numeric NOT NULL DEFAULT 0;</code>
+        </div>
+        <div id="payrollSettingsSchemaWarning" class="leave-warning" style="display:none;flex-direction:column;align-items:stretch;gap:6px;margin-bottom:10px;">
+          <div>⚠️ ยังไม่ได้สร้างตาราง <code>payroll_settings</code> — ค่าตั้งค่าด้านล่างจะยังบันทึกไม่ได้ถาวร กรุณารันคำสั่งนี้ใน Supabase SQL editor:</div>
+          <code style="display:block;background:#00000010;padding:8px;border-radius:6px;font-size:10.5px;user-select:all;white-space:pre-wrap;">CREATE TABLE IF NOT EXISTS payroll_settings (
+  id int PRIMARY KEY DEFAULT 1,
+  late_deduction_amount numeric NOT NULL DEFAULT 0,
+  leave_paid_vacation boolean NOT NULL DEFAULT true,
+  leave_paid_sick boolean NOT NULL DEFAULT true,
+  leave_paid_personal boolean NOT NULL DEFAULT false,
+  leave_paid_other boolean NOT NULL DEFAULT false,
+  updated_at timestamptz DEFAULT now()
+);
+ALTER TABLE payroll_settings ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow all access to payroll_settings" ON payroll_settings FOR ALL USING (true) WITH CHECK (true);</code>
+        </div>
+
+        <div class="table-card" style="margin-bottom:12px;padding:14px 16px;">
+          <div style="font-size:13px;font-weight:500;margin-bottom:10px;">⚙️ ตั้งค่านโยบายเงินเดือน</div>
+          <div class="field-lbl-sm" style="margin-bottom:6px;">ลาประเภทไหน "จ่ายตามปกติ" (ไม่หักเงิน)</div>
+          <div style="display:flex;flex-wrap:wrap;gap:14px;margin-bottom:12px;">
+            <label style="display:flex;align-items:center;gap:6px;font-size:12px;"><input type="checkbox" id="paySettingVacation"> 🏖️ พักร้อน</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:12px;"><input type="checkbox" id="paySettingSick"> 🤒 ป่วย</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:12px;"><input type="checkbox" id="paySettingPersonal"> 📌 กิจ</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:12px;"><input type="checkbox" id="paySettingOther"> 📝 ลากิจพิเศษ</label>
+          </div>
+          <div class="emp-form-row" style="margin-bottom:10px;">
+            <div>
+              <div class="field-lbl-sm">หักเงินกรณีมาสาย (บาท/ครั้ง)</div>
+              <input class="field-sm" id="payLateDeduction" type="number" min="0" step="1" placeholder="0">
+            </div>
+          </div>
+          <button class="btn-sm primary" style="font-size:11px;" onclick="savePayrollSettings()">💾 บันทึกการตั้งค่า</button>
+        </div>
+
+        <div class="table-card" style="margin-bottom:12px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 14px;">
+            <select class="field-input" id="payrollMonthSelect" style="max-width:220px;" onchange="loadPayrollData()"></select>
+            <button class="btn-sm primary" style="font-size:11px;" onclick="exportPayrollCSV()">⬇ CSV</button>
+          </div>
+        </div>
+
+        <div class="table-card">
+          <div class="table-head payroll-head" style="grid-template-columns:1fr 90px 70px 70px 70px 90px;font-size:10px;">
+            <div>พนักงาน / อัตรา</div><div>ควรได้</div><div>หักขาด</div><div>หักลา</div><div>หักสาย</div><div>สุทธิโดยประมาณ</div>
+          </div>
+          <div id="payrollTable"><div class="empty-row"><div class="spinner"></div></div></div>
+        </div>
+      </div><!-- /sv-payroll -->
+
       <!-- SUB-VIEW: employees -->
       <div id="sv-employees" style="display:none">
+        <div class="table-card" style="margin-bottom:12px;padding:14px 16px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+            <div style="font-size:13px;font-weight:500;">📥 นำเข้าพนักงานหลายคนจาก CSV</div>
+            <button class="btn-sm" style="font-size:11px;" onclick="toggleImportPanel()">เปิด/ปิด</button>
+          </div>
+          <div id="empImportPanel" style="display:none;margin-top:10px;">
+            <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">
+              1) ดาวน์โหลด template ด้านล่าง 2) กรอกข้อมูลใน Excel/Google Sheets 3) บันทึกเป็นไฟล์ .csv 4) อัปโหลดกลับมาที่นี่<br>
+              หมายเหตุ: นำเข้าได้เฉพาะบัญชี "พนักงาน" เท่านั้น (ไม่รองรับนำเข้าแอดมิน — เพิ่มแอดมินทีละคนในฟอร์มด้านล่างแทน)
+            </div>
+            <button class="btn-sm primary" style="font-size:11px;margin-bottom:10px;" onclick="downloadEmployeeImportTemplate()">⬇ ดาวน์โหลด Template CSV</button>
+            <div>
+              <input type="file" id="empImportFile" accept=".csv" class="field-sm" style="padding:6px;" onchange="handleEmployeeImportFile(event)">
+            </div>
+            <div id="empImportPreview" style="margin-top:10px;"></div>
+          </div>
+        </div>
         <div class="table-card" id="profileReqCard" style="display:none;margin-bottom:12px;">
           <div class="history-header"><span>⏳ คำขอเปลี่ยนตำแหน่ง (รออนุมัติ)</span></div>
           <div id="profileReqList"></div>
@@ -2147,11 +2328,11 @@ ALTER TABLE leave_requests ADD CONSTRAINT leave_requests_status_check
           <div class="emp-form-row">
             <div>
               <div class="field-lbl-sm">ชื่อ-นามสกุล</div>
-              <input class="field-sm" id="efName" placeholder="กัญจน์ธาดา">
+              <input class="field-sm" id="efName" placeholder="กรอกชื่อ">
             </div>
             <div>
               <div class="field-lbl-sm">Email (ใช้ Login)</div>
-              <input class="field-sm" id="efEmail" placeholder="gpai-tech.com" type="email">
+              <input class="field-sm" id="efEmail" placeholder="gpai-tech" type="email">
             </div>
           </div>
           <div class="emp-form-row">
@@ -2170,11 +2351,11 @@ ALTER TABLE leave_requests ADD CONSTRAINT leave_requests_status_check
           <div class="emp-form-row">
             <div>
               <div class="field-lbl-sm">ตำแหน่งงาน</div>
-              <input class="field-sm" id="efPosition" placeholder="IT Support">
+              <input class="field-sm" id="efPosition" placeholder="Employee">
             </div>
             <div>
               <div class="field-lbl-sm">รหัสพนักงาน</div>
-              <input class="field-sm" id="efCode" placeholder="ITO0123">
+              <input class="field-sm" id="efCode" placeholder="EMP0001">
             </div>
           </div>
           <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:12px;">
@@ -2190,11 +2371,11 @@ ALTER TABLE leave_requests ADD CONSTRAINT leave_requests_status_check
               </div>
               <div>
                 <div class="field-lbl-sm">📌 กิจ</div>
-                <input class="field-sm" id="efQuotaPersonal" type="number" min="0" step="0.5" placeholder="3">
+                <input class="field-sm" id="efQuotaPersonal" type="number" min="0" step="0.5" placeholder="0">
               </div>
               <div>
-                <div class="field-lbl-sm">📝 อื่นๆ</div>
-                <input class="field-sm" id="efQuotaOther" type="number" min="0" step="0.5" placeholder="0">
+                <div class="field-lbl-sm">📝 ลากิจพิเศษ</div>
+                <input class="field-sm" id="efQuotaOther" type="number" min="0" step="0.5" placeholder="3">
               </div>
             </div>
             <div style="font-size:10px;color:var(--muted);margin-top:6px;">คำนวณ "คงเหลือ" จากคำขอลาที่ "อนุมัติแล้ว" ในปีปฏิทินปัจจุบัน (ลาไม่เต็มวันนับ 0.5 วัน) — เว้นว่างช่องไหนจะใช้ค่าเริ่มต้นตามป้ายในช่อง</div>
@@ -2203,8 +2384,34 @@ ALTER TABLE leave_requests ADD CONSTRAINT leave_requests_status_check
             <div>⚠️ ตาราง <code>employees</code> ยังไม่มีคอลัมน์สิทธิ์วันลา กรุณารันคำสั่งนี้ใน Supabase SQL editor แล้วลองบันทึกใหม่:</div>
             <code style="display:block;background:#00000010;padding:8px;border-radius:6px;font-size:10.5px;user-select:all;white-space:pre-wrap;">ALTER TABLE employees ADD COLUMN IF NOT EXISTS leave_quota_vacation numeric NOT NULL DEFAULT 6;
 ALTER TABLE employees ADD COLUMN IF NOT EXISTS leave_quota_sick numeric NOT NULL DEFAULT 30;
-ALTER TABLE employees ADD COLUMN IF NOT EXISTS leave_quota_personal numeric NOT NULL DEFAULT 3;
-ALTER TABLE employees ADD COLUMN IF NOT EXISTS leave_quota_other numeric NOT NULL DEFAULT 0;</code>
+ALTER TABLE employees ADD COLUMN IF NOT EXISTS leave_quota_personal numeric NOT NULL DEFAULT 0;
+ALTER TABLE employees ADD COLUMN IF NOT EXISTS leave_quota_other numeric NOT NULL DEFAULT 3;</code>
+          </div>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:12px;">
+            <div class="field-lbl-sm" style="margin-bottom:8px;">💰 อัตราค่าจ้าง — ใช้คำนวณเงินเดือนโดยประมาณ (แท็บ "คำนวณเงินเดือน")</div>
+            <div class="emp-form-row">
+              <div>
+                <div class="field-lbl-sm">ประเภทการจ่าย</div>
+                <select class="field-sm" id="efPayType">
+                  <option value="monthly">เงินเดือนประจำ</option>
+                  <option value="daily">รายวัน</option>
+                  <option value="hourly">รายชั่วโมง</option>
+                </select>
+              </div>
+              <div>
+                <div class="field-lbl-sm">อัตรา (บาท)</div>
+                <input class="field-sm" id="efPayRate" type="number" min="0" step="0.01" placeholder="0">
+              </div>
+            </div>
+          </div>
+          <div id="empPaySchemaWarning" class="leave-warning" style="display:none;margin-bottom:10px;flex-direction:column;align-items:stretch;gap:6px;">
+            <div>⚠️ ตาราง <code>employees</code> ยังไม่มีคอลัมน์อัตราค่าจ้าง กรุณารันคำสั่งนี้ใน Supabase SQL editor แล้วลองบันทึกใหม่:</div>
+            <code style="display:block;background:#00000010;padding:8px;border-radius:6px;font-size:10.5px;user-select:all;white-space:pre-wrap;">ALTER TABLE employees ADD COLUMN IF NOT EXISTS pay_type text NOT NULL DEFAULT 'monthly';
+ALTER TABLE employees ADD COLUMN IF NOT EXISTS pay_rate numeric NOT NULL DEFAULT 0;</code>
+          </div>
+          <div id="empActiveSchemaWarning" class="leave-warning" style="display:none;margin-bottom:10px;flex-direction:column;align-items:stretch;gap:6px;">
+            <div>⚠️ ตาราง <code>employees</code> ยังไม่มีคอลัมน์สถานะการใช้งาน — ปุ่ม "ปิดใช้งาน" จะยังใช้ไม่ได้ กรุณารันคำสั่งนี้ใน Supabase SQL editor:</div>
+            <code style="display:block;background:#00000010;padding:8px;border-radius:6px;font-size:10.5px;user-select:all;white-space:pre-wrap;">ALTER TABLE employees ADD COLUMN IF NOT EXISTS is_active boolean NOT NULL DEFAULT true;</code>
           </div>
           <div id="efPermBlock" style="display:none;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:12px;">
             <div class="field-lbl-sm" style="margin-bottom:8px;">สิทธิ์การใช้งานของแอดมินคนนี้</div>
@@ -2244,7 +2451,12 @@ ALTER TABLE employees ADD COLUMN IF NOT EXISTS can_approve_claim boolean DEFAULT
           </div>
         </div>
         <div class="table-card" style="margin-top:12px;">
-          <div class="history-header"><span>รายชื่อพนักงานทั้งหมด</span></div>
+          <div class="history-header" style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+            <span>รายชื่อพนักงานทั้งหมด</span>
+            <label style="display:flex;align-items:center;gap:5px;font-size:11px;font-weight:400;color:var(--muted);cursor:pointer;">
+              <input type="checkbox" id="empShowInactive" onchange="loadEmployeeList()"> แสดงบัญชีที่ปิดใช้งานด้วย
+            </label>
+          </div>
           <div id="empList"><div class="empty-row"><div class="spinner"></div></div></div>
         </div>
       </div><!-- /sv-employees -->
@@ -2517,7 +2729,7 @@ on announcements for all using (true) with check (true);</code>
           <span class="ico">📌</span><span data-i18n="leave_type_personal">กิจ</span>
         </div>
         <div class="leave-type-opt" data-type="other" onclick="selectLeaveType('other')">
-          <span class="ico">📝</span><span data-i18n="leave_type_other">อื่นๆ</span>
+          <span class="ico">📝</span><span data-i18n="leave_type_other">ลากิจพิเศษ</span>
         </div>
       </div>
     </div>
@@ -2807,7 +3019,7 @@ let pendingCheckinReason = null; // เก็บเหตุผลไว้ช�
 // ── LEAVE SYSTEM: constants & helpers ──
 const LEAVE_TYPE_KEYS = ['vacation','sick','personal','other'];
 // โควตาวันลามาตรฐาน/ปี ใช้เมื่อพนักงานยังไม่ได้ตั้งค่าเฉพาะคน (แอดมินปรับต่อคนได้ในหน้า "พนักงาน")
-const LEAVE_QUOTA_DEFAULTS = { vacation: 6, sick: 30, personal: 3, other: 0 };
+const LEAVE_QUOTA_DEFAULTS = { vacation: 6, sick: 30, personal: 0, other: 3 };
 function getEmployeeLeaveQuota(emp, type) {
   const v = emp ? emp['leave_quota_' + type] : undefined;
   return (v === null || v === undefined || v === '') ? LEAVE_QUOTA_DEFAULTS[type] : Number(v);
@@ -2881,7 +3093,7 @@ function refreshLabelMaps() {
       vacation: { icon:'🏖️', label:'Vacation' },
       sick:     { icon:'🤒', label:'Sick Leave' },
       personal: { icon:'📌', label:'Personal' },
-      other:    { icon:'📝', label:'Other' },
+      other:    { icon:'📝', label:'Special Personal Leave' },
     };
     LEAVE_STATUS_LABELS = { pending:'Pending', approved:'Approved', rejected:'Rejected', cancel_requested:'Cancel Requested', cancelled:'Cancelled' };
     CLAIM_CATEGORY_LABELS = {
@@ -2898,7 +3110,7 @@ function refreshLabelMaps() {
       vacation: { icon:'🏖️', label:'พักร้อน' },
       sick:     { icon:'🤒', label:'ป่วย' },
       personal: { icon:'📌', label:'กิจ' },
-      other:    { icon:'📝', label:'อื่นๆ' },
+      other:    { icon:'📝', label:'ลากิจพิเศษ' },
     };
     LEAVE_STATUS_LABELS = { pending:'รอดำเนินการ', approved:'อนุมัติ', rejected:'ไม่อนุมัติ', cancel_requested:'รออนุมัติยกเลิก', cancelled:'ยกเลิกแล้ว' };
     CLAIM_CATEGORY_LABELS = {
@@ -2953,7 +3165,7 @@ const I18N = {
     news_screen_title: 'ข่าวสารองค์กร', news_screen_sub: 'อัปเดตข่าวสารและประกาศสำคัญจากองค์กร', news_search_ph: '🔍 ค้นหาข่าวสาร…',
     // leave modal
     leave_modal_title: 'แจ้งลา / ขอลา', leave_type_lbl: 'ประเภทการลา',
-    leave_type_vacation: 'พักร้อน', leave_type_sick: 'ป่วย', leave_type_personal: 'กิจ', leave_type_other: 'อื่นๆ',
+    leave_type_vacation: 'พักร้อน', leave_type_sick: 'ป่วย', leave_type_personal: 'กิจ', leave_type_other: 'ลากิจพิเศษ',
     leave_date_range_lbl: 'ช่วงวันที่ลา', leave_start_date_lbl: 'วันเริ่มลา', leave_end_date_lbl: 'ถึงวันที่',
     leave_partial_day: 'ลาไม่เต็มวัน (ระบุช่วงเวลา)', leave_start_time_lbl: 'เวลาเริ่มลา', leave_end_time_lbl: 'เวลาสิ้นสุด',
     leave_reason_lbl: 'เหตุผลการลา', leave_reason_ph: 'ระบุเหตุผลการลา…',
@@ -3024,7 +3236,7 @@ const I18N = {
     workcal_screen_title: 'Work Calendar', cal_present: 'Present', cal_late: 'Late', cal_leave: 'Leave', cal_absent: 'Absent',
     news_screen_title: 'Company News', news_screen_sub: 'Latest updates and announcements from the company', news_search_ph: '🔍 Search news…',
     leave_modal_title: 'Request Leave', leave_type_lbl: 'Leave Type',
-    leave_type_vacation: 'Vacation', leave_type_sick: 'Sick Leave', leave_type_personal: 'Personal', leave_type_other: 'Other',
+    leave_type_vacation: 'Vacation', leave_type_sick: 'Sick Leave', leave_type_personal: 'Personal', leave_type_other: 'Special Personal Leave',
     leave_date_range_lbl: 'Leave Date Range', leave_start_date_lbl: 'Start Date', leave_end_date_lbl: 'End Date',
     leave_partial_day: 'Partial day (specify time)', leave_start_time_lbl: 'Start Time', leave_end_time_lbl: 'End Time',
     leave_reason_lbl: 'Reason for Leave', leave_reason_ph: 'Enter reason for leave…',
@@ -3193,9 +3405,15 @@ function escapeHtml(str) {
   return String(str ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
+// ── วันหยุดประจำสัปดาห์ + วันหยุดนักขัตฤกษ์ (ตั้งค่าได้ที่แท็บแอดมิน "วันหยุด") ──
+// ค่าเริ่มต้นก่อนโหลดจาก DB: อาทิตย์(0)+เสาร์(6) หยุด — ใช้แทนที่ด้วยค่าจริงหลัง fetchAttendanceSettingsFromDB()
+let weeklyOffDaysSet = new Set([0, 6]);
+let holidayDatesSet = new Set(); // เก็บเป็น 'YYYY-MM-DD'
+let holidayListCache = []; // [{id, date, name}] ใช้แสดง/ลบในหน้าตั้งค่า
+
 function isWeekday(d) {
-  const wd = d.getDay();
-  return wd !== 0 && wd !== 6;
+  if (holidayDatesSet.has(toLocalDateStr(d))) return false; // วันหยุดนักขัตฤกษ์ — ไม่นับเป็นวันทำงาน ไม่ว่าจะวันไหนของสัปดาห์
+  return !weeklyOffDaysSet.has(d.getDay());
 }
 
 // รวมวันลาที่ "อนุมัติแล้ว" ต่อพนักงาน (นับเฉพาะวันทำงาน จำกัดขอบเขตช่วง [from,to])
@@ -3224,8 +3442,8 @@ function buildApprovedLeaveDayMap(leaves, from, to) {
 // ══════════════════════════════════════
 //  SETUP
 // ══════════════════════════════════════
-const SUPABASE_URL = 'https://gmbhjmmjsyfvjuhbparc.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtYmhqbW1qc3lmdmp1aGJwYXJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc3MjM2NTIsImV4cCI6MjEwMzI5OTY1Mn0.63vOrPVMYP4YRcItRVqauBY9VqunyRAmiNsya-NmazE';
+const SUPABASE_URL = 'https://bdzexdpmupxgvpzlvmzi.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJkemV4ZHBtdXB4Z3Zwemx2bXppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyNDM0MTUsImV4cCI6MjA5NzgxOTQxNX0.OeWEVGtgnJ6_COrTnpzpi08BXytz_MCysyOpBLOxMGI';
 
 window.addEventListener('DOMContentLoaded', () => {
   applyI18n(); // แปลภาษาตามที่บันทึกไว้ (localStorage) ตั้งแต่แรกโหลด รวมถึงหน้า Login
@@ -3415,6 +3633,11 @@ async function doLogin() {
     const pinMatch = data.pin === pinValue || data.pin === pinHash;
     if (!pinMatch) throw new Error('PIN ไม่ถูกต้อง');
 
+    // บัญชีพนักงานคนนี้ถูกปิดใช้งานไว้ (เช่น ลาออกแล้ว) — ไม่ให้ล็อกอินเข้าระบบต่อ แต่ประวัติเก่ายังอยู่ครบ
+    if (data.is_active === false) {
+      throw new Error('บัญชีนี้ถูกปิดใช้งานแล้ว กรุณาติดต่อแอดมิน');
+    }
+
     // ตั้งค่า currentCompany: ใช้ผลจาก join ถ้ามี ถ้าไม่มี (join ล้มเหลว) แต่ employees.company_id มีค่าอยู่
     // ให้ดึงข้อมูลบริษัทแยกต่างหากอีกครั้ง เพื่อให้ currentCompany?.id ถูกต้องเสมอไม่ว่า join จะสำเร็จหรือไม่
     let company = data.companies || null;
@@ -3495,6 +3718,9 @@ async function showApp() {
     const s = await fetchNotifySettingsFromDB();
     if (s) scheduleNotifications(s);
   } catch(e) { console.warn('init notify settings error', e); }
+  try {
+    await loadAttendanceSettingsAndHolidays(); // โหลดวันหยุดประจำสัปดาห์/นักขัตฤกษ์ก่อนหน้าจอไหนเริ่มคำนวณวันทำงาน
+  } catch(e) { console.warn('init attendance settings error', e); }
 }
 
 function logout() {
@@ -5303,6 +5529,9 @@ async function loadMyHistory() {
     byDay[day].push(r);
   }
 
+  // ตารางเวรของช่วงวันที่นี้ (ถ้ามีการใช้ระบบตารางเวรแล้ว) — ให้ผลตรงกับที่แอดมินเห็นในรายเดือน/คำนวณเงินเดือน
+  const scheduleInfo = await fetchShiftScheduleRange(new Date(fromVal + 'T00:00:00'), new Date(toVal + 'T23:59:59'));
+
   let totalDays = 0, totalLate = 0, totalHoursMs = 0;
 
   for (const [day, dayLogs] of Object.entries(byDay).sort()) {
@@ -5326,14 +5555,16 @@ async function loadMyHistory() {
       hoursStr = `${wh}ชม. ${wm}น.`;
     }
 
-    // เช็คมาสาย (ใช้กะที่ใกล้เคียงเวลาเช็คอินที่สุด — เหมือนระบบขอเหตุผลก่อนเข้างาน)
-    const matchedShift = getRelevantShiftForCheckin(ciDate);
+    // เช็คมาสาย: ถ้ามีระบบตารางเวรแล้ว ใช้กะที่แอดมินกำหนดไว้จริงของวันนั้น (ให้ตรงกับที่แอดมินเห็น)
+    // ถ้ายังไม่ได้ใช้ระบบตารางเวร ใช้ของเดิม (กะที่ใกล้เคียงเวลาเช็คอินที่สุด หรือเวลามาตรฐาน)
+    const resolved = resolveShiftForEmployeeDay(scheduleInfo, currentUser.id, day);
     let isLate = false;
-    if (matchedShift) {
-      isLate = isLateForShift(ciDate, matchedShift);
+    if (scheduleInfo.exists) {
+      isLate = !resolved.isScheduledOff && checkLateAgainstResolved(ciDate, resolved);
     } else {
-      isLate = ciDate.getHours() > WORK_START_HOUR ||
-               (ciDate.getHours() === WORK_START_HOUR && ciDate.getMinutes() > WORK_START_MIN);
+      const matchedShift = getRelevantShiftForCheckin(ciDate);
+      isLate = matchedShift ? isLateForShift(ciDate, matchedShift) :
+        (ciDate.getHours() > WORK_START_HOUR || (ciDate.getHours() === WORK_START_HOUR && ciDate.getMinutes() > WORK_START_MIN));
     }
     if (isLate) totalLate++;
 
@@ -5534,6 +5765,7 @@ async function loadAdminData() {
 
   const allEmps = empResult.data || [];
   const rows = logResult.data || [];
+  const todayScheduleInfo = await fetchShiftScheduleRange(today, today); // ตารางเวรของวันนี้ (ถ้ามีการใช้งานระบบตารางเวรแล้ว) — ให้ตรงกับที่เห็นในแท็บ "รายเดือน"
 
   // ── สร้าง Map เพื่อ lookup O(1) แทนการ filter ซ้ำ ──
   const logsByEmp = {};
@@ -5553,11 +5785,19 @@ async function loadAdminData() {
       const ciDateObj = new Date(ciLog.checked_at);
       const ciHour = ciDateObj.getHours();
       const ciMin  = ciDateObj.getMinutes();
-      // ตรวจสอบตามกะ (ใช้กะที่ใกล้เคียงเวลาเช็คอินที่สุด — เหมือนระบบขอเหตุผลก่อนเข้างาน) หรือเวลาเริ่มงานทั่วไป
-      const matchedShift = getRelevantShiftForCheckin(ciDateObj);
-      const isLate = matchedShift
-        ? isLateForShift(ciDateObj, matchedShift)
-        : (ciHour > WORK_START_HOUR || (ciHour === WORK_START_HOUR && ciMin > WORK_START_MIN));
+      let isLate, isScheduledOff = false;
+      if (todayScheduleInfo.exists) {
+        // มีระบบตารางเวรแล้ว — ใช้กะที่แอดมินกำหนดไว้จริงของวันนี้ ให้ตรงกับที่เห็นในแท็บ "รายเดือน"
+        const resolved = resolveShiftForEmployeeDay(todayScheduleInfo, emp.id, toLocalDateStr(today));
+        isScheduledOff = resolved.isScheduledOff;
+        isLate = !isScheduledOff && checkLateAgainstResolved(ciDateObj, resolved);
+      } else {
+        // ยังไม่ได้ใช้ระบบตารางเวร — ใช้ของเดิม (กะที่ใกล้เคียงเวลาเช็คอินที่สุด หรือเวลาเริ่มงานทั่วไป)
+        const matchedShift = getRelevantShiftForCheckin(ciDateObj);
+        isLate = matchedShift
+          ? isLateForShift(ciDateObj, matchedShift)
+          : (ciHour > WORK_START_HOUR || (ciHour === WORK_START_HOUR && ciMin > WORK_START_MIN));
+      }
       if (coLog) status = 'out';
       else if (isLate) status = 'late';
       else status = 'in';
@@ -5860,7 +6100,7 @@ function getAdminPermissions() {
   if (!currentUser || currentUser.role !== 'admin') return null;
   const hasPermSystem = ('is_super_admin' in currentUser) || ('can_approve_leave' in currentUser) || ('can_approve_ot' in currentUser) || ('can_approve_claim' in currentUser);
   if (!hasPermSystem) {
-    return { superAdmin:true, leave:true, ot:true, employees:true, news:true, notify:true, claim:true, payslip:true };
+    return { superAdmin:true, leave:true, ot:true, employees:true, news:true, notify:true, claim:true, payslip:true, payroll:true, holidays:true, shiftschedule:true };
   }
   const superAdmin = !!currentUser.is_super_admin;
   return {
@@ -5872,6 +6112,9 @@ function getAdminPermissions() {
     notify: superAdmin,
     claim: superAdmin || !!currentUser.can_approve_claim, // เบิกเงิน — สิทธิ์แยกเฉพาะ ไม่ผูกกับสิทธิ์อนุมัติลา
     payslip: superAdmin, // สลิปเงินเดือนเป็นข้อมูลอ่อนไหว — จำกัดเฉพาะ super admin เท่านั้น
+    payroll: superAdmin, // การคำนวณเงินเดือนเป็นข้อมูลอ่อนไหวเช่นกัน — จำกัดเฉพาะ super admin เท่านั้น
+    holidays: superAdmin, // ตั้งค่าวันหยุดประจำสัปดาห์/นักขัตฤกษ์ กระทบการคำนวณทั้งระบบ — จำกัดเฉพาะ super admin
+    shiftschedule: superAdmin, // จัดตารางเวรพนักงาน กระทบการคำนวณสาย/ขาด/เงินเดือน — จำกัดเฉพาะ super admin
   };
 }
 
@@ -5879,7 +6122,7 @@ function getAdminPermissions() {
 function applyAdminPermissionsUI() {
   const perm = getAdminPermissions();
   if (!perm) return;
-  const visMap = { today:true, monthly:true, leave:perm.leave, otreq:perm.ot, employees:perm.employees, news:perm.news, announce:perm.news, notify:perm.notify, claim:perm.claim, payslip:perm.payslip };
+  const visMap = { today:true, monthly:true, holidays:perm.holidays, shiftschedule:perm.shiftschedule, leave:perm.leave, otreq:perm.ot, employees:perm.employees, news:perm.news, announce:perm.news, notify:perm.notify, claim:perm.claim, payslip:perm.payslip, payroll:perm.payroll };
   Object.keys(visMap).forEach(n => {
     const btn = document.getElementById('stab-'+n);
     if (btn) btn.style.display = visMap[n] ? '' : 'none';
@@ -5889,18 +6132,20 @@ function applyAdminPermissionsUI() {
 
 function switchSubTab(name) {
   const perm = getAdminPermissions();
-  const visMap = { today:true, monthly:true, leave: !perm || perm.leave, otreq: !perm || perm.ot, employees: !perm || perm.employees, news: !perm || perm.news, announce: !perm || perm.news, notify: !perm || perm.notify, claim: !perm || perm.claim, payslip: !perm || perm.payslip };
+  const visMap = { today:true, monthly:true, holidays: !perm || perm.holidays, shiftschedule: !perm || perm.shiftschedule, leave: !perm || perm.leave, otreq: !perm || perm.ot, employees: !perm || perm.employees, news: !perm || perm.news, announce: !perm || perm.news, notify: !perm || perm.notify, claim: !perm || perm.claim, payslip: !perm || perm.payslip, payroll: !perm || perm.payroll };
   // กันแอดมินย่อยเข้าแท็บที่ไม่มีสิทธิ์ผ่านการเรียกฟังก์ชันตรงๆ (เผื่อ URL/console) — สลับไปแท็บแรกที่มีสิทธิ์แทน
   if (!visMap[name]) {
-    const fallback = ['today','monthly','leave','otreq','employees','news','announce','notify','claim','payslip'].find(n => visMap[n]);
+    const fallback = ['today','monthly','holidays','shiftschedule','leave','otreq','employees','news','announce','notify','claim','payslip','payroll'].find(n => visMap[n]);
     name = fallback || 'today';
   }
-  ['today','monthly','leave','otreq','employees','news','announce','notify','claim','payslip'].forEach(n => {
+  ['today','monthly','holidays','shiftschedule','leave','otreq','employees','news','announce','notify','claim','payslip','payroll'].forEach(n => {
     document.getElementById('sv-'+n).style.display = n === name ? '' : 'none';
     const btn = document.getElementById('stab-'+n);
     if (btn) btn.classList.toggle('active', n === name);
   });
   if (name === 'monthly') loadMonthlyData();
+  if (name === 'holidays') loadHolidaysTab();
+  if (name === 'shiftschedule') loadShiftScheduleTab();
   if (name === 'leave') loadLeaveRequestsAdmin();
   if (name === 'otreq') loadOtRequestsAdmin();
   if (name === 'employees') { loadEmployeeList().then(() => loadPendingProfileRequests()); }
@@ -5909,6 +6154,7 @@ function switchSubTab(name) {
   if (name === 'notify') loadNotifySettings();
   if (name === 'claim') loadClaimRequestsAdmin();
   if (name === 'payslip') { populatePayslipEmployeeSelect(); loadPayslipsAdminList(); }
+  if (name === 'payroll') { loadPayrollSettingsUI(); loadPayrollData(); }
 }
 
 // ══════════════════════════════════════
@@ -5990,7 +6236,8 @@ async function loadMonthlyData() {
   }
 
   const filterEmpId = document.getElementById('empFilter')?.value || '';
-  const workdays = countWorkdays(from, to);
+  const scheduleInfo = await fetchShiftScheduleRange(from, to); // ตารางเวรของทุกคนในเดือนนี้ (ถ้ามีการใช้งานระบบตารางเวรแล้ว)
+  const workdaysFallback = countWorkdays(from, to); // ใช้เมื่อยังไม่ได้ใช้ระบบตารางเวร (backward compatible)
 
   const rows = logs || [];
   const summary = (allEmps || [])
@@ -6011,13 +6258,16 @@ async function loadMonthlyData() {
         if (!ci) return;
         daysIn++;
         const ciDate = new Date(ci.checked_at);
-        if (ciDate.getHours() > WORK_START_HOUR || (ciDate.getHours() === WORK_START_HOUR && ciDate.getMinutes() > WORK_START_MIN)) daysLate++;
+        const resolved = resolveShiftForEmployeeDay(scheduleInfo, emp.id, date);
+        // วันหยุดของคนนี้ตามตารางเวร (isScheduledOff) แต่ดันมี log เช็คอิน → นับว่ามาทำงานตามจริง แต่ไม่ตัดสินว่าสาย เพราะไม่มีกะอ้างอิงของวันนั้น
+        if (!resolved.isScheduledOff && checkLateAgainstResolved(ciDate, resolved)) daysLate++;
         if (co) {
           const mins = (new Date(co.checked_at) - new Date(ci.checked_at)) / 60000;
           if (mins > 0 && mins < 1440) totalMins += mins;
         }
       });
       const leaveDays = leaveDayMap[emp.id] ? leaveDayMap[emp.id].size : 0;
+      const workdays = countEmployeeWorkdays(emp.id, from, to, scheduleInfo, workdaysFallback);
       const absent = Math.max(0, workdays - daysIn - leaveDays);
       const hours = (totalMins / 60).toFixed(1);
       return {id: emp.id, name: emp.name, daysIn, daysLate, leaveDays, absent, hours};
@@ -6036,7 +6286,7 @@ async function loadMonthlyData() {
   document.getElementById('mStatAbsent').textContent = totalAbsent;
   document.getElementById('mStatHours').textContent  = totalHours.toFixed(1) + 'h';
 
-  renderMonthlyDashboard(summary, rows);
+  renderMonthlyDashboard(summary, rows, scheduleInfo);
   loadLeaveQuotaTable(yr, filterEmpId);
 
   if (!summary.length) {
@@ -6055,9 +6305,9 @@ async function loadMonthlyData() {
 }
 
 // ══ ADMIN DASHBOARD: กราฟภาพรวมของเดือนที่เลือก (ในแท็บ "รายเดือน") ══
-function renderMonthlyDashboard(summary, attendanceLogs) {
+function renderMonthlyDashboard(summary, attendanceLogs, scheduleInfo) {
   renderDisciplineChart(summary);
-  renderLateTrendChart(attendanceLogs || []);
+  renderLateTrendChart(attendanceLogs || [], scheduleInfo);
   renderTopList('topLeaveList', summary, 'leaveDays', '🏖️');
   renderTopList('topLateList', summary, 'daysLate', '⏰');
 }
@@ -6080,14 +6330,19 @@ function renderDisciplineChart(summary) {
 }
 
 // เฉลี่ยนาทีที่มาสาย แยกตามวันในสัปดาห์ (จันทร์-อาทิตย์) จาก log เช็คอินดิบของเดือนที่เลือก
-function renderLateTrendChart(logs) {
+// ใช้เวลาเริ่มกะจริงตามตารางเวรของแต่ละคน/วัน ถ้ามีการตั้งตารางเวรไว้ (ไม่งั้น fallback เป็นเวลามาตรฐาน)
+function renderLateTrendChart(logs, scheduleInfo) {
   const box = document.getElementById('lateTrendChart');
   if (!box) return;
   const WD_LABELS = ['อา','จ','อ','พ','พฤ','ศ','ส'];
   const sums = [0,0,0,0,0,0,0], counts = [0,0,0,0,0,0,0];
   (logs || []).filter(r => r.type === 'check_in').forEach(r => {
     const d = new Date(r.checked_at);
-    const lateMins = (d.getHours()*60 + d.getMinutes()) - (WORK_START_HOUR*60 + WORK_START_MIN);
+    const dateStr = r.checked_at.split('T')[0];
+    const resolved = resolveShiftForEmployeeDay(scheduleInfo, r.employee_id, dateStr);
+    if (resolved.isScheduledOff) return; // วันหยุดของคนนี้ตามตารางเวร — ไม่นับเข้าสถิติมาสาย
+    const cutoffMins = getLateThresholdMinutes(resolved);
+    const lateMins = (d.getHours()*60 + d.getMinutes()) - cutoffMins;
     if (lateMins > 0) { sums[d.getDay()] += lateMins; counts[d.getDay()]++; }
   });
   const order = [1,2,3,4,5,6,0]; // เริ่มจันทร์ถึงอาทิตย์
@@ -6145,7 +6400,7 @@ async function loadLeaveQuotaTable(year, filterEmpId) {
   const yearLbl = document.getElementById('quotaYearLbl');
   if (yearLbl) yearLbl.textContent = year;
   if (!tbl) return;
-  const QUOTA_TYPE_LABELS = { vacation:'🏖️ พักร้อน', sick:'🤒 ป่วย', personal:'📌 กิจ', other:'📝 อื่นๆ' };
+  const QUOTA_TYPE_LABELS = { vacation:'🏖️ พักร้อน', sick:'🤒 ป่วย', personal:'📌 กิจ', other:'📝 ลากิจพิเศษ' };
   if (isDemo) {
     tbl.innerHTML = `<div class="table-row quota-row" style="grid-template-columns:1fr 1fr 1fr 1fr 1fr;">
       <div class="quota-name">สมชาย ใจดี</div>
@@ -6190,15 +6445,660 @@ async function loadLeaveQuotaTable(year, filterEmpId) {
   }
 }
 
+// ══════════════════════════════════════
+//  PAYROLL (ประมาณการเงินเดือน) — ไม่รวมประกันสังคม/ภาษี/OT ใช้ช่วยฝ่ายบัญชีเท่านั้น
+// ══════════════════════════════════════
+const PAYROLL_MONTHLY_DAY_DIVISOR = 30; // สำหรับพนักงานเงินเดือนประจำ: ค่าแรง/วัน = เงินเดือน / 30 (คงที่ทุกเดือน)
+const PAYROLL_HOURLY_DAY_HOURS = 8;     // ชั่วโมงมาตรฐาน/วัน ใช้ประมาณค่าลาแบบจ่ายของพนักงานรายชั่วโมง
+let payrollSettingsCache = { lateDeductionAmount: 0, leavePaid: { vacation:true, sick:true, personal:false, other:false } };
+
+function dbRowToPayrollSettings(row) {
+  return {
+    lateDeductionAmount: Number(row.late_deduction_amount) || 0,
+    leavePaid: {
+      vacation: row.leave_paid_vacation !== false,
+      sick:     row.leave_paid_sick !== false,
+      personal: !!row.leave_paid_personal,
+      other:    !!row.leave_paid_other,
+    },
+  };
+}
+
+async function fetchPayrollSettingsFromDB() {
+  const warnEl = document.getElementById('payrollSettingsSchemaWarning');
+  if (isDemo || !sb) return payrollSettingsCache;
+  try {
+    const { data, error } = await sb.from('payroll_settings').select('*').eq('id', 1).maybeSingle();
+    if (error) throw error;
+    if (warnEl) warnEl.style.display = 'none';
+    if (data) { payrollSettingsCache = dbRowToPayrollSettings(data); }
+    return payrollSettingsCache;
+  } catch(e) {
+    if (isMissingTableError(e, 'payroll_settings') && warnEl) warnEl.style.display = 'flex';
+    console.warn('fetchPayrollSettingsFromDB error (ตรวจสอบว่าได้สร้างตาราง payroll_settings แล้ว):', e);
+    return payrollSettingsCache; // ใช้ค่าเริ่มต้น/แคชเดิมไปก่อน ดีกว่าทำให้หน้าใช้งานไม่ได้เลย
+  }
+}
+
+async function upsertPayrollSettingsToDB(s) {
+  const row = {
+    id: 1,
+    late_deduction_amount: s.lateDeductionAmount ?? 0,
+    leave_paid_vacation: !!s.leavePaid.vacation,
+    leave_paid_sick:     !!s.leavePaid.sick,
+    leave_paid_personal: !!s.leavePaid.personal,
+    leave_paid_other:    !!s.leavePaid.other,
+    updated_at: new Date().toISOString(),
+  };
+  const { error } = await sb.from('payroll_settings').upsert(row, { onConflict: 'id' });
+  if (error) throw error;
+}
+
+async function loadPayrollSettingsUI() {
+  if (!document.getElementById('payrollMonthSelect').options.length) populateMonthSelect('payrollMonthSelect');
+  const s = isDemo ? payrollSettingsCache : await fetchPayrollSettingsFromDB();
+  document.getElementById('paySettingVacation').checked = s.leavePaid.vacation;
+  document.getElementById('paySettingSick').checked     = s.leavePaid.sick;
+  document.getElementById('paySettingPersonal').checked = s.leavePaid.personal;
+  document.getElementById('paySettingOther').checked    = s.leavePaid.other;
+  document.getElementById('payLateDeduction').value     = s.lateDeductionAmount || '';
+}
+
+async function savePayrollSettings() {
+  const s = {
+    lateDeductionAmount: parseFloat(document.getElementById('payLateDeduction').value) || 0,
+    leavePaid: {
+      vacation: document.getElementById('paySettingVacation').checked,
+      sick:     document.getElementById('paySettingSick').checked,
+      personal: document.getElementById('paySettingPersonal').checked,
+      other:    document.getElementById('paySettingOther').checked,
+    },
+  };
+  if (isDemo) { payrollSettingsCache = s; showToast('⚠️ โหมด Demo ไม่บันทึกจริง', 'a'); return; }
+  try {
+    await upsertPayrollSettingsToDB(s);
+    payrollSettingsCache = s;
+    showToast('✅ บันทึกการตั้งค่าเงินเดือนแล้ว', 'g');
+    loadPayrollData();
+  } catch(e) {
+    showToast('❌ บันทึกไม่สำเร็จ: ' + e.message + ' (ตรวจสอบว่าได้สร้างตาราง payroll_settings แล้ว)', 'r');
+  }
+}
+
+async function fetchEmployeesWithPay() {
+  const withPayCols = 'id,name,pay_type,pay_rate';
+  async function run(cols) {
+    let q = sb.from('employees').select(cols).neq('role','admin');
+    if (currentCompany?.id) q = q.eq('company_id', currentCompany.id);
+    let r = await q.order('name');
+    if (r.error && isMissingColumnError(r.error, 'company_id')) {
+      r = await sb.from('employees').select(cols).neq('role','admin').order('name');
+    }
+    return r;
+  }
+  let { data, error } = await run(withPayCols);
+  let hasPay = true;
+  if (error && isMissingColumnError(error, 'pay_type')) {
+    hasPay = false;
+    ({ data, error } = await run('id,name'));
+  }
+  return { data: data || [], hasPay };
+}
+
+function fmtBaht(n) {
+  return (Number(n) || 0).toLocaleString('th-TH', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+}
+
+// คำนวณเงินเดือนโดยประมาณของพนักงาน 1 คน จากอัตราค่าจ้าง + สถิติเดือนนั้น + นโยบายที่ตั้งไว้
+function computeEmployeePay(emp, stats, settings) {
+  const payType = emp.pay_type || 'monthly';
+  const rate = Number(emp.pay_rate) || 0;
+  const paidLeaveDays = LEAVE_TYPE_KEYS.reduce((sum, t) => sum + (settings.leavePaid[t] ? (stats.leaveByType[t] || 0) : 0), 0);
+  const unpaidLeaveDays = LEAVE_TYPE_KEYS.reduce((sum, t) => sum + (settings.leavePaid[t] ? 0 : (stats.leaveByType[t] || 0)), 0);
+  const lateDeduction = (settings.lateDeductionAmount || 0) * stats.daysLate;
+
+  let basePay = 0, absentDeduction = 0, unpaidLeaveDeduction = 0;
+  if (payType === 'daily') {
+    // รายวัน: จ่ายเฉพาะวันที่มาทำงานจริง + วันลาประเภทที่ตั้งว่า "จ่าย" เท่านั้น (ขาด/ลาไม่จ่าย = ไม่ได้เงินอยู่แล้วโดยธรรมชาติ)
+    basePay = rate * (stats.daysIn + paidLeaveDays);
+  } else if (payType === 'hourly') {
+    basePay = rate * stats.totalHours + rate * PAYROLL_HOURLY_DAY_HOURS * paidLeaveDays;
+  } else {
+    // เงินเดือนประจำ: ได้เต็มเดือนเป็นฐาน แล้วหักเฉพาะวันขาด/ลาไม่จ่าย ตามค่าแรง/วัน (หาร 30)
+    const dailyEquiv = rate / PAYROLL_MONTHLY_DAY_DIVISOR;
+    basePay = rate;
+    absentDeduction = dailyEquiv * stats.absent;
+    unpaidLeaveDeduction = dailyEquiv * unpaidLeaveDays;
+  }
+  const net = Math.max(0, basePay - absentDeduction - unpaidLeaveDeduction - lateDeduction);
+  return { payType, rate, basePay, absentDeduction, unpaidLeaveDeduction, lateDeduction, net };
+}
+
+async function loadPayrollData() {
+  if (!document.getElementById('payrollMonthSelect').options.length) populateMonthSelect('payrollMonthSelect');
+  const monthVal = document.getElementById('payrollMonthSelect')?.value;
+  const tbl = document.getElementById('payrollTable');
+  if (!tbl || !monthVal) return;
+
+  if (isDemo) {
+    window._payrollRows = [{
+      emp: { name:'สมชาย ใจดี', pay_type:'monthly', pay_rate:15000 },
+      stats: { daysIn:18, daysLate:0, absent:0, leaveByType:{vacation:0,sick:0,personal:0,other:0}, totalHours:144 },
+      pay: { payType:'monthly', rate:15000, basePay:15000, absentDeduction:0, unpaidLeaveDeduction:0, lateDeduction:0, net:15000 },
+    }];
+    tbl.innerHTML = `<div class="table-row payroll-row" style="grid-template-columns:1fr 90px 70px 70px 70px 90px;align-items:start;">
+      <div class="payroll-name">สมชาย ใจดี<div class="payroll-rate">เงินเดือนประจำ ${fmtBaht(15000)}฿</div></div>
+      <div class="mono-xs payroll-stat" data-lbl="ควรได้">${fmtBaht(15000)}</div>
+      <div class="mono-xs payroll-stat" data-lbl="หักขาด">0</div>
+      <div class="mono-xs payroll-stat" data-lbl="หักลา">0</div>
+      <div class="mono-xs payroll-stat" data-lbl="หักสาย">0</div>
+      <div class="mono-xs payroll-stat net" data-lbl="สุทธิ" style="font-weight:600;">${fmtBaht(15000)}</div>
+    </div>`;
+    return;
+  }
+
+  tbl.innerHTML = '<div class="empty-row"><div class="spinner"></div></div>';
+  try {
+    const [yr, mo] = monthVal.split('-').map(Number);
+    const from = new Date(yr, mo-1, 1);
+    const to   = new Date(yr, mo, 0, 23, 59, 59, 999);
+
+    const settings = await fetchPayrollSettingsFromDB();
+    const { data: emps, hasPay } = await fetchEmployeesWithPay();
+    const payWarnEl = document.getElementById('empPaySchemaWarning2');
+    if (payWarnEl) payWarnEl.style.display = hasPay ? 'none' : 'flex';
+
+    const [{ data: logs }, { data: leaves }] = await Promise.all([
+      sb.from('attendance').select('*').gte('checked_at', from.toISOString()).lte('checked_at', to.toISOString()),
+      sb.from('leave_requests').select('employee_id,leave_type,status,start_date,end_date,is_full_day')
+        .lte('start_date', toLocalDateStr(to)).gte('end_date', toLocalDateStr(from)),
+    ]);
+    const leaveByTypeMap = buildApprovedLeaveDayMapByType(leaves, from, to);
+    const scheduleInfo = await fetchShiftScheduleRange(from, to);
+    const workdaysFallback = countWorkdays(from, to);
+
+    if (!emps.length) { tbl.innerHTML = '<div class="empty-row">ไม่มีข้อมูลพนักงาน</div>'; return; }
+
+    window._payrollRows = emps.map(emp => {
+      const empLogs = (logs || []).filter(r => r.employee_id === emp.id);
+      const byDate = {};
+      empLogs.forEach(r => { const d = r.checked_at.split('T')[0]; (byDate[d] = byDate[d] || []).push(r); });
+      let daysIn = 0, daysLate = 0, totalMins = 0;
+      Object.entries(byDate).forEach(([date, dayLogs]) => {
+        const ci = dayLogs.find(r => r.type === 'check_in');
+        const co = [...dayLogs].reverse().find(r => r.type === 'check_out');
+        if (!ci) return; daysIn++;
+        const ciDate = new Date(ci.checked_at);
+        const resolved = resolveShiftForEmployeeDay(scheduleInfo, emp.id, date);
+        if (!resolved.isScheduledOff && checkLateAgainstResolved(ciDate, resolved)) daysLate++;
+        if (co) { const mins = (new Date(co.checked_at) - new Date(ci.checked_at)) / 60000; if (mins > 0 && mins < 1440) totalMins += mins; }
+      });
+      const workdays = countEmployeeWorkdays(emp.id, from, to, scheduleInfo, workdaysFallback);
+      const leaveByType = leaveByTypeMap[emp.id] || { vacation:0, sick:0, personal:0, other:0 };
+      const totalLeaveDays = LEAVE_TYPE_KEYS.reduce((s,t) => s + (leaveByType[t] || 0), 0);
+      const absent = Math.max(0, workdays - daysIn - totalLeaveDays);
+      const stats = { daysIn, daysLate, absent, leaveByType, totalHours: totalMins / 60 };
+      const pay = computeEmployeePay(emp, stats, settings);
+      return { emp, stats, pay };
+    });
+
+    const PAY_TYPE_LABELS = { monthly:'เงินเดือนประจำ', daily:'รายวัน', hourly:'รายชั่วโมง' };
+    const PAY_TYPE_UNIT   = { monthly:'', daily:'/วัน', hourly:'/ชม.' };
+    tbl.innerHTML = window._payrollRows.map(({ emp, pay }) => `
+      <div class="table-row payroll-row" style="grid-template-columns:1fr 90px 70px 70px 70px 90px;align-items:start;">
+        <div class="payroll-name">${escapeHtml(emp.name)}<div class="payroll-rate">${PAY_TYPE_LABELS[pay.payType]} ${fmtBaht(pay.rate)}฿${PAY_TYPE_UNIT[pay.payType]}</div></div>
+        <div class="mono-xs payroll-stat" data-lbl="ควรได้">${fmtBaht(pay.basePay)}</div>
+        <div class="mono-xs payroll-stat" data-lbl="หักขาด" style="color:${pay.absentDeduction>0?'var(--red)':'var(--muted)'}">${fmtBaht(pay.absentDeduction)}</div>
+        <div class="mono-xs payroll-stat" data-lbl="หักลา" style="color:${pay.unpaidLeaveDeduction>0?'var(--red)':'var(--muted)'}">${fmtBaht(pay.unpaidLeaveDeduction)}</div>
+        <div class="mono-xs payroll-stat" data-lbl="หักสาย" style="color:${pay.lateDeduction>0?'var(--amber)':'var(--muted)'}">${fmtBaht(pay.lateDeduction)}</div>
+        <div class="mono-xs payroll-stat net" data-lbl="สุทธิ" style="font-weight:600;">${fmtBaht(pay.net)}</div>
+      </div>`).join('');
+  } catch(e) {
+    tbl.innerHTML = `<div class="empty-row" style="color:var(--red);">❌ โหลดไม่ได้: ${e.message}</div>`;
+  }
+}
+
+function exportPayrollCSV() {
+  const mv = document.getElementById('payrollMonthSelect')?.value;
+  const rows = window._payrollRows || [];
+  if (!rows.length) { showToast('⚠️ ไม่มีข้อมูล', 'a'); return; }
+  const PAY_TYPE_LABELS = { monthly:'เงินเดือนประจำ', daily:'รายวัน', hourly:'รายชั่วโมง' };
+  const headers = ['ชื่อพนักงาน','ประเภทจ่าย','อัตรา','วันมาทำงาน','มาสาย(ครั้ง)','ขาด(วัน)','ลาจ่าย(วัน)','ลาไม่จ่าย(วัน)','ควรได้','หักขาด','หักลาไม่จ่าย','หักมาสาย','สุทธิโดยประมาณ'];
+  const escape = v => { const s = String(v); return s.includes(',') || s.includes('"') ? `"${s.replace(/"/g,'""')}"` : s; };
+  const body = rows.map(({ emp, stats, pay }) => {
+    const paidLeaveDays = LEAVE_TYPE_KEYS.reduce((s,t) => s + (payrollSettingsCache.leavePaid[t] ? (stats.leaveByType[t]||0) : 0), 0);
+    const unpaidLeaveDays = LEAVE_TYPE_KEYS.reduce((s,t) => s + (payrollSettingsCache.leavePaid[t] ? 0 : (stats.leaveByType[t]||0)), 0);
+    return [emp.name, PAY_TYPE_LABELS[pay.payType], pay.rate, stats.daysIn, stats.daysLate, stats.absent, paidLeaveDays, unpaidLeaveDays,
+      pay.basePay.toFixed(2), pay.absentDeduction.toFixed(2), pay.unpaidLeaveDeduction.toFixed(2), pay.lateDeduction.toFixed(2), pay.net.toFixed(2)];
+  });
+  const csv = [headers, ...body].map(r => r.map(escape).join(',')).join('\n');
+  const blob = new Blob(['\ufeff'+csv], { type:'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = `payroll_estimate_${mv}.csv`; a.click();
+  URL.revokeObjectURL(url);
+  showToast('✅ Export ประมาณการเงินเดือนสำเร็จ', 'g');
+}
+
 function countWorkdays(from, to) {
   let count = 0;
   const d = new Date(from);
   while (d <= to) {
-    const day = d.getDay();
-    if (day !== 0 && day !== 6) count++;
+    if (isWeekday(d)) count++;
     d.setDate(d.getDate() + 1);
   }
   return count;
+}
+
+// ══════════════════════════════════════
+//  HOLIDAYS: วันหยุดประจำสัปดาห์ + วันหยุดนักขัตฤกษ์
+// ══════════════════════════════════════
+async function fetchAttendanceSettingsFromDB() {
+  const warnEl = document.getElementById('attendanceSettingsSchemaWarning');
+  if (isDemo || !sb) return;
+  try {
+    const { data, error } = await sb.from('attendance_settings').select('*').eq('id', 1).maybeSingle();
+    if (error) throw error;
+    if (warnEl) warnEl.style.display = 'none';
+    if (data && data.weekly_off_days !== undefined && data.weekly_off_days !== null) {
+      const days = String(data.weekly_off_days).split(',').map(s => s.trim()).filter(s => s !== '').map(Number);
+      weeklyOffDaysSet = new Set(days);
+    }
+  } catch(e) {
+    if (isMissingTableError(e, 'attendance_settings') && warnEl) warnEl.style.display = 'flex';
+    console.warn('fetchAttendanceSettingsFromDB error (ตรวจสอบว่าได้สร้างตาราง attendance_settings แล้ว):', e);
+  }
+}
+
+async function upsertAttendanceSettingsToDB(offDaysArray) {
+  const row = { id: 1, weekly_off_days: offDaysArray.join(','), updated_at: new Date().toISOString() };
+  const { error } = await sb.from('attendance_settings').upsert(row, { onConflict: 'id' });
+  if (error) throw error;
+}
+
+function renderWeeklyOffDaysUI() {
+  for (let d = 0; d <= 6; d++) {
+    const el = document.getElementById('offDay' + d);
+    if (el) el.checked = weeklyOffDaysSet.has(d);
+  }
+}
+
+async function saveWeeklyOffDays() {
+  const days = [];
+  for (let d = 0; d <= 6; d++) {
+    if (document.getElementById('offDay' + d).checked) days.push(d);
+  }
+  if (!days.length) { showToast('⚠️ ต้องเลือกอย่างน้อย 1 วัน', 'a'); return; }
+  if (isDemo) { weeklyOffDaysSet = new Set(days); showToast('⚠️ โหมด Demo ไม่บันทึกจริง', 'a'); return; }
+  try {
+    await upsertAttendanceSettingsToDB(days);
+    weeklyOffDaysSet = new Set(days);
+    showToast('✅ บันทึกวันหยุดประจำสัปดาห์แล้ว', 'g');
+  } catch(e) {
+    showToast('❌ บันทึกไม่สำเร็จ: ' + e.message + ' (ตรวจสอบว่าได้สร้างตาราง attendance_settings แล้ว)', 'r');
+  }
+}
+
+async function fetchHolidaysFromDB() {
+  const warnEl = document.getElementById('holidaysSchemaWarning');
+  if (isDemo || !sb) return holidayListCache;
+  try {
+    let q = sb.from('company_holidays').select('id,date,name');
+    if (currentCompany?.id) q = q.eq('company_id', currentCompany.id);
+    let { data, error } = await q.order('date');
+    if (error && isMissingColumnError(error, 'company_id')) {
+      ({ data, error } = await sb.from('company_holidays').select('id,date,name').order('date'));
+    }
+    if (error) throw error;
+    if (warnEl) warnEl.style.display = 'none';
+    holidayListCache = data || [];
+    holidayDatesSet = new Set(holidayListCache.map(h => h.date));
+    return holidayListCache;
+  } catch(e) {
+    if (isMissingTableError(e, 'company_holidays') && warnEl) warnEl.style.display = 'flex';
+    console.warn('fetchHolidaysFromDB error (ตรวจสอบว่าได้สร้างตาราง company_holidays แล้ว):', e);
+    return holidayListCache;
+  }
+}
+
+function renderHolidayList() {
+  const box = document.getElementById('holidayListBox');
+  if (!box) return;
+  if (!holidayListCache.length) { box.innerHTML = '<div class="empty-row" style="padding:10px 0;font-size:11px;">ยังไม่มีวันหยุดที่ตั้งไว้</div>'; return; }
+  box.innerHTML = holidayListCache.map(h => `
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 2px;border-bottom:1px solid var(--border);font-size:12px;">
+      <div><b class="mono-xs">${h.date}</b> — ${escapeHtml(h.name)}</div>
+      <button class="btn-sm" style="font-size:10px;color:var(--red);flex-shrink:0;" onclick="deleteHoliday('${h.id}')">ลบ</button>
+    </div>`).join('');
+}
+
+async function addHoliday() {
+  const dateVal = document.getElementById('newHolidayDate').value;
+  const nameVal = document.getElementById('newHolidayName').value.trim();
+  if (!dateVal || !nameVal) { showToast('⚠️ กรอกวันที่และชื่อวันหยุดให้ครบ', 'a'); return; }
+  if (isDemo) { showToast('⚠️ โหมด Demo ไม่บันทึกจริง', 'a'); return; }
+  try {
+    const payload = { date: dateVal, name: nameVal, company_id: currentCompany?.id || null };
+    let { error } = await sb.from('company_holidays').insert(payload);
+    if (error && isMissingColumnError(error, 'company_id')) {
+      const { company_id, ...rest } = payload;
+      ({ error } = await sb.from('company_holidays').insert(rest));
+    }
+    if (error) throw error;
+    document.getElementById('newHolidayDate').value = '';
+    document.getElementById('newHolidayName').value = '';
+    showToast('✅ เพิ่มวันหยุดแล้ว', 'g');
+    await fetchHolidaysFromDB();
+    renderHolidayList();
+  } catch(e) {
+    showToast('❌ เพิ่มไม่สำเร็จ: ' + e.message + ' (ตรวจสอบว่าได้สร้างตาราง company_holidays แล้ว)', 'r');
+  }
+}
+
+async function deleteHoliday(id) {
+  if (isDemo) { showToast('⚠️ โหมด Demo ไม่บันทึกจริง', 'a'); return; }
+  try {
+    const { error } = await sb.from('company_holidays').delete().eq('id', id);
+    if (error) throw error;
+    showToast('✅ ลบวันหยุดแล้ว', 'g');
+    await fetchHolidaysFromDB();
+    renderHolidayList();
+  } catch(e) {
+    showToast('❌ ลบไม่สำเร็จ: ' + e.message, 'r');
+  }
+}
+
+// เรียกครั้งเดียวตอนแอปเริ่มทำงาน (ใน showApp) เพื่อให้ isWeekday() ใช้ค่าที่ตั้งไว้จริงได้ทันที
+// ก่อนที่หน้าจอไหนๆ จะเริ่มคำนวณวันทำงาน/วันขาด
+async function loadAttendanceSettingsAndHolidays() {
+  await Promise.all([ fetchAttendanceSettingsFromDB(), fetchHolidaysFromDB() ]);
+}
+
+// เรียกทุกครั้งที่เปิดแท็บ "วันหยุด" ในหน้าแอดมิน — โหลดข้อมูลสดแล้วเรนเดอร์ UI ทั้งสองส่วน
+async function loadHolidaysTab() {
+  if (isDemo) {
+    renderWeeklyOffDaysUI();
+    holidayListCache = [{ id:'demo1', date:'2026-04-13', name:'วันสงกรานต์' }];
+    holidayDatesSet = new Set(['2026-04-13']);
+    renderHolidayList();
+    return;
+  }
+  await loadAttendanceSettingsAndHolidays();
+  renderWeeklyOffDaysUI();
+  renderHolidayList();
+}
+
+// ══════════════════════════════════════
+//  SHIFT SCHEDULE (ตารางเวร): ใครอยู่กะไหนวันไหน — กำหนดโดยแอดมิน
+//  ใช้แทนเวลามาตรฐาน WORK_START_HOUR:WORK_START_MIN ในการตัดสิน "สาย/ขาด" เมื่อบริษัทมีการสลับกะ
+// ══════════════════════════════════════
+function getShiftById(id) {
+  return (allShifts || []).find(s => s.id === id) || null;
+}
+
+// ดึงตารางเวรของพนักงาน "ทุกคน" ในช่วงวันที่ที่กำหนด (ใช้ตอนเปิดรายงาน/คำนวณเงินเดือนทั้งเดือน)
+// คืนค่า { exists: bool, map: {'employeeId|YYYY-MM-DD': shift_id} }
+// exists=false หมายถึงยังไม่ได้สร้างตาราง shift_schedule เลย → จุดเรียกใช้ควร fallback เป็นพฤติกรรมเดิม (เวลามาตรฐานเดียวกันทุกคน)
+async function fetchShiftScheduleRange(from, to) {
+  const warnEl = document.getElementById('shiftScheduleSchemaWarning');
+  if (isDemo || !sb) return { exists: false, map: {} };
+  try {
+    let q = sb.from('shift_schedule').select('employee_id,date,shift_id')
+      .gte('date', toLocalDateStr(from)).lte('date', toLocalDateStr(to));
+    if (currentCompany?.id) q = q.eq('company_id', currentCompany.id);
+    let { data, error } = await q;
+    if (error && isMissingColumnError(error, 'company_id')) {
+      ({ data, error } = await sb.from('shift_schedule').select('employee_id,date,shift_id')
+        .gte('date', toLocalDateStr(from)).lte('date', toLocalDateStr(to)));
+    }
+    if (error) throw error;
+    if (warnEl) warnEl.style.display = 'none';
+    const map = {};
+    (data || []).forEach(r => { map[r.employee_id + '|' + r.date] = r.shift_id; });
+    return { exists: true, map };
+  } catch(e) {
+    if (isMissingTableError(e, 'shift_schedule')) {
+      if (warnEl) warnEl.style.display = 'flex';
+    }
+    console.warn('fetchShiftScheduleRange error (ตรวจสอบว่าได้สร้างตาราง shift_schedule แล้ว):', e);
+    return { exists: false, map: {} };
+  }
+}
+
+// หากะที่พนักงานคนนี้ถูกกำหนดไว้จริงในวันนี้ (ตาม scheduleInfo ที่ดึงมาแล้ว)
+// isScheduledOff=true หมายถึง "มีระบบตารางเวรแล้ว แต่วันนี้ไม่ได้กำหนดกะให้คนนี้" → ถือเป็นวันหยุดของเขา ไม่นับขาด/ไม่เช็คสาย
+function resolveShiftForEmployeeDay(scheduleInfo, employeeId, dateStr) {
+  if (scheduleInfo && scheduleInfo.exists) {
+    const shiftId = scheduleInfo.map[employeeId + '|' + dateStr];
+    if (!shiftId) return { isScheduledOff: true, shift: null };
+    return { isScheduledOff: false, shift: getShiftById(shiftId) };
+  }
+  return { isScheduledOff: false, shift: null }; // ยังไม่ได้ใช้ระบบตารางเวร — ไปใช้เวลามาตรฐานแทนที่จุดเรียกใช้
+}
+
+// นาทีของวัน (0-1439) ที่ถือว่า "สาย" ถ้าเช็คอินหลังจากนี้ — ใช้เวลาเริ่มกะจริง+เกรซของกะนั้น หรือเวลามาตรฐานถ้าไม่มีกะ
+function getLateThresholdMinutes(resolved) {
+  if (resolved.shift) {
+    const [sh, sm] = resolved.shift.start.split(':').map(Number);
+    return sh * 60 + sm + (Number(resolved.shift.grace) || 0);
+  }
+  return WORK_START_HOUR * 60 + WORK_START_MIN;
+}
+
+// ตัดสินว่า "สาย" หรือไม่ จากผลการ resolve กะของวันนั้น — ใช้ isLateForShift (รองรับกะข้ามคืน) ถ้ามีกะจริง
+function checkLateAgainstResolved(ciDate, resolved) {
+  if (resolved.shift) return isLateForShift(ciDate, resolved.shift);
+  return ciDate.getHours() > WORK_START_HOUR || (ciDate.getHours() === WORK_START_HOUR && ciDate.getMinutes() > WORK_START_MIN);
+}
+
+// จำนวน "วันทำงาน" ของพนักงาน 1 คน ในช่วงที่กำหนด — ถ้ามีระบบตารางเวรแล้ว นับเฉพาะวันที่มีกะกำหนดไว้จริงให้คนนี้
+// (วันที่ไม่มีกะกำหนด = วันหยุดของเขา ไม่นับเป็นวันทำงาน จึงไม่ถูกนับเป็น "ขาด" ด้วย) — ถ้ายังไม่ได้ใช้ระบบตารางเวร ใช้ค่า fallback เดิม
+function countEmployeeWorkdays(employeeId, from, to, scheduleInfo, fallbackWorkdays) {
+  if (!scheduleInfo || !scheduleInfo.exists) return fallbackWorkdays;
+  let count = 0;
+  const d = new Date(from);
+  while (d <= to) {
+    if (scheduleInfo.map[employeeId + '|' + toLocalDateStr(d)]) count++;
+    d.setDate(d.getDate() + 1);
+  }
+  return count;
+}
+
+// ── หน้าแอดมิน "ตารางเวร": จัดกะรายสัปดาห์ ──
+let shiftScheduleWeekStart = null; // Date ของวันจันทร์ในสัปดาห์ที่กำลังดูอยู่
+let shiftScheduleCache = {}; // แคชของสัปดาห์ที่กำลังแสดงอยู่ตอนนี้ { 'employeeId|YYYY-MM-DD': shift_id }
+
+function getMondayOf(d) {
+  const date = new Date(d);
+  const day = date.getDay();
+  const diff = day === 0 ? -6 : 1 - day; // ถ้าเป็นอาทิตย์ ให้ถอยไปจันทร์ของสัปดาห์เดียวกัน
+  date.setDate(date.getDate() + diff);
+  date.setHours(0,0,0,0);
+  return date;
+}
+
+function shiftScheduleChangeWeek(deltaWeeks) {
+  shiftScheduleWeekStart.setDate(shiftScheduleWeekStart.getDate() + deltaWeeks * 7);
+  loadShiftScheduleTab();
+}
+
+// ── การเลือกแบบกลุ่ม (bulk) สำหรับตั้งกะทีเดียวหลายคน/หลายวัน ──
+let shiftScheduleSelectedEmployees = new Set();
+let shiftScheduleSelectedDays = new Set([0,1,2,3,4,5,6]); // ดัชนีวันในสัปดาห์ที่กำลังแสดง (0=จันทร์...6=อาทิตย์) — ค่าเริ่มต้นเลือกทั้งสัปดาห์
+
+async function loadShiftScheduleTab() {
+  if (!shiftScheduleWeekStart) shiftScheduleWeekStart = getMondayOf(new Date());
+  const weekStart = shiftScheduleWeekStart;
+  const weekEnd = new Date(weekStart); weekEnd.setDate(weekEnd.getDate() + 6);
+  const lbl = document.getElementById('shiftScheduleWeekLabel');
+  if (lbl) lbl.textContent = `${weekStart.toLocaleDateString('th-TH',{day:'numeric',month:'short'})} – ${weekEnd.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'})}`;
+
+  const box = document.getElementById('shiftScheduleGrid');
+  if (!box) return;
+  box.innerHTML = '<div class="empty-row"><div class="spinner"></div></div>';
+  // สลับสัปดาห์/โหลดใหม่แต่ละครั้ง — เคลียร์การเลือกทิ้ง กันพลาดไปใช้กับสัปดาห์อื่นโดยไม่ตั้งใจ (วันเลือกกลับเป็นค่าเริ่มต้น = ทั้งสัปดาห์)
+  shiftScheduleSelectedEmployees = new Set();
+  shiftScheduleSelectedDays = new Set([0,1,2,3,4,5,6]);
+
+  if (isDemo) {
+    box.innerHTML = '<div class="empty-row" style="padding:16px 0;font-size:11px;">โหมด Demo ไม่รองรับการจัดตารางเวร</div>';
+    return;
+  }
+
+  const { data: emps } = await fetchEmployeePickerList();
+  const scheduleInfo = await fetchShiftScheduleRange(weekStart, weekEnd);
+  shiftScheduleCache = scheduleInfo.map;
+
+  if (!emps || !emps.length) { box.innerHTML = '<div class="empty-row">ยังไม่มีพนักงาน</div>'; return; }
+  if (!allShifts || !allShifts.length) {
+    box.innerHTML = '<div class="empty-row">ยังไม่ได้ตั้งกะไว้เลย — ไปตั้งกะที่แท็บ "คำขอโอที" ก่อน (ใช้ตารางกะร่วมกัน)</div>';
+    return;
+  }
+
+  const WD_LABELS = ['จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์','อาทิตย์'];
+  const dates = Array.from({length:7}, (_,i) => { const d = new Date(weekStart); d.setDate(d.getDate()+i); return d; });
+  const shiftOptionsHtml = `<option value="">หยุด (ไม่มีกะ)</option>${allShifts.map(s => `<option value="${s.id}">${escapeHtml(s.name)} (${s.start})</option>`).join('')}`;
+
+  // ── แถบตั้งกะแบบกลุ่ม ──
+  let html = `<div class="roster-bulk-bar" style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px;margin-bottom:10px;background:var(--bg);border:1px solid var(--border);border-radius:10px;">
+    <span style="font-size:11px;color:var(--muted);">ตั้งกะให้:</span>
+    <select class="field-sm" id="rosterBulkShiftSelect" style="width:auto;font-size:11px;">${shiftOptionsHtml}</select>
+    <button class="btn-sm primary" id="rosterBulkApplyBtn" style="font-size:11px;" onclick="applyBulkShiftToSelection()">✓ ใช้กับที่เลือกไว้</button>
+    <span id="rosterSelectedCount" style="font-size:10.5px;color:var(--muted);">— ยังไม่ได้เลือกพนักงาน —</span>
+  </div>
+  <div style="font-size:10px;color:var(--muted);margin-bottom:8px;">✅ ติ๊กชื่อพนักงาน (เลือกได้หลายคน = ตั้งเป็นกลุ่ม) และ/หรือติ๊กเลือกเฉพาะบางวันที่ช่องหัวตาราง (ค่าเริ่มต้นติ๊กทั้งสัปดาห์ไว้ให้แล้ว) แล้วกด "ใช้กับที่เลือกไว้"</div>`;
+
+  html += `<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:11px;min-width:760px;">
+    <thead><tr>
+      <th style="text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);white-space:nowrap;">
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+          <input type="checkbox" id="rosterSelectAll" onchange="toggleRosterSelectAll(this.checked)"> พนักงาน
+        </label>
+      </th>
+      ${dates.map((d,i) => `<th style="padding:8px 6px;border-bottom:1px solid var(--border);white-space:nowrap;">
+        <label style="display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;">
+          <input type="checkbox" class="roster-day-check" checked onchange="toggleRosterDaySelect(${i}, this.checked)">
+          <span>${WD_LABELS[i]}<br><span style="font-weight:400;color:var(--muted);">${d.getDate()}/${d.getMonth()+1}</span></span>
+        </label>
+      </th>`).join('')}
+    </tr></thead><tbody>`;
+  emps.forEach(emp => {
+    html += `<tr><td style="padding:6px 10px;border-bottom:1px solid var(--border);white-space:nowrap;">
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+        <input type="checkbox" class="roster-emp-check" data-emp="${emp.id}" onchange="toggleRosterEmpSelect('${emp.id}', this.checked)">
+        ${escapeHtml(emp.name)}
+      </label>
+    </td>`;
+    dates.forEach(d => {
+      const dateStr = toLocalDateStr(d);
+      const key = emp.id + '|' + dateStr;
+      const currentShiftId = shiftScheduleCache[key] || '';
+      html += `<td style="padding:4px;border-bottom:1px solid var(--border);text-align:center;">
+        <select class="field-sm" style="font-size:10.5px;padding:4px;" onchange="setShiftScheduleCell('${emp.id}','${dateStr}', this.value)">
+          <option value="">หยุด</option>
+          ${allShifts.map(s => `<option value="${s.id}" ${currentShiftId===s.id?'selected':''}>${escapeHtml(s.name)} (${s.start})</option>`).join('')}
+        </select>
+      </td>`;
+    });
+    html += `</tr>`;
+  });
+  html += `</tbody></table></div>`;
+  box.innerHTML = html;
+}
+
+function toggleRosterEmpSelect(empId, checked) {
+  if (checked) shiftScheduleSelectedEmployees.add(empId); else shiftScheduleSelectedEmployees.delete(empId);
+  const master = document.getElementById('rosterSelectAll');
+  const boxes = document.querySelectorAll('.roster-emp-check');
+  if (master) master.checked = boxes.length > 0 && [...boxes].every(cb => cb.checked);
+  updateRosterSelectedCountLabel();
+}
+
+function toggleRosterDaySelect(dayIdx, checked) {
+  if (checked) shiftScheduleSelectedDays.add(dayIdx); else shiftScheduleSelectedDays.delete(dayIdx);
+  updateRosterSelectedCountLabel();
+}
+
+function toggleRosterSelectAll(checked) {
+  document.querySelectorAll('.roster-emp-check').forEach(cb => {
+    cb.checked = checked;
+    if (checked) shiftScheduleSelectedEmployees.add(cb.dataset.emp); else shiftScheduleSelectedEmployees.delete(cb.dataset.emp);
+  });
+  updateRosterSelectedCountLabel();
+}
+
+function updateRosterSelectedCountLabel() {
+  const el = document.getElementById('rosterSelectedCount');
+  if (!el) return;
+  if (!shiftScheduleSelectedEmployees.size) { el.textContent = '— ยังไม่ได้เลือกพนักงาน —'; return; }
+  el.textContent = `เลือกไว้ ${shiftScheduleSelectedEmployees.size} คน × ${shiftScheduleSelectedDays.size} วัน`;
+}
+
+// ตั้งกะ (หรือ "หยุด") ให้พนักงานที่ติ๊กไว้ทุกคน ในวันที่ติ๊กไว้ทุกวัน ภายในสัปดาห์ที่กำลังดูอยู่ — ในคำสั่งเดียว
+async function applyBulkShiftToSelection() {
+  const shiftId = document.getElementById('rosterBulkShiftSelect').value; // '' = หยุด (ไม่มีกะ)
+  if (!shiftScheduleSelectedEmployees.size) { showToast('⚠️ เลือกพนักงานอย่างน้อย 1 คนก่อน (ติ๊กที่ชื่อ)', 'a'); return; }
+  if (!shiftScheduleSelectedDays.size) { showToast('⚠️ เลือกวันอย่างน้อย 1 วันก่อน (ติ๊กที่หัวตาราง)', 'a'); return; }
+
+  const weekStart = shiftScheduleWeekStart;
+  const dates = Array.from(shiftScheduleSelectedDays).map(i => { const d = new Date(weekStart); d.setDate(d.getDate()+i); return toLocalDateStr(d); });
+  const empIds = Array.from(shiftScheduleSelectedEmployees);
+
+  const btn = document.getElementById('rosterBulkApplyBtn');
+  if (btn) { btn.disabled = true; btn.textContent = 'กำลังบันทึก…'; }
+  try {
+    if (!shiftId) {
+      // "หยุด" — ลบทุกคู่ (พนักงาน, วันที่) ที่เลือกไว้ทิ้ง
+      const { error } = await sb.from('shift_schedule').delete().in('employee_id', empIds).in('date', dates);
+      if (error) throw error;
+    } else {
+      const rows = [];
+      empIds.forEach(eid => dates.forEach(d => rows.push({ employee_id: eid, date: d, shift_id: shiftId, company_id: currentCompany?.id || null })));
+      let { error } = await sb.from('shift_schedule').upsert(rows, { onConflict: 'employee_id,date' });
+      if (error && isMissingColumnError(error, 'company_id')) {
+        const rowsNoCompany = rows.map(({ company_id, ...r }) => r);
+        ({ error } = await sb.from('shift_schedule').upsert(rowsNoCompany, { onConflict: 'employee_id,date' }));
+      }
+      if (error) throw error;
+    }
+    showToast(`✅ ตั้งกะให้ ${empIds.length} คน × ${dates.length} วัน สำเร็จ`, 'g');
+    await loadShiftScheduleTab(); // โหลดกริดใหม่ทั้งหมด (การเลือกจะถูกล้างไปด้วยโดยตั้งใจ กันกดซ้ำผิดช่วง)
+  } catch(e) {
+    if (isMissingTableError(e, 'shift_schedule')) {
+      const warnEl = document.getElementById('shiftScheduleSchemaWarning');
+      if (warnEl) warnEl.style.display = 'flex';
+    }
+    showToast('❌ บันทึกไม่สำเร็จ: ' + e.message, 'r');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '✓ ใช้กับที่เลือกไว้'; }
+  }
+}
+
+async function setShiftScheduleCell(employeeId, dateStr, shiftId) {
+  try {
+    if (!shiftId) {
+      // เลือก "หยุด" — ลบแถวเดิมทิ้ง (ถ้ามี)
+      const { error } = await sb.from('shift_schedule').delete().eq('employee_id', employeeId).eq('date', dateStr);
+      if (error) throw error;
+      delete shiftScheduleCache[employeeId + '|' + dateStr];
+      showToast('✅ ตั้งเป็นวันหยุดแล้ว', 'g');
+      return;
+    }
+    const payload = { employee_id: employeeId, date: dateStr, shift_id: shiftId, company_id: currentCompany?.id || null };
+    let { error } = await sb.from('shift_schedule').upsert(payload, { onConflict: 'employee_id,date' });
+    if (error && isMissingColumnError(error, 'company_id')) {
+      const { company_id, ...rest } = payload;
+      ({ error } = await sb.from('shift_schedule').upsert(rest, { onConflict: 'employee_id,date' }));
+    }
+    if (error) throw error;
+    shiftScheduleCache[employeeId + '|' + dateStr] = shiftId;
+    showToast('✅ บันทึกกะแล้ว', 'g');
+  } catch(e) {
+    if (isMissingTableError(e, 'shift_schedule')) {
+      const warnEl = document.getElementById('shiftScheduleSchemaWarning');
+      if (warnEl) warnEl.style.display = 'flex';
+    }
+    showToast('❌ บันทึกไม่สำเร็จ: ' + e.message, 'r');
+  }
 }
 
 async function exportMonthlyCSV() {
@@ -6254,6 +7154,180 @@ async function exportMonthlyCSV() {
 // ══════════════════════════════════════
 let editingEmpId = null;
 
+// ══════════════════════════════════════
+//  IMPORT พนักงานจำนวนมากจาก CSV
+// ══════════════════════════════════════
+const EMPLOYEE_IMPORT_HEADERS = ['ชื่อ-นามสกุล','อีเมล','PIN(4หลัก)','ตำแหน่งงาน','รหัสพนักงาน','โควตาพักร้อน','โควตาป่วย','โควตากิจ','โควตาลากิจพิเศษ','ประเภทจ่ายเงิน(monthly/daily/hourly)','อัตราค่าจ้าง'];
+let pendingImportRows = [];
+
+function toggleImportPanel() {
+  const el = document.getElementById('empImportPanel');
+  if (el) el.style.display = (el.style.display === 'none' || !el.style.display) ? 'block' : 'none';
+}
+
+function downloadEmployeeImportTemplate() {
+  const example1 = ['สมชาย ใจดี','somchai@example.com','1234','พนักงานขาย','EMP001','6','30','0','3','monthly','15000'];
+  const example2 = ['สมหญิง รักงาน','somying@example.com','5678','แคชเชียร์','EMP002','6','30','0','3','daily','450'];
+  const escape = v => { const s = String(v); return s.includes(',') || s.includes('"') ? `"${s.replace(/"/g,'""')}"` : s; };
+  const csv = [EMPLOYEE_IMPORT_HEADERS, example1, example2].map(r => r.map(escape).join(',')).join('\n');
+  const blob = new Blob(['\ufeff'+csv], { type:'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'employee_import_template.csv'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// CSV parser พื้นฐาน — รองรับฟิลด์ที่มีเครื่องหมายคำพูดครอบ (เผื่อชื่อ/ตำแหน่งมีคอมม่าอยู่ในนั้น)
+function parseCSV(text) {
+  const rows = [];
+  let row = [], field = '', inQuotes = false;
+  text = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inQuotes) {
+      if (c === '"') { if (text[i+1] === '"') { field += '"'; i++; } else { inQuotes = false; } }
+      else field += c;
+    } else {
+      if (c === '"') inQuotes = true;
+      else if (c === ',') { row.push(field); field = ''; }
+      else if (c === '\n') { row.push(field); rows.push(row); row = []; field = ''; }
+      else field += c;
+    }
+  }
+  if (field !== '' || row.length) { row.push(field); rows.push(row); }
+  return rows.filter(r => !(r.length === 1 && r[0].trim() === ''));
+}
+
+function normalizeImportPayType(v) {
+  const s = (v || '').trim().toLowerCase();
+  if (s === 'daily' || s === 'รายวัน') return 'daily';
+  if (s === 'hourly' || s === 'รายชั่วโมง') return 'hourly';
+  return 'monthly';
+}
+
+function handleEmployeeImportFile(ev) {
+  const file = ev.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const rows = parseCSV(e.target.result);
+      if (rows.length < 2) { showToast('⚠️ ไฟล์ว่างเปล่าหรือไม่มีข้อมูล', 'a'); return; }
+      const dataRows = rows.slice(1); // แถวแรกเป็นหัวตาราง ข้ามไป
+      pendingImportRows = dataRows.map((r, idx) => {
+        const [name, email, pin, position, code, qVac, qSick, qPer, qOther, payType, payRate] = r.map(c => (c || '').trim());
+        const errors = [];
+        if (!name) errors.push('ไม่มีชื่อ');
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.push('อีเมลไม่ถูกต้อง');
+        if (!pin || !/^\d{4}$/.test(pin)) errors.push('PIN ต้องเป็นตัวเลข 4 หลัก');
+        return {
+          rowNum: idx + 2, name, email, pin, position, employee_code: code,
+          leave_quota_vacation: qVac !== '' ? Number(qVac) : undefined,
+          leave_quota_sick: qSick !== '' ? Number(qSick) : undefined,
+          leave_quota_personal: qPer !== '' ? Number(qPer) : undefined,
+          leave_quota_other: qOther !== '' ? Number(qOther) : undefined,
+          pay_type: normalizeImportPayType(payType),
+          pay_rate: payRate !== '' ? Number(payRate) : undefined,
+          errors,
+        };
+      });
+      // เช็คอีเมลซ้ำกันเองภายในไฟล์ที่อัปโหลดมา
+      const emailCount = {};
+      pendingImportRows.forEach(r => { if (r.email) emailCount[r.email] = (emailCount[r.email] || 0) + 1; });
+      pendingImportRows.forEach(r => { if (r.email && emailCount[r.email] > 1) r.errors.push('อีเมลซ้ำกันในไฟล์'); });
+      renderImportPreview();
+    } catch(err) {
+      showToast('❌ อ่านไฟล์ไม่สำเร็จ: ' + err.message, 'r');
+    }
+  };
+  reader.readAsText(file, 'utf-8');
+}
+
+function renderImportPreview() {
+  const box = document.getElementById('empImportPreview');
+  if (!box) return;
+  const validCount = pendingImportRows.filter(r => !r.errors.length).length;
+  const invalidCount = pendingImportRows.length - validCount;
+  let html = `<div style="font-size:12px;margin-bottom:8px;">พบ ${pendingImportRows.length} แถว — ✅ ถูกต้อง ${validCount} แถว${invalidCount ? ` ⚠️ มีปัญหา ${invalidCount} แถว (จะข้ามตอนนำเข้า)` : ''}</div>`;
+  html += `<div style="max-height:260px;overflow:auto;border:1px solid var(--border);border-radius:8px;">`;
+  html += pendingImportRows.map(r => `
+    <div style="display:flex;gap:8px;padding:6px 10px;border-bottom:1px solid var(--border);font-size:11px;${r.errors.length ? 'background:#FEF2F2;' : ''}">
+      <div style="width:26px;color:var(--muted);flex-shrink:0;">#${r.rowNum}</div>
+      <div style="flex:1;min-width:0;">${escapeHtml(r.name || '-')} — ${escapeHtml(r.email || '-')}</div>
+      <div style="color:var(--red);flex-shrink:0;">${escapeHtml(r.errors.join(', '))}</div>
+    </div>`).join('');
+  html += `</div>`;
+  if (validCount > 0) {
+    html += `<button class="btn-sm primary" style="font-size:11px;margin-top:10px;" id="empImportConfirmBtn" onclick="confirmEmployeeImport()">✓ ยืนยันนำเข้า ${validCount} คน</button>`;
+  }
+  box.innerHTML = html;
+}
+
+async function confirmEmployeeImport() {
+  const validRows = pendingImportRows.filter(r => !r.errors.length);
+  if (!validRows.length) return;
+  if (isDemo) { showToast('⚠️ ไม่สามารถนำเข้าในโหมด Demo', 'a'); return; }
+  const btn = document.getElementById('empImportConfirmBtn');
+  if (btn) btn.disabled = true;
+
+  let successCount = 0;
+  const failedRows = [];
+  for (let i = 0; i < validRows.length; i++) {
+    const r = validRows[i];
+    if (btn) btn.textContent = `กำลังนำเข้า… (${i+1}/${validRows.length})`;
+    try {
+      const payload = {
+        name: r.name, email: r.email, role: 'employee',
+        position: r.position || null, employee_code: r.employee_code || null,
+        pin: await sha256(r.pin),
+      };
+      if (currentCompany?.id) payload.company_id = currentCompany.id;
+      if (r.leave_quota_vacation !== undefined) payload.leave_quota_vacation = r.leave_quota_vacation;
+      if (r.leave_quota_sick !== undefined) payload.leave_quota_sick = r.leave_quota_sick;
+      if (r.leave_quota_personal !== undefined) payload.leave_quota_personal = r.leave_quota_personal;
+      if (r.leave_quota_other !== undefined) payload.leave_quota_other = r.leave_quota_other;
+      payload.pay_type = r.pay_type;
+      if (r.pay_rate !== undefined) payload.pay_rate = r.pay_rate;
+
+      let workingPayload = { ...payload };
+      let { error } = await sb.from('employees').insert(workingPayload);
+      if (error && isMissingColumnError(error, 'company_id')) {
+        const { company_id, ...rest } = workingPayload;
+        workingPayload = rest;
+        ({ error } = await sb.from('employees').insert(workingPayload));
+      }
+      if (error && isMissingColumnError(error, 'leave_quota_vacation')) {
+        const { leave_quota_vacation, leave_quota_sick, leave_quota_personal, leave_quota_other, ...noQuota } = workingPayload;
+        workingPayload = noQuota;
+        ({ error } = await sb.from('employees').insert(workingPayload));
+      }
+      if (error && isMissingColumnError(error, 'pay_type')) {
+        const { pay_type, pay_rate, ...noPay } = workingPayload;
+        workingPayload = noPay;
+        ({ error } = await sb.from('employees').insert(workingPayload));
+      }
+      if (error) throw error;
+      successCount++;
+    } catch(e) {
+      failedRows.push(`แถว #${r.rowNum} (${r.email}): ${e.message}`);
+    }
+  }
+
+  if (failedRows.length) {
+    showToast(`⚠️ นำเข้าสำเร็จ ${successCount}/${validRows.length} คน — ที่เหลือผิดพลาด ดูรายละเอียดด้านล่าง`, 'a');
+    const box = document.getElementById('empImportPreview');
+    if (box) box.innerHTML += `<div style="margin-top:10px;font-size:11px;color:var(--red);">${failedRows.map(escapeHtml).join('<br>')}</div>`;
+    if (btn) { btn.disabled = false; btn.textContent = `✓ ยืนยันนำเข้า ${validRows.length} คน`; }
+  } else {
+    showToast(`✅ นำเข้าพนักงานสำเร็จ ${successCount} คน`, 'g');
+    const fileInput = document.getElementById('empImportFile');
+    if (fileInput) fileInput.value = '';
+    const box = document.getElementById('empImportPreview');
+    if (box) box.innerHTML = '';
+    pendingImportRows = [];
+  }
+  loadEmployeeList();
+}
+
 async function loadEmployeeList() {
   if (isDemo) {
     document.getElementById('empList').innerHTML = `
@@ -6269,9 +7343,14 @@ async function loadEmployeeList() {
   }
   document.getElementById('empList').innerHTML = '<div class="empty-row"><div class="spinner"></div></div>';
   const BASE_COLS = 'id,name,email,role,position,employee_code,avatar_url';
-  const PERM_COLS = 'is_super_admin,can_approve_leave,can_approve_ot,can_approve_claim';
-  const QUOTA_COLS = 'leave_quota_vacation,leave_quota_sick,leave_quota_personal,leave_quota_other';
-  let data, error, hasPerm = true, hasQuota = true;
+  const OPT_GROUPS = [
+    { cols: 'is_super_admin,can_approve_leave,can_approve_ot,can_approve_claim', probeCol: 'is_super_admin', extraProbes: ['can_approve_leave','can_approve_ot','can_approve_claim'], warnId: 'empPermSchemaWarning' },
+    { cols: 'leave_quota_vacation,leave_quota_sick,leave_quota_personal,leave_quota_other', probeCol: 'leave_quota_vacation', warnId: 'empQuotaSchemaWarning' },
+    { cols: 'pay_type,pay_rate', probeCol: 'pay_type', warnId: 'empPaySchemaWarning' },
+    { cols: 'is_active', probeCol: 'is_active', warnId: 'empActiveSchemaWarning' },
+  ];
+  let included = OPT_GROUPS.map(() => true);
+  let data, error;
   async function tryEmpSelect(cols) {
     let q = sb.from('employees').select(cols);
     if (currentCompany?.id) q = q.eq('company_id', currentCompany.id);
@@ -6281,40 +7360,47 @@ async function loadEmployeeList() {
     }
     return r;
   }
-  ({ data, error } = await tryEmpSelect(`${BASE_COLS},${PERM_COLS},${QUOTA_COLS}`));
-  if (error && isMissingColumnError(error, 'leave_quota_vacation')) {
-    hasQuota = false;
-    ({ data, error } = await tryEmpSelect(`${BASE_COLS},${PERM_COLS}`));
+  function buildCols() {
+    return [BASE_COLS, ...OPT_GROUPS.filter((g,i) => included[i]).map(g => g.cols)].join(',');
   }
-  if (error && (isMissingColumnError(error, 'is_super_admin') || isMissingColumnError(error, 'can_approve_leave') || isMissingColumnError(error, 'can_approve_ot') || isMissingColumnError(error, 'can_approve_claim'))) {
-    hasPerm = false;
-    ({ data, error } = await tryEmpSelect(hasQuota ? `${BASE_COLS},${QUOTA_COLS}` : BASE_COLS));
-    if (error && isMissingColumnError(error, 'leave_quota_vacation')) {
-      hasQuota = false;
-      ({ data, error } = await tryEmpSelect(BASE_COLS));
-    }
+  for (let attempt = 0; attempt <= OPT_GROUPS.length; attempt++) {
+    ({ data, error } = await tryEmpSelect(buildCols()));
+    if (!error) break;
+    const missingIdx = OPT_GROUPS.findIndex((g, i) => included[i] &&
+      (isMissingColumnError(error, g.probeCol) || (g.extraProbes||[]).some(c => isMissingColumnError(error, c))));
+    if (missingIdx === -1) break; // error ไม่เกี่ยวกับคอลัมน์ที่ยังไม่มี — หยุด cascade แล้วโยน error ตามปกติ
+    included[missingIdx] = false;
   }
-  document.getElementById('empPermSchemaWarning').style.display = hasPerm ? 'none' : 'flex';
-  document.getElementById('empQuotaSchemaWarning').style.display = hasQuota ? 'none' : 'flex';
+  OPT_GROUPS.forEach((g, i) => {
+    document.getElementById(g.warnId).style.display = included[i] ? 'none' : 'flex';
+  });
   if (error) { showToast('❌ '+error.message,'r'); return; }
   if (!data?.length) { document.getElementById('empList').innerHTML = '<div class="empty-row">ยังไม่มีพนักงาน</div>'; return; }
   window._empCache = window._empCache || {};
   data.forEach(e => window._empCache[e.id] = e);
-  document.getElementById('empList').innerHTML = data.map(e => `
-    <div class="emp-table-row" style="grid-template-columns:1fr auto;align-items:flex-start;">
+  const showInactive = document.getElementById('empShowInactive')?.checked;
+  const visibleData = showInactive ? data : data.filter(e => e.is_active !== false);
+  if (!visibleData.length) { document.getElementById('empList').innerHTML = '<div class="empty-row">ไม่มีพนักงานที่ใช้งานอยู่ (ลองติ๊ก "แสดงบัญชีที่ปิดใช้งาน" ด้านบน)</div>'; return; }
+  document.getElementById('empList').innerHTML = visibleData.map(e => {
+    const inactive = e.is_active === false;
+    return `
+    <div class="emp-table-row" style="grid-template-columns:1fr auto;align-items:flex-start;${inactive ? 'opacity:0.55;' : ''}">
       <div style="min-width:0;">
         <div style="font-size:13px;font-weight:600;">${escapeHtml(e.name)}</div>
         <div style="font-size:11px;color:var(--muted);word-break:break-all;margin-top:2px;">${escapeHtml(e.email)}</div>
         <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:5px;">
           <span class="badge-s ${e.role==='admin'?'late':'in'}">${roleBadgeLabel(e)}</span>
           ${e.position ? `<span style="font-size:11px;color:var(--muted);">${escapeHtml(e.position)}</span>` : ''}
+          ${inactive ? `<span class="badge-s rejected">🔒 ปิดใช้งานอยู่</span>` : ''}
         </div>
       </div>
       <div style="display:flex;gap:4px;align-items:flex-start;">
         <button class="btn-sm" style="padding:4px 8px;font-size:11px;background:var(--surface2);color:var(--muted);border:1px solid var(--border);" onclick="editEmployee('${e.id}')">✏</button>
+        <button class="btn-sm" style="padding:4px 8px;font-size:11px;background:var(--surface2);color:var(--muted);border:1px solid var(--border);" onclick="toggleEmployeeActive('${e.id}', ${e.is_active !== false})" title="${inactive ? 'เปิดใช้งานอีกครั้ง' : 'ปิดใช้งาน (เช่น พนักงานลาออก) — ประวัติเก่ายังอยู่ครบ'}">${inactive ? '🔓' : '🔒'}</button>
         <button class="btn-sm danger" style="padding:4px 8px;font-size:11px;" onclick="deleteEmployee('${e.id}','${e.name.replace(/'/g,"\'")}')">🗑</button>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 // ป้ายบทบาทในตารางพนักงาน — แยกให้เห็นชัดว่าแอดมินคนนี้เป็น Super Admin หรือแอดมินย่อย (เห็นเฉพาะลา/โอที)
@@ -6345,6 +7431,8 @@ function editEmployee(id) {
   document.getElementById('efQuotaSick').value = e.leave_quota_sick ?? '';
   document.getElementById('efQuotaPersonal').value = e.leave_quota_personal ?? '';
   document.getElementById('efQuotaOther').value = e.leave_quota_other ?? '';
+  document.getElementById('efPayType').value = e.pay_type || 'monthly';
+  document.getElementById('efPayRate').value = e.pay_rate ?? '';
   document.getElementById('efIsSuperAdmin').checked = e.is_super_admin !== false; // ค่าเริ่มต้นถ้ายังไม่มีคอลัมน์นี้ = ถือเป็น Super Admin (พฤติกรรมเดิม)
   document.getElementById('efCanApproveLeave').checked = !!e.can_approve_leave;
   document.getElementById('efCanApproveOt').checked = !!e.can_approve_ot;
@@ -6385,6 +7473,8 @@ function resetEmpForm() {
   document.getElementById('efQuotaSick').value = '';
   document.getElementById('efQuotaPersonal').value = '';
   document.getElementById('efQuotaOther').value = '';
+  document.getElementById('efPayType').value = 'monthly';
+  document.getElementById('efPayRate').value = '';
   document.getElementById('efIsSuperAdmin').checked = false;
   document.getElementById('efCanApproveLeave').checked = false;
   document.getElementById('efCanApproveOt').checked = false;
@@ -6425,6 +7515,9 @@ async function saveEmployee() {
       const raw = document.getElementById('efQuota'+suffix).value.trim();
       if (raw !== '') payload['leave_quota_'+suffix.toLowerCase()] = Number(raw);
     });
+    payload.pay_type = document.getElementById('efPayType').value;
+    const payRateRaw = document.getElementById('efPayRate').value.trim();
+    if (payRateRaw !== '') payload.pay_rate = Number(payRateRaw);
     if (role === 'admin') {
       payload.is_super_admin = document.getElementById('efIsSuperAdmin').checked;
       payload.can_approve_leave = document.getElementById('efCanApproveLeave').checked;
@@ -6463,6 +7556,15 @@ async function saveEmployee() {
     } else {
       document.getElementById('empQuotaSchemaWarning').style.display = 'none';
     }
+    if (error && isMissingColumnError(error, 'pay_type')) {
+      // ฐานข้อมูลยังไม่มีคอลัมน์อัตราค่าจ้าง — บันทึกข้อมูลส่วนอื่นตามปกติก่อน แล้วแจ้งให้รัน SQL
+      document.getElementById('empPaySchemaWarning').style.display = 'flex';
+      const { pay_type, pay_rate, ...noPay } = workingPayload;
+      workingPayload = noPay;
+      ({ error } = await runSave(workingPayload));
+    } else {
+      document.getElementById('empPaySchemaWarning').style.display = 'none';
+    }
     if (error && (isMissingColumnError(error, 'is_super_admin') || isMissingColumnError(error, 'can_approve_leave') || isMissingColumnError(error, 'can_approve_ot') || isMissingColumnError(error, 'can_approve_claim'))) {
       // ฐานข้อมูลยังไม่มีคอลัมน์สิทธิ์แอดมิน — บันทึกข้อมูลส่วนอื่นตามปกติก่อน แล้วแจ้งให้รัน SQL เพื่อเปิดใช้ระบบสิทธิ์ย่อย
       document.getElementById('empPermSchemaWarning').style.display = 'flex';
@@ -6489,6 +7591,30 @@ async function deleteEmployee(id, name) {
   const {error} = await sb.from('employees').delete().eq('id', id);
   if (error) { showToast('❌ '+error.message,'r'); return; }
   showToast('✅ ลบพนักงานสำเร็จ','g');
+  loadEmployeeList();
+}
+
+// เปิด/ปิดการใช้งานบัญชีพนักงาน — ใช้แทนการลบสำหรับคนที่ลาออกแล้ว (ลบจริงมักทำไม่ได้เพราะมีประวัติ
+// เช็คอิน/ลา/OT/เบิกเงินผูกอยู่ ฐานข้อมูลจะปฏิเสธด้วย foreign key constraint) ปิดใช้งานแล้วล็อกอินไม่ได้
+// ทันที แต่ประวัติเก่าทั้งหมดยังอยู่ครบสำหรับดูรายงานย้อนหลัง
+async function toggleEmployeeActive(id, currentlyActive) {
+  const willBeActive = !currentlyActive;
+  const confirmMsg = willBeActive
+    ? 'เปิดใช้งานบัญชีนี้อีกครั้ง? พนักงานจะล็อกอินเข้าระบบได้ตามปกติ'
+    : 'ปิดใช้งานบัญชีนี้? (เช่น พนักงานลาออกแล้ว) พนักงานจะล็อกอินไม่ได้ทันที แต่ประวัติเก่ายังอยู่ครบ ไม่หายไปไหน';
+  if (!confirm(confirmMsg)) return;
+  if (isDemo) { showToast('⚠️ Demo mode','a'); return; }
+  const { error } = await sb.from('employees').update({ is_active: willBeActive }).eq('id', id);
+  if (error) {
+    if (isMissingColumnError(error, 'is_active')) {
+      document.getElementById('empActiveSchemaWarning').style.display = 'flex';
+      showToast('❌ ยังไม่มีคอลัมน์สถานะการใช้งาน — ดูคำแนะนำ SQL ด้านบน', 'r');
+    } else {
+      showToast('❌ ' + error.message, 'r');
+    }
+    return;
+  }
+  showToast(willBeActive ? '✅ เปิดใช้งานบัญชีแล้ว' : '✅ ปิดใช้งานบัญชีแล้ว (ประวัติเก่ายังอยู่ครบ)', 'g');
   loadEmployeeList();
 }
 
@@ -7254,7 +8380,7 @@ async function switchTab(name) {
     await loadShiftsFromStorage();
     const visMap = applyAdminPermissionsUI();
     // ถ้าแอดมินคนนี้ไม่มีสิทธิ์เห็นแท็บ "วันนี้" (ไม่ควรเกิดขึ้น เพราะ today เปิดให้ทุกแอดมินเสมอ) กันไว้ ให้ไปแท็บแรกที่มีสิทธิ์
-    const firstAllowed = visMap ? (['today','monthly','leave','otreq','claim','payslip','employees','news','announce','notify'].find(n => visMap[n]) || 'today') : 'today';
+    const firstAllowed = visMap ? (['today','monthly','holidays','shiftschedule','leave','otreq','claim','payslip','payroll','employees','news','announce','notify'].find(n => visMap[n]) || 'today') : 'today';
     switchSubTab(firstAllowed);
     loadAdminData();
   }
@@ -7394,8 +8520,7 @@ async function loadSummaryData() {
     const maxH = Math.max(1, ...dailyHours);
     barBox.innerHTML = dailyHours.map((h,i) => {
       const pctH = Math.max(3, Math.round((h/maxH)*100));
-      const dow = new Date(yr, mo-1, i+1).getDay();
-      const weekendCls = (dow === 0 || dow === 6) ? ' weekend' : '';
+      const weekendCls = !isWeekday(new Date(yr, mo-1, i+1)) ? ' weekend' : '';
       return `<div class="bar${weekendCls}" style="height:${pctH}%" title="${h.toFixed(1)}h"><span>${i+1}</span></div>`;
     }).join('') || '<div class="empty-row">ไม่มีข้อมูล</div>';
     renderMyLeaveQuota(yr);
@@ -7783,7 +8908,7 @@ async function loadWorkCalendar() {
   for (let d=1; d<=daysInMonth; d++) {
     const dateObj = new Date(yr, mo-1, d);
     const key = toLocalDateStrGlobal(dateObj);
-    const isWeekend = dateObj.getDay()===0 || dateObj.getDay()===6;
+    const isWeekend = !isWeekday(dateObj);
     const isFuture = key > todayStr;
     let cls = 'cal-cell';
     if (isDemo && !isFuture && !isWeekend) {
