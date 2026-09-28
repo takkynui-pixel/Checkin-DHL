@@ -1401,7 +1401,7 @@ select.field-sm { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
         <button type="button" data-lang="en" onclick="setLanguage('en')">EN</button>
       </div>
       <div style="font-size:12px;color:var(--muted);" data-i18n="login_secure">🔒 Secure Login</div>
-      <div class="login-footer-ver">Version 2.65.081 · Powered by VTA-Service</div>
+      <div class="login-footer-ver">Version 2.65.082 · Powered by VTA-Service</div>
     </div>
   </div>
 </div>
@@ -2332,7 +2332,7 @@ CREATE POLICY "Allow all access to payroll_settings" ON payroll_settings FOR ALL
             </div>
             <div>
               <div class="field-lbl-sm">Email (ใช้ Login)</div>
-              <input class="field-sm" id="efEmail" placeholder="gpai-tech" type="email">
+              <input class="field-sm" id="efEmail" placeholder="GPAi-tech" type="email">
             </div>
           </div>
           <div class="emp-form-row">
@@ -2351,7 +2351,7 @@ CREATE POLICY "Allow all access to payroll_settings" ON payroll_settings FOR ALL
           <div class="emp-form-row">
             <div>
               <div class="field-lbl-sm">ตำแหน่งงาน</div>
-              <input class="field-sm" id="efPosition" placeholder="Employee">
+              <input class="field-sm" id="efPosition" placeholder="EMPLOYEE">
             </div>
             <div>
               <div class="field-lbl-sm">รหัสพนักงาน</div>
@@ -3442,8 +3442,8 @@ function buildApprovedLeaveDayMap(leaves, from, to) {
 // ══════════════════════════════════════
 //  SETUP
 // ══════════════════════════════════════
-const SUPABASE_URL = 'https://gmbhjmmjsyfvjuhbparc.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtYmhqbW1qc3lmdmp1aGJwYXJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc3MjM2NTIsImV4cCI6MjEwMzI5OTY1Mn0.63vOrPVMYP4YRcItRVqauBY9VqunyRAmiNsya-NmazE';
+const SUPABASE_URL = 'https://bdzexdpmupxgvpzlvmzi.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJkemV4ZHBtdXB4Z3Zwemx2bXppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyNDM0MTUsImV4cCI6MjA5NzgxOTQxNX0.OeWEVGtgnJ6_COrTnpzpi08BXytz_MCysyOpBLOxMGI';
 
 window.addEventListener('DOMContentLoaded', () => {
   applyI18n(); // แปลภาษาตามที่บันทึกไว้ (localStorage) ตั้งแต่แรกโหลด รวมถึงหน้า Login
@@ -4114,15 +4114,25 @@ async function performAction(photoDataUrl) {
           const lateMin = parseInt(ns.lateMinutes) || 30;
           const ciDate  = new Date();
 
-          // เช็คตามกะก่อน (ใช้กะที่ใกล้เคียงเวลาเช็คอินที่สุด — เหมือนระบบขอเหตุผลก่อนเข้างาน) ถ้าไม่มีกะค่อยใช้ WORK_START_HOUR
-          const matchedShift = getRelevantShiftForCheckin(ciDate);
+          // ตัดสิน "สาย" จากกะที่แอดมินกำหนดให้พนักงานคนนี้ในตารางเวรของวันนี้ (ให้ตรงกับรายงาน/หน้าแอป)
+          // ถ้ายังไม่ได้ใช้ระบบตารางเวร (ตาราง shift_schedule ยังไม่มี) ค่อยใช้วิธีเดิม: เดากะจากเวลาเช็คอิน → เวลามาตรฐาน
+          // หมายเหตุ: ส่วนนี้ทำงานหลังบันทึกเช็คอินและแสดงผลสำเร็จให้พนักงานเห็นแล้ว จึงไม่ทำให้การเช็คอินช้าลง
           let isActuallyLate = false;
-          if (matchedShift) {
-            isActuallyLate = isLateForShift(ciDate, matchedShift);
+          const ciDayStart = new Date(ciDate); ciDayStart.setHours(0,0,0,0);
+          const todaySchedule = await fetchShiftScheduleRange(ciDayStart, ciDayStart, currentUser.id);
+          if (todaySchedule.exists) {
+            const resolved = resolveShiftForEmployeeDay(todaySchedule, currentUser.id, toLocalDateStr(ciDate));
+            // วันที่ไม่มีกะกำหนดให้ (วันหยุดของเขา) ไม่ถือว่าสาย
+            isActuallyLate = !resolved.isScheduledOff && checkLateAgainstResolved(ciDate, resolved);
           } else {
-            const limitMs = (WORK_START_HOUR * 60 + WORK_START_MIN + lateMin) * 60000;
-            const midnightMs = new Date(ciDate).setHours(0,0,0,0);
-            isActuallyLate = (ciDate - midnightMs) > limitMs;
+            const matchedShift = getRelevantShiftForCheckin(ciDate);
+            if (matchedShift) {
+              isActuallyLate = isLateForShift(ciDate, matchedShift);
+            } else {
+              const limitMs = (WORK_START_HOUR * 60 + WORK_START_MIN + lateMin) * 60000;
+              const midnightMs = new Date(ciDate).setHours(0,0,0,0);
+              isActuallyLate = (ciDate - midnightMs) > limitMs;
+            }
           }
 
           if (isActuallyLate) {
@@ -5530,7 +5540,7 @@ async function loadMyHistory() {
   }
 
   // ตารางเวรของช่วงวันที่นี้ (ถ้ามีการใช้ระบบตารางเวรแล้ว) — ให้ผลตรงกับที่แอดมินเห็นในรายเดือน/คำนวณเงินเดือน
-  const scheduleInfo = await fetchShiftScheduleRange(new Date(fromVal + 'T00:00:00'), new Date(toVal + 'T23:59:59'));
+  const scheduleInfo = await fetchShiftScheduleRange(new Date(fromVal + 'T00:00:00'), new Date(toVal + 'T23:59:59'), currentUser.id);
 
   let totalDays = 0, totalLate = 0, totalHoursMs = 0;
 
@@ -6838,22 +6848,31 @@ function getShiftById(id) {
 // ดึงตารางเวรของพนักงาน "ทุกคน" ในช่วงวันที่ที่กำหนด (ใช้ตอนเปิดรายงาน/คำนวณเงินเดือนทั้งเดือน)
 // คืนค่า { exists: bool, map: {'employeeId|YYYY-MM-DD': shift_id} }
 // exists=false หมายถึงยังไม่ได้สร้างตาราง shift_schedule เลย → จุดเรียกใช้ควร fallback เป็นพฤติกรรมเดิม (เวลามาตรฐานเดียวกันทุกคน)
-async function fetchShiftScheduleRange(from, to) {
+// employeeId (ไม่บังคับ): ถ้าระบุ จะดึงเฉพาะของพนักงานคนนั้น (เร็วกว่ามากตอนเช็คอิน/ดูประวัติตัวเอง)
+// ดึงเป็นหน้าละ 1,000 แถววนจนครบ — Supabase ตัดผลลัพธ์ที่ 1,000 แถวโดยไม่แจ้งเตือน ซึ่งเดือนหนึ่งของพนักงาน 100 คนเกินได้ง่าย
+async function fetchShiftScheduleRange(from, to, employeeId) {
   const warnEl = document.getElementById('shiftScheduleSchemaWarning');
   if (isDemo || !sb) return { exists: false, map: {} };
   try {
-    let q = sb.from('shift_schedule').select('employee_id,date,shift_id')
-      .gte('date', toLocalDateStr(from)).lte('date', toLocalDateStr(to));
-    if (currentCompany?.id) q = q.eq('company_id', currentCompany.id);
-    let { data, error } = await q;
-    if (error && isMissingColumnError(error, 'company_id')) {
-      ({ data, error } = await sb.from('shift_schedule').select('employee_id,date,shift_id')
-        .gte('date', toLocalDateStr(from)).lte('date', toLocalDateStr(to)));
+    const PAGE = 1000;
+    const all = [];
+    for (let offset = 0; ; offset += PAGE) {
+      const build = (withCompany) => {
+        let q = sb.from('shift_schedule').select('employee_id,date,shift_id')
+          .gte('date', toLocalDateStr(from)).lte('date', toLocalDateStr(to));
+        if (withCompany && currentCompany?.id) q = q.eq('company_id', currentCompany.id);
+        if (employeeId) q = q.eq('employee_id', employeeId);
+        return q.order('date').order('employee_id').range(offset, offset + PAGE - 1);
+      };
+      let { data, error } = await build(true);
+      if (error && isMissingColumnError(error, 'company_id')) ({ data, error } = await build(false));
+      if (error) throw error;
+      all.push(...(data || []));
+      if (!data || data.length < PAGE) break;
     }
-    if (error) throw error;
     if (warnEl) warnEl.style.display = 'none';
     const map = {};
-    (data || []).forEach(r => { map[r.employee_id + '|' + r.date] = r.shift_id; });
+    all.forEach(r => { map[r.employee_id + '|' + r.date] = r.shift_id; });
     return { exists: true, map };
   } catch(e) {
     if (isMissingTableError(e, 'shift_schedule')) {
