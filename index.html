@@ -1401,7 +1401,7 @@ select.field-sm { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
         <button type="button" data-lang="en" onclick="setLanguage('en')">EN</button>
       </div>
       <div style="font-size:12px;color:var(--muted);" data-i18n="login_secure">🔒 Secure Login</div>
-      <div class="login-footer-ver">Version 2.65.082 · Powered by VTA-Service</div>
+      <div class="login-footer-ver">Version 2.65.084 · Powered by VTA-Service</div>
     </div>
   </div>
 </div>
@@ -3442,8 +3442,8 @@ function buildApprovedLeaveDayMap(leaves, from, to) {
 // ══════════════════════════════════════
 //  SETUP
 // ══════════════════════════════════════
-const SUPABASE_URL = 'https://gmbhjmmjsyfvjuhbparc.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtYmhqbW1qc3lmdmp1aGJwYXJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc3MjM2NTIsImV4cCI6MjEwMzI5OTY1Mn0.63vOrPVMYP4YRcItRVqauBY9VqunyRAmiNsya-NmazE';
+const SUPABASE_URL = 'https://bdzexdpmupxgvpzlvmzi.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJkemV4ZHBtdXB4Z3Zwemx2bXppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyNDM0MTUsImV4cCI6MjA5NzgxOTQxNX0.OeWEVGtgnJ6_COrTnpzpi08BXytz_MCysyOpBLOxMGI';
 
 window.addEventListener('DOMContentLoaded', () => {
   applyI18n(); // แปลภาษาตามที่บันทึกไว้ (localStorage) ตั้งแต่แรกโหลด รวมถึงหน้า Login
@@ -4657,6 +4657,30 @@ function checkLeaveTodayWindow(now = new Date()) {
   return { ok:false, nearestShift };
 }
 
+// เฉพาะ "ลาป่วย" เท่านั้นที่แจ้งย้อนหลังได้ ประเภทอื่นห้ามเลือกวันในอดีต
+function isBackdateAllowedForType(type) {
+  return type === 'sick';
+}
+
+// ปรับ .min ของช่องวันที่ตามประเภทลาที่เลือกอยู่ — ลาป่วยเอา .min ออกทั้งหมด (ย้อนหลังได้ไม่จำกัด)
+// ประเภทอื่นตั้ง .min = วันนี้ (ห้ามเลือกวันในอดีต) หมายเหตุ: การพึ่งพา .min เพียงอย่างเดียวไม่พอเพราะพฤติกรรม
+// native date picker ของ Android/iOS ไม่ตรงกัน (ดูหมายเหตุที่ submitLeaveRequest) จึงต้องมีการตรวจซ้ำตอนส่งคำขอด้วย
+function applyLeaveDateMinConstraint() {
+  const todayStr = toLocalDateStr(new Date());
+  const startEl = document.getElementById('leaveStartDate');
+  const endEl = document.getElementById('leaveEndDate');
+  if (isBackdateAllowedForType(selectedLeaveType)) {
+    startEl.removeAttribute('min');
+    endEl.removeAttribute('min');
+  } else {
+    startEl.min = todayStr;
+    endEl.min = todayStr;
+    // ถ้าสลับมาจากลาป่วย (ที่อาจเลือกวันในอดีตไว้) เป็นประเภทอื่น ให้รีเซ็ตวันที่กลับมาเป็นวันนี้กันสับสน
+    if (startEl.value && startEl.value < todayStr) { startEl.value = todayStr; syncDtField('leaveStartDate'); }
+    if (endEl.value && endEl.value < todayStr) { endEl.value = todayStr; syncDtField('leaveEndDate'); }
+  }
+}
+
 function openLeaveModal() {
   if (!currentUser) return;
   // reset ฟอร์ม
@@ -4666,8 +4690,7 @@ function openLeaveModal() {
   const todayStr = toLocalDateStr(new Date());
   document.getElementById('leaveStartDate').value = todayStr;
   document.getElementById('leaveEndDate').value = todayStr;
-  document.getElementById('leaveStartDate').min = todayStr;
-  document.getElementById('leaveEndDate').min = todayStr;
+  applyLeaveDateMinConstraint(); // ค่าเริ่มต้นเป็น "พักร้อน" → ห้ามลาย้อนหลัง
   document.getElementById('leavePartialDay').checked = false;
   document.getElementById('leaveTimeRow').style.display = 'none';
   document.getElementById('leaveStartTime').value = '09:00';
@@ -4692,6 +4715,7 @@ function selectLeaveType(type) {
   selectedLeaveType = type;
   document.querySelectorAll('#leaveTypeGrid .leave-type-opt').forEach(el =>
     el.classList.toggle('sel', el.dataset.type === type));
+  applyLeaveDateMinConstraint();
 }
 
 function onLeaveDateChange() {
@@ -4872,6 +4896,13 @@ async function submitLeaveRequest() {
 
   if (!startDate || !endDate) { showToast('⚠️ กรุณาเลือกวันที่ลา','a'); return; }
   if (endDate < startDate) { showToast('⚠️ วันที่สิ้นสุดต้องไม่ก่อนวันเริ่มลา','a'); return; }
+  // ตรวจซ้ำฝั่ง JS เสมอ (ไม่พึ่งแค่ .min ของ native date picker) เพราะ Android/iOS บังคับใช้ .min ไม่ตรงกัน
+  // — เฉพาะ "ลาป่วย" เท่านั้นที่แจ้งย้อนหลังได้ ประเภทอื่นห้ามเลือกวันในอดีตไม่ว่าจะมาจากช่องทางไหน
+  const todayStrForCheck = toLocalDateStr(new Date());
+  if (!isBackdateAllowedForType(selectedLeaveType) && startDate < todayStrForCheck) {
+    showToast('⚠️ ลาย้อนหลังได้เฉพาะ "ลาป่วย" เท่านั้น กรุณาเลือกวันที่ปัจจุบันหรืออนาคต','a');
+    return;
+  }
   if (!reason) { showToast('⚠️ กรุณาระบุเหตุผลการลา','a'); return; }
   if (isPartial && (!startTime || !endTime || endTime <= startTime)) {
     showToast('⚠️ กรุณาระบุช่วงเวลาลาให้ถูกต้อง','a'); return;
