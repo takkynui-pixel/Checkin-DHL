@@ -1401,7 +1401,7 @@ select.field-sm { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
         <button type="button" data-lang="en" onclick="setLanguage('en')">EN</button>
       </div>
       <div style="font-size:12px;color:var(--muted);" data-i18n="login_secure">🔒 Secure Login</div>
-      <div class="login-footer-ver">Version 2.65.084 · Powered by VTA-Service</div>
+      <div class="login-footer-ver">Version 2.65.087 · Powered by VTA-Service</div>
     </div>
   </div>
 </div>
@@ -2115,6 +2115,30 @@ create policy "Allow all access to shift_schedule" on shift_schedule for all usi
 ALTER TABLE leave_requests ADD CONSTRAINT leave_requests_status_check
   CHECK (status IN ('pending','approved','rejected','cancel_requested','cancelled'));</code>
         </div>
+        <div id="leaveDecisionSchemaWarning" class="leave-warning" style="display:none;margin-bottom:10px;flex-direction:column;align-items:stretch;gap:6px;">
+          <div>⚠️ ตาราง <code>leave_requests</code> ยังไม่มีคอลัมน์เก็บ "ผู้อนุมัติ/เวลา/เหตุผลที่ไม่อนุมัติ" กรุณารันคำสั่งนี้ใน Supabase SQL editor แล้วลองใหม่:</div>
+          <code style="display:block;background:#00000010;padding:8px;border-radius:6px;font-size:10.5px;user-select:all;white-space:pre-wrap;">ALTER TABLE leave_requests
+  ADD COLUMN IF NOT EXISTS approved_by text,
+  ADD COLUMN IF NOT EXISTS approved_by_name text,
+  ADD COLUMN IF NOT EXISTS decided_at timestamptz,
+  ADD COLUMN IF NOT EXISTS reject_reason text;</code>
+        </div>
+        <div style="margin-bottom:12px;">
+          <button class="btn-sm" style="background:var(--surface2);color:var(--text);border:1px solid var(--border);font-size:11px;" onclick="toggleLeaveDocSettings()">✍️ ตั้งค่าเอกสารใบลา (ลายเซ็น / โลโก้)</button>
+          <div id="leaveDocSettings" style="display:none;margin-top:10px;padding:12px;border:1px solid var(--border);border-radius:12px;background:var(--surface);">
+            <div style="font-size:12px;font-weight:600;margin-bottom:6px;">ลายเซ็นของคุณ (แปะในใบลาที่คุณอนุมัติ)</div>
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
+              <div style="width:160px;height:64px;border:1px dashed var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;background:#fff;overflow:hidden;"><img id="docSigPreview" alt="" style="max-width:100%;max-height:100%;display:none;"><span id="docSigEmpty" style="font-size:11px;color:#999;">ยังไม่มีลายเซ็น</span></div>
+              <input type="file" id="docSigFile" accept="image/*" onchange="onDocImageChange('sig', this)" style="font-size:11px;max-width:200px;">
+            </div>
+            <div style="font-size:11px;color:var(--muted);margin:-6px 0 12px;">เซ็นลงกระดาษขาวด้วยปากกาสีเข้ม ถ่ายรูปให้ชัด ระบบจะตัดพื้นหลังขาวให้อัตโนมัติ</div>
+            <div style="font-size:12px;font-weight:600;margin-bottom:6px;">โลโก้บริษัท (หัวกระดาษใบลา)</div>
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+              <div style="width:160px;height:64px;border:1px dashed var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;background:#fff;overflow:hidden;"><img id="docLogoPreview" alt="" style="max-width:100%;max-height:100%;display:none;"><span id="docLogoEmpty" style="font-size:11px;color:#999;">ยังไม่มีโลโก้</span></div>
+              <input type="file" id="docLogoFile" accept="image/*" onchange="onDocImageChange('logo', this)" style="font-size:11px;max-width:200px;">
+            </div>
+          </div>
+        </div>
         <div id="leaveAdminList"><div class="empty-row"><div class="spinner"></div></div></div>
       </div><!-- /sv-leave -->
 
@@ -2609,6 +2633,10 @@ on announcements for all using (true) with check (true);</code>
             <button class="btn-sm primary" onclick="saveNotifySettings()">💾 บันทึก</button>
             <button class="btn-sm" style="background:var(--surface2);color:var(--muted);border:1px solid var(--border);" onclick="fetchTgChatId()">📡 ดึง Chat ID อัตโนมัติ</button>
             <button class="btn-sm" style="background:var(--surface2);color:var(--muted);border:1px solid var(--border);" onclick="testTelegramNotify()">🧪 ทดสอบส่ง</button>
+          </div>
+          <div id="notifySchemaWarning" class="leave-warning" style="display:none;margin-top:10px;flex-direction:column;align-items:stretch;gap:6px;">
+            <div>⚠️ ตาราง <code>notify_settings</code> ยังไม่มีคอลัมน์สำหรับกันส่งสรุปซ้ำข้ามอุปกรณ์ กรุณารันคำสั่งนี้ใน Supabase SQL editor:</div>
+            <code style="display:block;background:#00000010;padding:8px;border-radius:6px;font-size:10.5px;user-select:all;white-space:pre-wrap;">ALTER TABLE notify_settings ADD COLUMN IF NOT EXISTS last_summary_date date;</code>
           </div>
         </div>
         <div class="table-card">
@@ -3334,8 +3362,8 @@ function isCheckConstraintError(error) {
 }
 // จำนวนชั่วโมงหลังกะเริ่ม ที่ยังอนุญาตให้แจ้งลาแบบกะทันหันได้
 const LEAVE_LATE_GRACE_HOURS = 2;
-// จำนวนชั่วโมงขั้นต่ำ ก่อนกะจะเลิกงาน ที่ต้องยื่นขอโอทีล่วงหน้า
-const OT_MIN_HOURS_BEFORE_SHIFT_END = 2;
+// ยื่นขอโอทีได้ตั้งแต่ก่อนกะเลิกงาน จนถึงหลังกะเลิกงานไม่เกินกี่นาที (สำหรับโอทีต่อเนื่องหลังเลิกงาน)
+const OT_MAX_MINUTES_AFTER_SHIFT_END = 30;
 
 // วันในสัปดาห์แบบย่อสุด (ใช้ในตาราง "ประวัติของฉัน" บนมือถือ กันตัวอักษรยาวเกินคอลัมน์แคบจนบรรทัดเยื้อง/ไม่ตรงแถว)
 const SHORT_TH_WEEKDAY = ['อา','จ','อ','พ','พฤ','ศ','ส'];
@@ -3442,8 +3470,8 @@ function buildApprovedLeaveDayMap(leaves, from, to) {
 // ══════════════════════════════════════
 //  SETUP
 // ══════════════════════════════════════
-const SUPABASE_URL = 'https://gmbhjmmjsyfvjuhbparc.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtYmhqbW1qc3lmdmp1aGJwYXJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc3MjM2NTIsImV4cCI6MjEwMzI5OTY1Mn0.63vOrPVMYP4YRcItRVqauBY9VqunyRAmiNsya-NmazE';
+const SUPABASE_URL = 'https://bdzexdpmupxgvpzlvmzi.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJkemV4ZHBtdXB4Z3Zwemx2bXppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyNDM0MTUsImV4cCI6MjA5NzgxOTQxNX0.OeWEVGtgnJ6_COrTnpzpi08BXytz_MCysyOpBLOxMGI';
 
 window.addEventListener('DOMContentLoaded', () => {
   applyI18n(); // แปลภาษาตามที่บันทึกไว้ (localStorage) ตั้งแต่แรกโหลด รวมถึงหน้า Login
@@ -3453,7 +3481,7 @@ window.addEventListener('DOMContentLoaded', () => {
   setInterval(updateClock, 1000);
   // แปลงช่องวันที่/เวลาในฟอร์มฝั่งพนักงาน (ลา/โอที/เบิกเงิน) ให้เป็นแบบกำหนดเอง
   // เพื่อเลี่ยงบั๊ก native date/time control ล้นจอบนมือถือ
-  ['leaveStartDate','leaveEndDate','leaveStartTime','leaveEndTime','otDate','otStartTime','otEndTime','claimDate']
+  ['leaveStartDate','leaveEndDate','leaveStartTime','leaveEndTime','otDate','otStartTime','otEndTime','claimDate','summaryTime']
     .forEach(id => makeDateTimeFieldCustom(id));
 });
 
@@ -4388,11 +4416,11 @@ async function syncCheckinStateFromDB() {
       isCheckedIn = true;
       const ciDateObj = new Date(last.checked_at);
       ciTimestamp = ciDateObj.getTime();
-      const t = ciDateObj.toLocaleTimeString('th-TH', { hour12:false });
+      const ciTimeStr = ciDateObj.toLocaleTimeString('th-TH', { hour12:false }); // อย่าตั้งชื่อ t — จะทับฟังก์ชันแปลภาษา t()
 
       document.getElementById('statusRing').className = 'status-ring in';
       document.getElementById('statusLbl').className = 'dash-status-value in';
-      document.getElementById('ciTime').textContent = t;
+      document.getElementById('ciTime').textContent = ciTimeStr;
       if (last.lat && last.lng) {
         document.getElementById('ciCoord').textContent =
           `${parseFloat(last.lat).toFixed(4)}°N, ${parseFloat(last.lng).toFixed(4)}°E`;
@@ -4407,7 +4435,7 @@ async function syncCheckinStateFromDB() {
       if (isCarriedOver) {
         document.getElementById('statusLbl').textContent = t('status_carried_over');
         const dateLabel = ciDateObj.toLocaleDateString('th-TH', { day:'numeric', month:'long', year:'numeric' });
-        showCarriedOverWarning(dateLabel, t);
+        showCarriedOverWarning(dateLabel, ciTimeStr);
       } else {
         document.getElementById('statusLbl').textContent = t('status_working');
         hideCarriedOverWarning();
@@ -4461,11 +4489,11 @@ function restoreCheckinStateLocal() {
     if (s.userId !== currentUser.id) { enableBtn(true, 'checkin'); return; }
     isCheckedIn = true;
     ciTimestamp = s.ciTimestamp;
-    const t = new Date(ciTimestamp).toLocaleTimeString('th-TH',{hour12:false});
+    const ciTimeStr = new Date(ciTimestamp).toLocaleTimeString('th-TH',{hour12:false}); // อย่าตั้งชื่อ t — จะทับฟังก์ชันแปลภาษา t()
     document.getElementById('statusRing').className = 'status-ring in';
     document.getElementById('statusLbl').className = 'dash-status-value in';
     document.getElementById('statusLbl').textContent = t('status_working');
-    document.getElementById('ciTime').textContent = t;
+    document.getElementById('ciTime').textContent = ciTimeStr;
     if (s.ciCoord) document.getElementById('ciCoord').textContent =
       `${s.ciCoord.lat.toFixed(4)}°N, ${s.ciCoord.lng.toFixed(4)}°E`;
     document.getElementById('sessionCard').style.display = 'block';
@@ -4546,10 +4574,12 @@ function renderLeaveHistoryItem(r, opts) {
     cancelBlock = `<div class="leave-cancel-hint">📩 ส่งคำขอยกเลิกแล้ว รอแอดมินตรวจสอบ</div>`;
   }
 
+  const rejectStr = (r.status === 'rejected' && r.reject_reason) ? `<br><span style="color:var(--red);">เหตุผลที่ไม่อนุมัติ: ${escapeHtml(r.reject_reason)}</span>` : '';
+  const printBtn = `<br><button class="leave-cancel-btn" style="border-color:var(--border);color:var(--text);" onclick="printLeaveForm('${r.id}')">📄 ใบลา / PDF</button>`;
   return `<div class="history-item">
     <div>
       <div class="hi-time">${tInfo.icon} ${tInfo.label}</div>
-      <div class="hi-sub">${rangeStr}${timeStr}${reasonStr}${attachStr}${cancelBlock ? `<br>${cancelBlock}` : ''}</div>
+      <div class="hi-sub">${rangeStr}${timeStr}${reasonStr}${rejectStr}${attachStr}${cancelBlock ? `<br>${cancelBlock}` : ''}${printBtn}</div>
     </div>
     <div class="hi-badge ${r.status || 'pending'}">${statusLabel}</div>
   </div>`;
@@ -5009,14 +5039,15 @@ function nearestShiftByEnd(dateStr, now = new Date()) {
   return best;
 }
 
-// ตรวจว่ายื่นขอโอทีทันเงื่อนไขหรือไม่ (ต้องยื่นก่อนกะเลิกงานอย่างน้อย OT_MIN_HOURS_BEFORE_SHIFT_END ชั่วโมง)
-// คืนค่า {ok:boolean, shiftEnd:Date|null, hoursLeft:number|null}
+// ตรวจว่ายื่นขอโอทีทันเงื่อนไขหรือไม่ (ยื่นได้ก่อนกะเลิกงาน จนถึงหลังเลิกงานไม่เกิน OT_MAX_MINUTES_AFTER_SHIFT_END นาที)
+// คืนค่า {ok:boolean, shiftEnd:Date|null, hoursLeft:number|null, minutesPast:number|null}
 function checkOtWindow(dateStr, shiftId, now = new Date()) {
   const shift = (allShifts || []).find(s => s.id === shiftId);
-  if (!shift) return { ok:true, shiftEnd:null, hoursLeft:null };
+  if (!shift) return { ok:true, shiftEnd:null, hoursLeft:null, minutesPast:null };
   const shiftEnd = shiftEndDateTime(dateStr, shift);
   const hoursLeft = (shiftEnd - now) / 3600000;
-  return { ok: hoursLeft >= OT_MIN_HOURS_BEFORE_SHIFT_END, shiftEnd, hoursLeft };
+  const minutesPast = (now - shiftEnd) / 60000; // ค่าบวก = เลิกกะไปแล้วกี่นาที
+  return { ok: minutesPast <= OT_MAX_MINUTES_AFTER_SHIFT_END, shiftEnd, hoursLeft, minutesPast };
 }
 
 function populateOtShiftSelect() {
@@ -5075,25 +5106,25 @@ function updateOtNotice() {
 
   const todayStr = toLocalDateStr(new Date());
   if (dateVal !== todayStr) {
-    // ขอล่วงหน้าสำหรับวันอื่น ไม่ติดเงื่อนไข 2 ชม. (เพราะยังไม่ถึงเวลาเลิกงานของวันนั้นแน่นอน)
+    // ขอล่วงหน้าสำหรับวันอื่น ไม่ติดเงื่อนไขช่วงเวลา (เพราะยังไม่ถึงเวลาเลิกงานของวันนั้นแน่นอน)
     const shift = (allShifts || []).find(s => s.id === shiftId);
     box.innerHTML = `<div class="leave-warning">ℹ️ <div>ยื่นขอโอทีล่วงหน้าสำหรับวันที่ ${dateVal}${shift ? ` (กะ "${shift.name}" เลิกงาน ${shift.end} น.)` : ''}</div></div>`;
     submitBtn.disabled = false;
     return;
   }
 
-  const { ok, shiftEnd, hoursLeft } = checkOtWindow(dateVal, shiftId);
+  const { ok, shiftEnd, hoursLeft, minutesPast } = checkOtWindow(dateVal, shiftId);
   const shift = (allShifts || []).find(s => s.id === shiftId);
   const endStr = shiftEnd ? shiftEnd.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}) : '';
   if (ok) {
     box.innerHTML = `<div class="leave-warning">⚠️
-      <div>คุณกำลังขอโอทีสำหรับ<b>วันนี้</b> — กะ "${shift?.name||''}" เลิกงาน ${endStr} น. ระบบอนุญาตให้ยื่นได้เมื่อเหลือเวลาอย่างน้อย ${OT_MIN_HOURS_BEFORE_SHIFT_END} ชั่วโมงก่อนเลิกงาน</div>
+      <div>คุณกำลังขอโอทีสำหรับ<b>วันนี้</b> — กะ "${shift?.name||''}" เลิกงาน ${endStr} น. ระบบอนุญาตให้ยื่นได้จนถึงหลังเลิกงานไม่เกิน ${OT_MAX_MINUTES_AFTER_SHIFT_END} นาที${minutesPast > 0 ? ` (ขณะนี้เลยเวลาเลิกงานมาแล้ว ${Math.ceil(minutesPast)} นาที)` : ''}</div>
     </div>`;
     submitBtn.disabled = false;
   } else {
-    const leftStr = hoursLeft != null && hoursLeft > 0 ? `เหลือเวลาอีก ${hoursLeft.toFixed(1)} ชม.` : 'เลยเวลากะแล้ว';
+    const leftStr = `เลยเวลาเลิกงานมาแล้ว ${Math.floor(minutesPast)} นาที`;
     box.innerHTML = `<div class="leave-error">⛔
-      <div>ไม่สามารถยื่นขอโอทีได้ ต้องยื่นล่วงหน้าอย่างน้อย ${OT_MIN_HOURS_BEFORE_SHIFT_END} ชั่วโมงก่อนกะ "${shift?.name||''}" เลิกงาน (${endStr} น.) — ${leftStr} กรุณาติดต่อหัวหน้างานโดยตรง</div>
+      <div>ไม่สามารถยื่นขอโอทีได้ ต้องยื่นไม่เกิน ${OT_MAX_MINUTES_AFTER_SHIFT_END} นาทีหลังกะ "${shift?.name||''}" เลิกงาน (${endStr} น.) — ${leftStr} กรุณาติดต่อหัวหน้างานโดยตรง</div>
     </div>`;
     submitBtn.disabled = true;
   }
@@ -5114,9 +5145,10 @@ async function submitOtRequest() {
   if (endTime <= startTime) { showToast('⚠️ เวลาสิ้นสุดต้องอยู่หลังเวลาเริ่มโอที','a'); return; }
 
   const todayStr = toLocalDateStr(new Date());
+  if (dateVal < todayStr) { showToast('⛔ ไม่สามารถขอโอทีย้อนหลังข้ามวันได้','r'); return; }
   if (dateVal === todayStr) {
     const { ok } = checkOtWindow(dateVal, shiftId);
-    if (!ok) { showToast(`⛔ ต้องยื่นขอโอทีล่วงหน้าอย่างน้อย ${OT_MIN_HOURS_BEFORE_SHIFT_END} ชม. ก่อนกะเลิกงาน`,'r'); return; }
+    if (!ok) { showToast(`⛔ ต้องยื่นขอโอทีไม่เกิน ${OT_MAX_MINUTES_AFTER_SHIFT_END} นาทีหลังกะเลิกงาน`,'r'); return; }
   }
 
   const submitBtn = document.getElementById('otSubmitBtn');
@@ -5270,7 +5302,7 @@ function renderLeaveAdminCard(lv) {
   } else if (lv.status === 'cancel_requested') {
     actions = `<div class="leave-admin-actions">
         <button class="btn-sm" style="background:var(--red-dim);color:var(--red);border:1px solid var(--red);" onclick="updateLeaveStatus('${lv.id}','cancelled')">✓ ยืนยันยกเลิก</button>
-        <button class="btn-sm" style="background:var(--green-dim);color:var(--green);border:1px solid var(--green);" onclick="updateLeaveStatus('${lv.id}','approved')">✕ ไม่อนุมัติ (คงลาไว้เหมือนเดิม)</button>
+        <button class="btn-sm" style="background:var(--green-dim);color:var(--green);border:1px solid var(--green);" onclick="updateLeaveStatus('${lv.id}','approved',true)">✕ ไม่อนุมัติ (คงลาไว้เหมือนเดิม)</button>
       </div>`;
   } else {
     actions = `<span class="leave-admin-reset" onclick="updateLeaveStatus('${lv.id}','pending')">↺ เปลี่ยนกลับเป็นรอดำเนินการ</span>`;
@@ -5284,19 +5316,62 @@ function renderLeaveAdminCard(lv) {
     <div class="leave-admin-detail">${tInfo.icon} ${tInfo.label} · ${rangeStr}${timeStr}</div>
     <div class="leave-admin-reason">เหตุผล: ${escapeHtml(lv.reason || '—')}</div>
     ${attachStr}
+    ${decisionInfoHtml(lv)}
     ${actions}
+    <div style="margin-top:8px;"><button class="btn-sm" style="background:var(--surface2);color:var(--text);border:1px solid var(--border);font-size:11px;" onclick="printLeaveForm('${lv.id}')">📄 พิมพ์ใบลา / PDF</button></div>
     <div class="leave-admin-meta">ส่งคำขอเมื่อ ${createdStr}</div>
   </div>`;
 }
 
-async function updateLeaveStatus(id, status) {
+// แสดงผู้พิจารณา/เวลา/เหตุผล (ถ้ามีบันทึกไว้)
+function decisionInfoHtml(lv) {
+  if (!lv || (lv.status !== 'approved' && lv.status !== 'rejected')) return '';
+  const who = lv.approved_by_name ? escapeHtml(lv.approved_by_name) : '';
+  const when = lv.decided_at ? new Date(lv.decided_at).toLocaleString('th-TH', {dateStyle:'short', timeStyle:'short'}) : '';
+  const verb = lv.status === 'approved' ? 'อนุมัติ' : 'ไม่อนุมัติ';
+  const line1 = (who || when) ? `<div class="leave-admin-reason">${verb}โดย ${who || '—'}${when ? ' · ' + when : ''}</div>` : '';
+  const line2 = (lv.status === 'rejected' && lv.reject_reason) ? `<div class="leave-admin-reason" style="color:var(--red);">เหตุผลที่ไม่อนุมัติ: ${escapeHtml(lv.reject_reason)}</div>` : '';
+  return line1 + line2;
+}
+
+async function updateLeaveStatus(id, status, keepDecision) {
   if (isDemo) { showToast('📋 Demo: ไม่บันทึกจริง','g'); return; }
+
+  // บันทึกหลักฐานการพิจารณา: ใคร / เมื่อไหร่ / เหตุผล (กรณีไม่อนุมัติบังคับกรอกเหตุผล)
+  let decision = {};
+  if (!keepDecision && (status === 'approved' || status === 'rejected')) {
+    let reason = null;
+    if (status === 'rejected') {
+      const input = prompt('ระบุเหตุผลที่ไม่อนุมัติ (จำเป็นต้องกรอก):');
+      if (input === null) return; // กดยกเลิก
+      reason = input.trim();
+      if (!reason) { showToast('⛔ ต้องระบุเหตุผลที่ไม่อนุมัติ','r'); return; }
+    }
+    decision = {
+      approved_by: currentUser?.id || null,
+      approved_by_name: currentUser?.name || null,
+      decided_at: new Date().toISOString(),
+      reject_reason: reason,
+    };
+  } else if (status === 'pending') {
+    decision = { approved_by: null, approved_by_name: null, decided_at: null, reject_reason: null };
+  }
+
   try {
-    const { data, error } = await sb.from('leave_requests')
-      .update({ status, employee_seen: false }) // reset ให้พนักงานเห็นการแจ้งเตือนในแอปเมื่อเปิดครั้งถัดไป
+    const baseUpdate = { status, employee_seen: false }; // reset ให้พนักงานเห็นการแจ้งเตือนในแอปเมื่อเปิดครั้งถัดไป
+    const selectStr = '*, employees!leave_requests_employee_id_fkey(id,name)';
+    let { data, error } = await sb.from('leave_requests')
+      .update({ ...baseUpdate, ...decision })
       .eq('id', id)
-      .select('*, employees!leave_requests_employee_id_fkey(id,name)')
+      .select(selectStr)
       .single();
+    // ถ้ายังไม่ได้เพิ่มคอลัมน์บันทึกผู้อนุมัติ → บันทึกสถานะอย่างเดียวไปก่อน และแจ้งให้รัน SQL
+    if (error && Object.keys(decision).length && ['approved_by','approved_by_name','decided_at','reject_reason'].some(c => isMissingColumnError(error, c))) {
+      const w = document.getElementById('leaveDecisionSchemaWarning');
+      if (w) w.style.display = 'flex';
+      ({ data, error } = await sb.from('leave_requests').update(baseUpdate).eq('id', id).select(selectStr).single());
+      if (!error) showToast('⚠️ บันทึกสถานะแล้ว แต่ยังไม่ได้เก็บชื่อผู้อนุมัติ/เหตุผล — ดูคำแนะนำ SQL ด้านบนของหน้าคำขอลา','r');
+    }
     if (error) throw error;
 
     const labelMap = {
@@ -5330,6 +5405,269 @@ async function updateLeaveStatus(id, status) {
       showToast('❌ อัปเดตสถานะไม่สำเร็จ: ' + e.message, 'r');
     }
   }
+}
+
+// ══════════════════════════════════════
+//  ใบลา (HR-009) — พิมพ์ / บันทึกเป็น PDF + ตั้งค่าลายเซ็น/โลโก้
+// ══════════════════════════════════════
+const DOC_IMG_BUCKET = 'avatars'; // ใช้ bucket เดียวกับรูปโปรไฟล์ (มีอยู่แล้ว)
+function docImagePath(kind, companyId, userId) {
+  return kind === 'logo' ? `${companyId || 'shared'}/doc_logo.png` : `${companyId || 'shared'}/doc_sig_${userId}.png`;
+}
+function docImageUrl(kind, companyId, userId) {
+  const { data } = sb.storage.from(DOC_IMG_BUCKET).getPublicUrl(docImagePath(kind, companyId, userId));
+  return data?.publicUrl ? data.publicUrl + '?t=' + Date.now() : '';
+}
+
+function toggleLeaveDocSettings() {
+  const box = document.getElementById('leaveDocSettings');
+  if (!box) return;
+  const show = box.style.display === 'none';
+  box.style.display = show ? 'block' : 'none';
+  if (show && !isDemo && currentUser) {
+    for (const [kind, imgId, emptyId] of [['sig','docSigPreview','docSigEmpty'], ['logo','docLogoPreview','docLogoEmpty']]) {
+      const img = document.getElementById(imgId), empty = document.getElementById(emptyId);
+      img.onload = () => { img.style.display = ''; empty.style.display = 'none'; };
+      img.onerror = () => { img.style.display = 'none'; empty.style.display = ''; };
+      img.src = docImageUrl(kind, currentCompany?.id, currentUser.id);
+    }
+  }
+}
+
+// ย่อรูป + (ลายเซ็น) ตัดพื้นหลังขาวให้โปร่งใส → Blob PNG
+function processDocImage(file, maxW, maxH, transparentize) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      const ratio = Math.min(1, maxW / img.width, maxH / img.height);
+      const w = Math.max(1, Math.round(img.width * ratio)), h = Math.max(1, Math.round(img.height * ratio));
+      const c = document.createElement('canvas'); c.width = w; c.height = h;
+      const ctx = c.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      if (transparentize) {
+        const d = ctx.getImageData(0, 0, w, h), px = d.data;
+        for (let i = 0; i < px.length; i += 4) {
+          const lum = 0.299*px[i] + 0.587*px[i+1] + 0.114*px[i+2];
+          const a = Math.max(0, Math.min(255, (235 - lum) * 255 / 90)); // ขาว→โปร่งใส, ดำ→ทึบ
+          px[i] = px[i+1] = px[i+2] = Math.min(px[i], px[i+1], px[i+2], 40) ; // ทำให้เส้นเข้มคมขึ้น
+          px[i+3] = a;
+        }
+        ctx.putImageData(d, 0, 0);
+      }
+      URL.revokeObjectURL(url);
+      c.toBlob(b => b ? resolve(b) : reject(new Error('แปลงรูปไม่สำเร็จ')), 'image/png');
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('เปิดไฟล์รูปไม่ได้')); };
+    img.src = url;
+  });
+}
+
+async function onDocImageChange(kind, input) {
+  const file = input.files?.[0];
+  if (!file) return;
+  if (isDemo) { showToast('📋 Demo: ไม่บันทึกจริง','g'); input.value=''; return; }
+  try {
+    showToast('📤 กำลังอัปโหลด…','g');
+    const blob = kind === 'sig' ? await processDocImage(file, 500, 200, true) : await processDocImage(file, 600, 200, false);
+    const path = docImagePath(kind, currentCompany?.id, currentUser.id);
+    const { error } = await sb.storage.from(DOC_IMG_BUCKET).upload(path, blob, { upsert: true, contentType: 'image/png' });
+    if (error) throw error;
+    const img = document.getElementById(kind === 'sig' ? 'docSigPreview' : 'docLogoPreview');
+    img.src = docImageUrl(kind, currentCompany?.id, currentUser.id);
+    showToast(kind === 'sig' ? '✅ บันทึกลายเซ็นแล้ว' : '✅ บันทึกโลโก้แล้ว','g');
+  } catch(e) {
+    console.error('onDocImageChange error', e);
+    showToast('❌ อัปโหลดไม่สำเร็จ: ' + (e.message || e), 'r');
+  } finally { input.value = ''; }
+}
+
+function ensureLeaveDocOverlay() {
+  let ov = document.getElementById('leaveDocOverlay');
+  if (ov) return ov;
+  ov = document.createElement('div');
+  ov.id = 'leaveDocOverlay';
+  ov.style.cssText = 'display:none;position:fixed;inset:0;z-index:99999;background:#333;flex-direction:column;';
+  ov.innerHTML = `
+    <div style="display:flex;gap:8px;align-items:center;padding:10px 12px;background:#1e1e1e;color:#fff;">
+      <button onclick="closeLeaveDoc()" style="padding:8px 14px;border-radius:8px;border:1px solid #666;background:transparent;color:#fff;font-size:13px;">✕ ปิด</button>
+      <div style="flex:1;font-size:13px;opacity:.8;">ใบลา (HR-009)</div>
+      <button onclick="printLeaveDocFrame()" style="padding:8px 14px;border-radius:8px;border:0;background:#1976D2;color:#fff;font-size:13px;font-weight:600;">🖨 พิมพ์ / บันทึก PDF</button>
+    </div>
+    <iframe id="leaveDocFrame" style="flex:1;border:0;background:#fff;width:100%;"></iframe>`;
+  document.body.appendChild(ov);
+  return ov;
+}
+function closeLeaveDoc() { const ov = document.getElementById('leaveDocOverlay'); if (ov) ov.style.display = 'none'; }
+function printLeaveDocFrame() {
+  const f = document.getElementById('leaveDocFrame');
+  if (f?.contentWindow) { f.contentWindow.focus(); f.contentWindow.print(); }
+}
+
+async function printLeaveForm(id) {
+  if (isDemo) { showToast('📋 Demo: ยังไม่รองรับการพิมพ์ใบลาในโหมดทดลอง','g'); return; }
+  try {
+    showToast('📄 กำลังเตรียมใบลา…','g');
+    const { data: lv, error } = await sb.from('leave_requests')
+      .select('*, employees!leave_requests_employee_id_fkey(id,name,employee_code,position)')
+      .eq('id', id).single();
+    if (error) throw error;
+    const emp = lv.employees || {};
+    // ข้อมูลผู้พิจารณา (ชื่อดึงจาก approved_by_name ก่อน, ถ้าไม่มีลองดึงจากตารางพนักงาน)
+    let approverName = lv.approved_by_name || '';
+    if (!approverName && lv.approved_by) {
+      try {
+        const { data: ap } = await sb.from('employees').select('name').eq('id', lv.approved_by).single();
+        approverName = ap?.name || '';
+      } catch(e) { /* ไม่มีสิทธิ์อ่าน — ปล่อยว่าง */ }
+    }
+    const companyId = lv.company_id || currentCompany?.id;
+    const decided = lv.status === 'approved' || lv.status === 'rejected';
+    const sigUrl = (decided && lv.approved_by) ? docImageUrl('sig', companyId, lv.approved_by) : '';
+    const logoUrl = docImageUrl('logo', companyId, null);
+
+    const html = buildLeaveFormHtml({ lv, emp, approverName, sigUrl, logoUrl });
+    const ov = ensureLeaveDocOverlay();
+    ov.style.display = 'flex';
+    const frame = document.getElementById('leaveDocFrame');
+    frame.srcdoc = html;
+  } catch(e) {
+    console.error('printLeaveForm error', e);
+    showToast('❌ เปิดใบลาไม่สำเร็จ: ' + (e.message || e), 'r');
+  }
+}
+
+function buildLeaveFormHtml({ lv, emp, approverName, sigUrl, logoUrl }) {
+  const e = (v) => escapeHtml(v == null ? '' : String(v));
+  // วันที่รูปแบบ ว/ด/ปี(พ.ศ. 2 หลัก) เช่น 30/9/69
+  const d2 = (v) => {
+    if (!v) return '';
+    const dt = (typeof v === 'string' && v.length <= 10) ? new Date(v + 'T00:00:00') : new Date(v);
+    if (isNaN(dt)) return '';
+    return `${dt.getDate()}/${dt.getMonth()+1}/${String((dt.getFullYear()+543)%100).padStart(2,'0')}`;
+  };
+  // จำนวนวัน/ชั่วโมง
+  let daysTxt = '', hoursTxt = '';
+  if (lv.is_full_day === false && lv.start_time && lv.end_time) {
+    const [sh, sm] = lv.start_time.split(':').map(Number), [eh, em] = lv.end_time.split(':').map(Number);
+    const mins = Math.max(0, (eh*60+em) - (sh*60+sm));
+    hoursTxt = (Math.round(mins/6)/10).toString().replace(/\.0$/,'');
+  } else if (lv.start_date && lv.end_date) {
+    const a = new Date(lv.start_date + 'T00:00:00'), b = new Date(lv.end_date + 'T00:00:00');
+    daysTxt = String(Math.round((b - a) / 86400000) + 1);
+  }
+  // ประเภทการลา → ช่องในฟอร์ม
+  let key;
+  if (lv.leave_type === 'vacation') key = 'vac';
+  else if (lv.leave_type === 'personal') key = 'personal';
+  else if (lv.leave_type === 'sick') key = lv.attachment_url ? 'sickCert' : 'sickNo';
+  else key = 'paidPersonal'; // ลากิจพิเศษ → ลากิจได้รับค่าจ้าง
+  const cb = (on) => `<span class="cb">${on ? '✓' : ''}</span>`;
+  const types = [
+    ['vac','ลาพักผ่อนประจำปี'], ['sickNo','ลาป่วย (ไม่มีใบรับรองแพทย์)'],
+    ['personal','ลากิจส่วนตัว'], ['paidPersonal','ลากิจได้รับค่าจ้าง (แนบเอกสาร)'],
+    ['sickCert','ลาป่วย (มีใบรับรองแพทย์)'], ['other','ลาอื่นๆ'],
+  ];
+  const typeCell = ([k, label]) => `<div class="tcell">${cb(key === k)}<span>${label}${k==='other' ? ' <span class="ln" style="min-width:60px"></span>' : ''}</span></div>`;
+
+  const approved = lv.status === 'approved', rejected = lv.status === 'rejected';
+  const decidedDate = d2(lv.decided_at);
+  const ref = 'LV-' + String(lv.id || '').replace(/-/g,'').slice(0,8).toUpperCase();
+  const printedAt = new Date().toLocaleString('th-TH', {dateStyle:'medium', timeStyle:'short'});
+
+  return `<!DOCTYPE html><html lang="th"><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  html,body { margin:0; padding:0; background:#fff; font-family:'Sarabun','Prompt','Noto Sans Thai',Tahoma,sans-serif; color:#111; }
+  .sheet { width:740px; margin:0 auto; padding:6px 0; }
+  .head { display:flex; align-items:center; gap:12px; padding:4px 6px 8px; }
+  .head img { max-height:52px; max-width:150px; }
+  .brand-en { font-size:22px; font-weight:700; letter-spacing:1px; line-height:1.1; }
+  .brand-th { font-size:15px; letter-spacing:3px; }
+  .form { border:1.5px solid #111; }
+  .title { text-align:center; font-weight:700; font-size:20px; padding:3px 0; border-bottom:1.5px solid #111; position:relative; }
+  .title .ref { position:absolute; right:8px; top:8px; font-size:11px; font-weight:400; color:#444; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; }
+  .cell { padding:6px 10px; border-bottom:1.5px solid #111; font-size:13px; line-height:1.9; }
+  .cell.l { border-right:1.5px solid #111; }
+  .band { background:#d9d9d9; text-align:center; font-weight:700; font-size:13px; padding:2px 0; border-bottom:1.5px solid #111; }
+  .band.l { border-right:1.5px solid #111; }
+  .ln { display:inline-block; border-bottom:1px dotted #333; min-width:80px; padding:0 4px; text-align:center; line-height:1.3; }
+  .ln.grow { min-width:120px; }
+  .cb { display:inline-block; width:15px; height:15px; border:1.3px solid #111; text-align:center; line-height:13px; font-size:14px; font-weight:700; margin-right:6px; vertical-align:middle; }
+  .tcell { display:flex; align-items:center; font-size:12px; line-height:1.9; }
+  .tgrid { display:grid; grid-template-columns:1fr 1.15fr; column-gap:6px; }
+  .sub { font-weight:700; text-align:center; font-size:13px; }
+  .sigrow { display:flex; align-items:flex-end; gap:6px; margin-top:2px; }
+  .sigbox { display:inline-block; min-width:170px; height:34px; border-bottom:1px dotted #333; text-align:center; }
+  .sigbox img { max-height:32px; max-width:170px; }
+  .paren { text-align:center; font-size:12px; line-height:1.5; }
+  .foot { padding:5px 8px 0; font-size:11.5px; display:flex; justify-content:space-between; }
+  .small { font-size:10px; color:#666; margin-top:4px; text-align:right; }
+  .noprint { display:none; }
+  @media screen { body { background:#eee; } .sheet { background:#fff; } }
+  @media print { body { background:#fff; } .sheet { width:100%; } }
+</style></head><body>
+<div class="sheet" id="sheet">
+  <div class="head">
+    ${logoUrl ? `<img src="${logoUrl}" alt="" onerror="this.style.display='none'">` : ''}
+    <div><div class="brand-en">VTA SERVICE CO.,LTD.</div><div class="brand-th">บริษัท วีทีเอ เซอร์วิส จำกัด</div></div>
+  </div>
+  <div class="form">
+    <div class="title">ใบลา<span class="ref">เลขที่ ${e(ref)}</span></div>
+    <div class="grid">
+      <div class="cell l" style="border-bottom:1.5px solid #111;">
+        <div>ชื่อ-สกุล <span class="ln grow">${e(emp.name)}</span> รหัส SN <span class="ln">${e(emp.employee_code)}</span> แผนก <span class="ln" style="min-width:50px"></span></div>
+        <div class="sub" style="margin-top:2px;">ประเภทของการลางาน</div>
+        <div class="tgrid">${types.map(typeCell).join('')}</div>
+      </div>
+      <div class="cell">
+        <div style="text-align:center;font-weight:700;">จาก</div>
+        <div>วันที่ <span class="ln grow">${e(d2(lv.start_date))}</span></div>
+        <div style="text-align:center;font-weight:700;">ถึง</div>
+        <div>วันที่ <span class="ln grow">${e(d2(lv.end_date))}</span></div>
+        <div>จำนวน <span class="ln" style="min-width:36px">${e(daysTxt)}</span> วัน <span class="ln" style="min-width:36px">${e(hoursTxt)}</span> ชั่วโมง</div>
+        <div>${cb(false)}กะกลางวัน &nbsp;&nbsp; ${cb(false)}กะกลางคืน</div>
+      </div>
+      <div class="cell l">
+        <div>ลายเซ็นผู้ขอลา <span class="ln grow">${e(emp.name)}</span> เบอร์โทรพนักงาน <span class="ln" style="min-width:70px"></span></div>
+        <div>วันที่ <span class="ln">${e(d2(lv.created_at))}</span></div>
+      </div>
+      <div class="cell">เหตุผลการลา <span class="ln" style="min-width:190px;text-align:left;">${e(lv.reason || '')}</span></div>
+      <div class="band l">ผู้บังคับบัญชา บริษัท On-site</div>
+      <div class="band">ผู้บังคับบัญชาของ VTA-Service</div>
+      <div class="cell l" style="border-bottom:0;min-height:180px;">
+        <div>${cb(false)}รับทราบ</div>
+        <div class="sigrow" style="margin-top:26px;">ลงชื่อ<span class="sigbox"></span>หัวหน้างาน (Leader)</div>
+        <div class="paren">(......................................................)</div>
+        <div class="sigrow" style="margin-top:12px;">ลงชื่อ<span class="sigbox"></span>หัวหน้าแผนก (Supervisor)</div>
+        <div class="paren">(......................................................)</div>
+      </div>
+      <div class="cell" style="border-bottom:0;min-height:180px;">
+        <div>${cb(approved)}อนุมัติ</div>
+        <div>${cb(rejected)}ไม่อนุมัติ</div>
+        <div>เหตุผล <span class="ln" style="min-width:200px;text-align:left;">${rejected ? e(lv.reject_reason || '') : ''}</span></div>
+        <div class="sigrow" style="margin-top:4px;">ลงชื่อ<span class="sigbox"></span>หัวหน้างาน</div>
+        <div class="paren">(......................................................)</div>
+        <div class="sigrow" style="margin-top:4px;">ลงชื่อ<span class="sigbox">${sigUrl ? `<img src="${sigUrl}" alt="" onerror="this.style.display='none'">` : ''}</span>ผู้จัดการฝ่ายบุคคล</div>
+        <div class="paren">(${approverName ? e(approverName) : '......................................................'})${decidedDate ? `<br>วันที่ ${e(decidedDate)}` : ''}</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><div><b>หมายเหตุ</b> กรณีที่ผู้บังคับบัญชาลงชื่ออนุมัติเรียบร้อยแล้ว ให้นำเอกสารส่งงานบุคคลบริษัททีวีเอฯ ในวันถัดไปทันที หรือไม่เกิน 3 วัน</div></div>
+  <div class="foot" style="justify-content:flex-end;"><div>HR-009/Rev.-00 ( 20-12-2019 )</div></div>
+  <div class="small">พิมพ์เมื่อ ${e(printedAt)} · ${e(ref)}</div>
+</div>
+<script>
+  // บนหน้าจอมือถือ: ย่อฟอร์มให้พอดีความกว้าง (ตอนพิมพ์ไม่ย่อ)
+  function fit(){ var w=window.innerWidth; var s=document.getElementById('sheet'); s.style.zoom = w<760 ? (w-8)/740 : 1; }
+  window.addEventListener('resize',fit); fit();
+  window.addEventListener('beforeprint',function(){ document.getElementById('sheet').style.zoom=1; });
+  window.addEventListener('afterprint',fit);
+<\/script>
+</body></html>`;
 }
 
 // ══════════════════════════════════════
@@ -8077,6 +8415,7 @@ function dbRowToNotifySettings(row) {
     summaryTime:   row.summary_time || '18:00',
     notifyLate:    !!row.notify_late,
     notifySummary: !!row.notify_summary,
+    lastSummaryDate: row.last_summary_date || null,
   };
 }
 
@@ -8129,7 +8468,7 @@ async function loadNotifySettings() {
     if (s.botToken)    document.getElementById('tgBotToken').value  = s.botToken;
     if (s.chatId)      document.getElementById('tgChatId').value    = s.chatId;
     if (s.lateMinutes) document.getElementById('lateMinutes').value = s.lateMinutes;
-    if (s.summaryTime) document.getElementById('summaryTime').value = s.summaryTime;
+    if (s.summaryTime) { document.getElementById('summaryTime').value = s.summaryTime; syncDtField('summaryTime'); }
     document.getElementById('notifyLate').checked    = !!s.notifyLate;
     document.getElementById('notifySummary').checked = !!s.notifySummary;
   } catch(e) { console.warn('loadNotifySettings error', e); }
@@ -8162,7 +8501,8 @@ async function saveNotifySettings() {
       // ล้างค่าเก่าใน localStorage เครื่องนี้ (ย้ายเข้าส่วนกลางเรียบร้อยแล้ว ไม่ต้องพึ่งอีก)
       localStorage.removeItem(NOTIFY_KEY);
     }
-    lastSummarySentDate = ''; // reset เพื่อให้ส่งได้ใหม่เมื่อเปลี่ยน settings
+    lastSummarySentDate = ''; // reset ตัวกันซ้ำในเครื่องนี้ (การกันซ้ำข้ามเครื่องใช้ last_summary_date ใน DB)
+    summaryCfgFetchedAt = 0;
     showToast(`✅ บันทึกแล้ว (ใช้ได้ทุกอุปกรณ์) — สรุปจะส่งเวลา ${normalizedTime}`, 'g');
     scheduleNotifications(s);
   } catch(e) {
@@ -8315,8 +8655,92 @@ function parseNotifyTime(timeStr) {
   return null;
 }
 
-// ติดตาม summary ที่ส่งไปแล้วในวันนี้ (กันส่งซ้ำ)
+// ติดตาม summary ที่ส่งไปแล้วในวันนี้ (กันส่งซ้ำ ในเครื่องนี้)
 let lastSummarySentDate = '';
+let summaryRetryAfter = 0;      // ถ้าส่ง Telegram ล้มเหลว พักก่อนลองใหม่ (กันยิงรัวทุก 30 วินาที)
+let summaryCfgFetchedAt = 0;
+
+// ส่งสรุปประจำวัน — "ถึงเวลาแล้วและวันนี้ยังไม่เคยส่ง" ก็ส่งเลย (ไม่ต้องตรงนาทีเป๊ะ)
+// ทำงานบนทุกเครื่องที่เปิดแอป แต่ใช้การ "จองสิทธิ์ส่ง" ใน DB (notify_settings.last_summary_date)
+// เพื่อให้ทั้งระบบส่งแค่ครั้งเดียวต่อวัน ไม่ว่าจะมีกี่เครื่องเปิดอยู่
+async function checkDailySummary() {
+  try {
+    if (!currentUser) return;
+    const now = new Date();
+    const todayKey = toLocalDateStr(now); // วันที่ตามเวลาท้องถิ่น (เดิมใช้ UTC ทำให้เลยเที่ยงคืนถึง 07:00 วันที่ผิด)
+    if (lastSummarySentDate === todayKey) return;
+    if (Date.now() < summaryRetryAfter) return;
+
+    // รีเฟรชการตั้งค่าจากส่วนกลางทุก ~2 นาที (ที่เหลือใช้แคช เพื่อไม่ยิง DB ทุก 30 วินาที)
+    let cfg = notifySettingsCache;
+    if (!cfg || Date.now() - summaryCfgFetchedAt > 120000) {
+      cfg = await fetchNotifySettingsFromDB() || cfg;
+      summaryCfgFetchedAt = Date.now();
+    }
+    if (!cfg || !cfg.notifySummary || !cfg.summaryTime || !cfg.botToken || !cfg.chatId) return;
+    const parsed = parseNotifyTime(cfg.summaryTime);
+    if (!parsed) return;
+    if (now.getHours()*60 + now.getMinutes() < parsed.h*60 + parsed.m) return; // ยังไม่ถึงเวลา
+    if (cfg.lastSummaryDate === todayKey) { lastSummarySentDate = todayKey; return; } // มีเครื่องอื่นส่งแล้ว
+
+    // ── จองสิทธิ์ส่งวันนี้ (atomic) — ใครจองได้คนเดียวเป็นคนส่ง ──
+    let claimedInDb = false;
+    if (!isDemo && sb) {
+      const { data, error } = await sb.from('notify_settings')
+        .update({ last_summary_date: todayKey })
+        .eq('id', 1)
+        .or(`last_summary_date.is.null,last_summary_date.neq.${todayKey}`)
+        .select('id');
+      if (error) {
+        if (isMissingColumnError(error, 'last_summary_date')) {
+          // ยังไม่ได้เพิ่มคอลัมน์ → ใช้การกันซ้ำในเครื่องนี้แทน + แจ้งให้แอดมินรัน SQL
+          const w = document.getElementById('notifySchemaWarning');
+          if (w) w.style.display = 'flex';
+          if (localStorage.getItem('wc_summary_sent') === todayKey) { lastSummarySentDate = todayKey; return; }
+          localStorage.setItem('wc_summary_sent', todayKey);
+        } else {
+          throw error;
+        }
+      } else {
+        if (!data || !data.length) { lastSummarySentDate = todayKey; return; } // เครื่องอื่นจองไปก่อน
+        claimedInDb = true;
+        if (notifySettingsCache) notifySettingsCache.lastSummaryDate = todayKey;
+      }
+    }
+    lastSummarySentDate = todayKey;
+
+    const todayStr = now.toLocaleDateString('th-TH');
+    let msg = `📊 <b>สรุปการเข้างาน ${todayStr}</b>\n`;
+    if (!isDemo && sb) {
+      const dayStart = new Date(now); dayStart.setHours(0,0,0,0);
+      const {data: logs} = await sb.from('attendance')
+        .select('employee_id, type, employees!attendance_employee_id_fkey(name)')
+        .gte('checked_at', dayStart.toISOString())
+        .order('checked_at');
+      const allEmpsRes = await fetchEmployeePickerList();
+      const total = (allEmpsRes.data || []).length;
+      const ciNames = [...new Set((logs||[]).filter(r=>r.type==='check_in').map(r=>r.employees?.name).filter(Boolean))];
+      const absentCount = total - ciNames.length;
+      msg += `✅ เช็คอินแล้ว ${ciNames.length} คน\n`;
+      if (ciNames.length) msg += ciNames.map(n=>`  • ${n}`).join('\n') + '\n';
+      if (absentCount > 0) msg += `❌ ยังไม่มา ${absentCount} คน\n`;
+    }
+    const ok = await sendTelegramNotify(msg);
+    if (!ok) {
+      // ส่งไม่สำเร็จ → คืนสิทธิ์ให้ลองใหม่ภายหลัง (พัก 10 นาที)
+      lastSummarySentDate = '';
+      summaryRetryAfter = Date.now() + 10 * 60000;
+      if (claimedInDb) {
+        await sb.from('notify_settings').update({ last_summary_date: null }).eq('id', 1).eq('last_summary_date', todayKey);
+        if (notifySettingsCache) notifySettingsCache.lastSummaryDate = null;
+      } else {
+        localStorage.removeItem('wc_summary_sent');
+      }
+    }
+  } catch(e) {
+    console.warn('checkDailySummary error', e);
+  }
+}
 
 function scheduleNotifications(s) {
   // clear timers เก่าทั้งหมด
@@ -8324,46 +8748,17 @@ function scheduleNotifications(s) {
   notifyTimers = [];
   if (!s || (!s.notifySummary && !s.notifyLate)) return;
 
-  // ใช้ setInterval ตรวจทุก 30 วินาที — ทนต่อ browser throttle มากกว่า setTimeout ครั้งเดียว
-  const ticker = setInterval(async () => {
-    const cfg = await fetchNotifySettingsFromDB() || s;
-    if (!cfg.botToken || !cfg.chatId) return;
+  // เช็คทันทีหนึ่งครั้ง (ครอบคลุมกรณีเปิดแอปหลังเลยเวลาสรุปไปแล้ว) แล้วเช็คซ้ำทุก 30 วินาที
+  checkDailySummary();
+  notifyTimers.push(setInterval(checkDailySummary, 30000));
 
-    const now = new Date();
-    const hh  = now.getHours();
-    const mm  = now.getMinutes();
-
-    // ── สรุปประจำวัน ──
-    if (cfg.notifySummary && cfg.summaryTime) {
-      const parsed = parseNotifyTime(cfg.summaryTime);
-      if (parsed) {
-        const todayKey = now.toISOString().split('T')[0];
-        const isMatchTime = (hh === parsed.h && mm === parsed.m);
-        if (isMatchTime && lastSummarySentDate !== todayKey) {
-          lastSummarySentDate = todayKey; // mark ก่อนส่งเพื่อกัน double-fire
-          const todayStr = now.toLocaleDateString('th-TH');
-          let msg = `📊 <b>สรุปการเข้างาน ${todayStr}</b>\n`;
-          if (!isDemo && sb) {
-            const dayStart = new Date(now); dayStart.setHours(0,0,0,0);
-            const {data: logs} = await sb.from('attendance')
-              .select('employee_id, type, employees!attendance_employee_id_fkey(name)')
-              .gte('checked_at', dayStart.toISOString())
-              .order('checked_at');
-            const allEmpsRes = await fetchEmployeePickerList();
-            const total = (allEmpsRes.data || []).length;
-            const ciNames = [...new Set((logs||[]).filter(r=>r.type==='check_in').map(r=>r.employees?.name).filter(Boolean))];
-            const absentCount = total - ciNames.length;
-            msg += `✅ เช็คอินแล้ว ${ciNames.length} คน\n`;
-            if (ciNames.length) msg += ciNames.map(n=>`  • ${n}`).join('\n') + '\n';
-            if (absentCount > 0) msg += `❌ ยังไม่มา ${absentCount} คน\n`;
-          }
-          await sendTelegramNotify(msg);
-        }
-      }
-    }
-  }, 30000); // ตรวจทุก 30 วินาที
-
-  notifyTimers.push(ticker);
+  // มือถือ/แท็บที่ถูกพักการทำงานในพื้นหลัง timer จะไม่เดิน → เช็คซ้ำทันทีเมื่อกลับมาเปิดแอปหรือกลับมาออนไลน์
+  if (!window._summaryHooksAdded) {
+    window._summaryHooksAdded = true;
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) checkDailySummary(); });
+    window.addEventListener('focus', () => checkDailySummary());
+    window.addEventListener('online', () => checkDailySummary());
+  }
 }
 
 // ══════════════════════════════════════
